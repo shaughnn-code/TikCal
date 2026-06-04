@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TikCal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { accent: '#6DAA67' },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@700&family=Righteous&family=Russo+One&family=Space+Mono:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { background-color: #0F0F0F; color: #fff; font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; margin: 0; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #0F0F0F; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.4; cursor: pointer; }
+    select option { background: #1a1a1a; color: #fff; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    const {
+      useState, useEffect, useContext, createContext,
+      useCallback, useRef, useMemo
+    } = React;
+
+    // ─── CONSTANTS ────────────────────────────────────────────────────────────
+
+    const TOTEMS = [
+      { emoji: '🎧', label: 'Earplug' },
+      { emoji: '🍬', label: 'Gum Pack' },
+      { emoji: '🕶️', label: 'Diffraction' },
+      { emoji: '💨', label: 'Vape' },
+      { emoji: '🎫', label: 'Wristband' },
+      { emoji: '🔑', label: 'Key Fob' },
+      { emoji: '👱‍♀️', label: 'Scrunchie' },
+      { emoji: '💡', label: 'LED Prop' },
+      { emoji: '🪭', label: 'Fan' },
+      { emoji: '🔋', label: 'Charger' },
+      { emoji: '🧴', label: 'Lip Balm' },
+      { emoji: '🧼', label: 'Sanitizer' },
+      { emoji: '🛍️', label: 'Stash Bag' },
+      { emoji: '💊', label: 'Vitamins' },
+      { emoji: '✨', label: 'Glow Stick' },
+      { emoji: '📿', label: 'Kandi' },
+      { emoji: '📸', label: 'Polaroid' },
+    ];
+
+    const renderTotem = (emoji, size = 24) => <span style={{ fontSize: size }}>{emoji}</span>;
+
+    // ─── CALENDAR INITIALS HELPERS ────────────────────────────────────────────
+
+    const getInitials = (artist) => {
+      if (!artist || !artist.trim()) return '?';
+      const words = artist.trim().split(/\s+/);
+      if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+      return (words[0][0] + words[1][0]).toUpperCase();
+    };
+
+    // Each style: a distinctive font + a unique accent color
+    const EVENT_STYLES = [
+      { font: "'Bebas Neue', sans-serif",   color: '#6DAA67', bg: 'rgba(109,170,103,0.18)' },
+      { font: "'Orbitron', sans-serif",     color: '#6AA8C8', bg: 'rgba(106,168,200,0.18)' },
+      { font: "'Space Mono', monospace",    color: '#C8AA6A', bg: 'rgba(200,170,106,0.18)' },
+      { font: "'Righteous', sans-serif",    color: '#C86A8A', bg: 'rgba(200,106,138,0.18)' },
+      { font: "'Russo One', sans-serif",    color: '#8A6DC8', bg: 'rgba(138,109,200,0.18)' },
+    ];
+
+    const getEventStyle = (artist) => {
+      const hash = [...(artist || 'X')].reduce((a, c) => a + c.charCodeAt(0), 0);
+      return EVENT_STYLES[hash % EVENT_STYLES.length];
+    };
+
+    const NYC_VENUES = [
+      'The Roof', 'Elsewhere', 'Nowadays', 'Good Room', 'Basement',
+      'Avant Gardner', 'Brooklyn Mirage', 'Club Cumming', "Baby's All Right",
+      '1896', 'Lot 45', 'Knockdown Center', 'Williamsburg Warehouse', 'Other',
+    ];
+
+    const MOCK_EVENTS = [
+      { id: 'mock-1', title: 'Superior Ingredients', artist: 'Dee Vault', date: '2026-05-18', venue: 'The Roof', notes: 'Rooftop closing set' },
+      { id: 'mock-2', title: 'Nite Chemistry', artist: 'Palms Trax', date: '2026-06-07', venue: 'Elsewhere', notes: '' },
+      { id: 'mock-3', title: 'Open Air Season Opener', artist: 'FJAAK', date: '2026-06-21', venue: 'Nowadays', notes: 'All day event, gates at noon' },
+    ];
+
+    // ─── STORAGE ──────────────────────────────────────────────────────────────
+
+    const S = {
+      USERS: 'tc_users', EVENTS: 'tc_events', CUR: 'tc_cur',
+      getUsers: () => JSON.parse(localStorage.getItem('tc_users') || '[]'),
+      saveUsers: (u) => localStorage.setItem('tc_users', JSON.stringify(u)),
+      getEvents: () => JSON.parse(localStorage.getItem('tc_events') || '[]'),
+      saveEvents: (e) => localStorage.setItem('tc_events', JSON.stringify(e)),
+      getCurId: () => localStorage.getItem('tc_cur'),
+      setCurId: (id) => id ? localStorage.setItem('tc_cur', id) : localStorage.removeItem('tc_cur'),
+      userById: (id) => S.getUsers().find(u => u.id === id) || null,
+      userByEmail: (email) => S.getUsers().find(u => u.email.toLowerCase() === email.toLowerCase()) || null,
+      createUser: (data) => {
+        const users = S.getUsers();
+        const u = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+        users.push(u); S.saveUsers(users); return u;
+      },
+      updateUser: (id, data) => {
+        const users = S.getUsers();
+        const i = users.findIndex(u => u.id === id);
+        if (i < 0) return null;
+        users[i] = { ...users[i], ...data }; S.saveUsers(users); return users[i];
+      },
+      userEvents: (uid) => S.getEvents().filter(e => e.userId === uid),
+      createEvent: (data) => {
+        const events = S.getEvents();
+        const e = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+        events.push(e); S.saveEvents(events); return e;
+      },
+      deleteEvent: (id) => S.saveEvents(S.getEvents().filter(e => e.id !== id)),
+    };
+
+    // ─── ROUTER ───────────────────────────────────────────────────────────────
+
+    const RouterCtx = createContext(null);
+
+    const RouterProvider = ({ children }) => {
+      const getPath = () => {
+        const h = window.location.hash.slice(1);
+        return h ? h.split('?')[0] : '/';
+      };
+      const [path, setPath] = useState(getPath);
+      useEffect(() => {
+        const h = () => setPath(getPath());
+        window.addEventListener('hashchange', h);
+        return () => window.removeEventListener('hashchange', h);
+      }, []);
+      const navigate = useCallback((to) => { window.location.hash = to; }, []);
+      return <RouterCtx.Provider value={{ path, navigate }}>{children}</RouterCtx.Provider>;
+    };
+
+    const useNav = () => useContext(RouterCtx).navigate;
+    const usePath = () => useContext(RouterCtx).path;
+
+    const Redirect = ({ to }) => {
+      const nav = useNav();
+      useEffect(() => nav(to), []);
+      return null;
+    };
+
+    // ─── AUTH ─────────────────────────────────────────────────────────────────
+
+    const AuthCtx = createContext(null);
+
+    const AuthProvider = ({ children }) => {
+      const [user, setUser] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        const id = S.getCurId();
+        if (id) {
+          const u = S.userById(id);
+          if (u) { setUser(u); seedMock(u); }
+          else S.setCurId(null);
+        }
+        setLoading(false);
+      }, []);
+
+      const seedMock = (u) => {
+        if (u.setupComplete && S.userEvents(u.id).length === 0) {
+          MOCK_EVENTS.forEach(ev => S.createEvent({ ...ev, userId: u.id }));
+        }
+      };
+
+      const login = (email, password) => {
+        const u = S.userByEmail(email);
+        if (!u) return { success: false, error: 'No account found with that email.' };
+        if (u.password !== password) return { success: false, error: 'Incorrect password.' };
+        S.setCurId(u.id); setUser(u); return { success: true };
+      };
+
+      const signup = (email, password) => {
+        if (S.userByEmail(email)) return { success: false, error: 'An account with that email already exists.' };
+        const u = S.createUser({ email, password, name: '', bio: '', favoriteVenue: '', totem: '', setupComplete: false });
+        S.setCurId(u.id); setUser(u); return { success: true };
+      };
+
+      const logout = () => { S.setCurId(null); setUser(null); };
+
+      const updateProfile = (data) => {
+        if (!user) return;
+        const updated = S.updateUser(user.id, data);
+        if (updated) setUser(updated);
+      };
+
+      return (
+        <AuthCtx.Provider value={{ user, login, signup, logout, updateProfile, loading }}>
+          {children}
+        </AuthCtx.Provider>
+      );
+    };
+
+    const useAuth = () => useContext(AuthCtx);
+
+    // ─── DESIGN TOKENS / COMPONENTS ───────────────────────────────────────────
+
+    const Inp = ({ label, type = 'text', value, onChange, placeholder, required, cls = '' }) => (
+      <div className={cls}>
+        {label && <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-2">{label}</label>}
+        <input
+          type={type}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          required={required}
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-700 text-sm focus:outline-none focus:border-[#6DAA67]/60 transition-colors"
+        />
+      </div>
+    );
+
+    const Txta = ({ label, value, onChange, placeholder, rows = 3 }) => (
+      <div>
+        {label && <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-2">{label}</label>}
+        <textarea
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          rows={rows}
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-700 text-sm focus:outline-none focus:border-[#6DAA67]/60 transition-colors resize-none"
+        />
+      </div>
+    );
+
+    const Sel = ({ label, value, onChange, options }) => (
+      <div>
+        {label && <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-2">{label}</label>}
+        <select
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          className="w-full bg-[#1c1c1c] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#6DAA67]/60 transition-colors appearance-none"
+          style={{ color: value ? '#fff' : '#4b5563' }}
+        >
+          <option value="">Select…</option>
+          {options.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </div>
+    );
+
+    const Btn = ({ children, onClick, type = 'button', variant = 'primary', disabled, cls = '' }) => {
+      const styles = {
+        primary: 'bg-[#6DAA67] hover:bg-[#5a9256] text-white',
+        ghost: 'border border-white/10 hover:border-white/25 text-gray-300 hover:text-white',
+        danger: 'border border-red-500/20 hover:border-red-400/40 text-red-400 hover:text-red-300',
+      };
+      return (
+        <button
+          type={type}
+          onClick={onClick}
+          disabled={disabled}
+          className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${styles[variant]} ${disabled ? 'opacity-40 cursor-not-allowed' : ''} ${cls}`}
+        >
+          {children}
+        </button>
+      );
+    };
+
+    // ─── NAV ──────────────────────────────────────────────────────────────────
+
+    const Nav = () => {
+      const { user, logout } = useAuth();
+      const nav = useNav();
+      const path = usePath();
+      if (!user || !user.setupComplete) return null;
+
+      const initials = user?.name
+        ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+        : '?';
+
+      return (
+        <nav className="border-b border-white/[0.07] px-4 py-4">
+          <div className="max-w-2xl mx-auto flex items-center justify-between">
+            <button onClick={() => nav('/calendar')} className="text-white font-semibold tracking-tight text-lg">
+              TikCal
+            </button>
+            <div className="flex items-center gap-6">
+              <button
+                onClick={() => nav('/calendar')}
+                className={`text-sm transition-colors ${path === '/calendar' ? 'text-[#6DAA67]' : 'text-gray-500 hover:text-white'}`}
+              >
+                Calendar
+              </button>
+              <button
+                onClick={() => nav('/profile')}
+                className={`flex items-center gap-2 text-sm transition-colors ${path === '/profile' ? 'text-[#6DAA67]' : 'text-gray-500 hover:text-white'}`}
+              >
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors ${
+                  path === '/profile'
+                    ? 'bg-[#6DAA67]/20 border-[#6DAA67]/50'
+                    : 'bg-white/5 border-white/20'
+                }`}>
+                  <span className={`text-[9px] font-semibold ${path === '/profile' ? 'text-[#6DAA67]' : 'text-gray-400'}`}>
+                    {initials}
+                  </span>
+                </div>
+                Profile
+              </button>
+              <button
+                onClick={() => { logout(); nav('/login'); }}
+                className="text-sm text-gray-600 hover:text-white transition-colors"
+              >
+                Out
+              </button>
+            </div>
+          </div>
+        </nav>
+      );
+    };
+
+    // ─── EVENT CARD ───────────────────────────────────────────────────────────
+
+    const EventCard = ({ event, onDelete }) => {
+      const [hover, setHover] = useState(false);
+      const today = new Date().toISOString().slice(0, 10);
+      const isPast = event.date < today;
+
+      const fmt = (ds) => new Date(ds + 'T12:00:00').toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric',
+      });
+
+      const countdown = (() => {
+        const diff = Math.ceil((new Date(event.date + 'T12:00:00') - new Date()) / 86400000);
+        if (diff < 0) return null;
+        if (diff === 0) return 'tonight';
+        if (diff === 1) return 'tomorrow';
+        return `${diff}d`;
+      })();
+
+      return (
+        <div
+          className={`border rounded-2xl p-4 transition-all ${isPast ? 'border-white/[0.04] opacity-50' : 'border-white/[0.08] hover:border-white/[0.15]'}`}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="font-medium text-white text-sm truncate">{event.title}</span>
+                {countdown && !isPast && (
+                  <span className="shrink-0 text-[10px] text-[#6DAA67] border border-[#6DAA67]/25 rounded-full px-2 py-0.5">
+                    {countdown}
+                  </span>
+                )}
+              </div>
+              {event.artist && <p className="text-gray-500 text-xs mb-2">{event.artist}</p>}
+              <div className="flex items-center gap-2 text-[11px] text-gray-600">
+                <span>{fmt(event.date)}</span>
+                <span className="text-gray-800">·</span>
+                <span>{event.venue}</span>
+              </div>
+              {event.notes && <p className="text-gray-600 text-[11px] mt-2 italic">{event.notes}</p>}
+            </div>
+            {onDelete && hover && (
+              <button
+                onClick={() => { if (confirm('Remove this show?')) onDelete(event.id); }}
+                className="text-gray-700 hover:text-red-400 transition-colors text-xs shrink-0 mt-0.5"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // ─── CALENDAR GRID ────────────────────────────────────────────────────────
+
+    const CalGrid = ({ events, onDayClick, selectedDate }) => {
+      const now = new Date();
+      const [view, setView] = useState(new Date(now.getFullYear(), now.getMonth(), 1));
+      const yr = view.getFullYear(), mo = view.getMonth();
+
+      const byDate = useMemo(() => {
+        const m = {};
+        events.forEach(e => { (m[e.date] = m[e.date] || []).push(e); });
+        return m;
+      }, [events]);
+
+      const firstDay = new Date(yr, mo, 1).getDay();
+      const daysInMo = new Date(yr, mo + 1, 0).getDate();
+      const cells = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMo }, (_, i) => i + 1)];
+
+      const ds = (d) => `${yr}-${String(mo + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const isToday = (d) => now.getFullYear() === yr && now.getMonth() === mo && now.getDate() === d;
+
+      return (
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <button onClick={() => setView(new Date(yr, mo - 1, 1))} className="text-gray-500 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5">
+              ‹
+            </button>
+            <span className="text-white text-sm font-medium">
+              {view.toLocaleString('default', { month: 'long' })} {yr}
+            </span>
+            <button onClick={() => setView(new Date(yr, mo + 1, 1))} className="text-gray-500 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5">
+              ›
+            </button>
+          </div>
+
+          <div className="grid grid-cols-7 mb-1">
+            {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+              <div key={d} className="text-center text-[9px] text-gray-700 uppercase tracking-widest py-2">{d}</div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-0.5">
+            {cells.map((d, i) => {
+              if (!d) return <div key={`e${i}`} />;
+              const date = ds(d);
+              const evs = byDate[date] || [];
+              const hasEv = evs.length > 0;
+              const isSelected = selectedDate === date;
+
+              return (
+                <button
+                  key={d}
+                  onClick={() => hasEv && onDayClick(date)}
+                  className={`
+                    relative flex flex-col items-center pt-1.5 pb-1 px-0.5 gap-0.5 rounded-xl transition-all min-h-[52px]
+                    ${isToday(d) ? 'ring-1 ring-[#6DAA67]/40' : ''}
+                    ${isSelected ? 'bg-[#6DAA67]/10' : hasEv ? 'hover:bg-white/[0.04]' : ''}
+                    ${hasEv ? 'cursor-pointer' : 'cursor-default'}
+                  `}
+                >
+                  <span className={`text-[11px] leading-none ${isToday(d) ? 'text-[#6DAA67] font-semibold' : 'text-gray-500'}`}>
+                    {d}
+                  </span>
+                  {evs.slice(0, 2).map((ev) => {
+                    const s = getEventStyle(ev.artist);
+                    return (
+                      <div
+                        key={ev.id}
+                        title={`${ev.artist} — ${ev.title}`}
+                        style={{
+                          fontFamily: s.font,
+                          color: s.color,
+                          backgroundColor: s.bg,
+                          borderColor: s.color,
+                          fontSize: '8px',
+                          lineHeight: 1,
+                          letterSpacing: '0.03em',
+                        }}
+                        className="w-full border rounded text-center px-0.5 py-[3px] overflow-hidden font-bold"
+                      >
+                        {getInitials(ev.artist)}
+                      </div>
+                    );
+                  })}
+                  {evs.length > 2 && (
+                    <span className="text-[7px] text-gray-600 leading-none">+{evs.length - 2}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    };
+
+    // ─── TOTEM SELECTOR ───────────────────────────────────────────────────────
+
+    const TotemSel = ({ value, onChange }) => (
+      <div className="grid grid-cols-4 gap-2">
+        {TOTEMS.map(t => (
+          <button
+            key={t.emoji}
+            type="button"
+            onClick={() => onChange(t.emoji)}
+            className={`flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border transition-all ${
+              value === t.emoji ? 'border-[#6DAA67] bg-[#6DAA67]/10' : 'border-white/10 hover:border-white/20'
+            }`}
+          >
+            <span className="text-xl leading-none">{t.emoji}</span>
+            <span className="text-[8px] text-gray-500 text-center leading-tight">{t.label}</span>
+          </button>
+        ))}
+      </div>
+    );
+
+    // ─── PAGE WRAPPER ─────────────────────────────────────────────────────────
+
+    const Wrap = ({ children, cls = '' }) => (
+      <div className={`max-w-2xl mx-auto px-4 py-8 ${cls}`}>{children}</div>
+    );
+
+    // ─── LOGIN PAGE ───────────────────────────────────────────────────────────
+
+    const LoginPage = () => {
+      const { login, user } = useAuth();
+      const nav = useNav();
+      const [email, setEmail] = useState('');
+      const [pw, setPw] = useState('');
+      const [err, setErr] = useState('');
+      const [loading, setLoading] = useState(false);
+
+      useEffect(() => { if (user) nav(user.setupComplete ? '/calendar' : '/setup'); }, [user]);
+
+      const submit = (e) => {
+        e.preventDefault(); setErr(''); setLoading(true);
+        const r = login(email, pw);
+        setLoading(false);
+        if (!r.success) setErr(r.error);
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center px-4">
+          <div className="w-full max-w-sm">
+            <div className="text-center mb-12">
+              <div className="text-5xl mb-4">🎫</div>
+              <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">TikCal</h1>
+              <p className="text-gray-600 text-sm">Your concert calendar</p>
+            </div>
+
+            <form onSubmit={submit} className="space-y-4">
+              <Inp label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required />
+              <Inp label="Password" type="password" value={pw} onChange={setPw} placeholder="••••••••" required />
+              {err && <p className="text-red-400 text-xs text-center py-1">{err}</p>}
+              <Btn type="submit" disabled={loading} cls="w-full flex justify-center">
+                {loading ? 'Signing in…' : 'Sign in'}
+              </Btn>
+            </form>
+
+            <p className="text-center text-gray-600 text-sm mt-6">
+              No account?{' '}
+              <button onClick={() => nav('/signup')} className="text-[#6DAA67] hover:underline">Create one</button>
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    // ─── SIGNUP PAGE ──────────────────────────────────────────────────────────
+
+    const SignupPage = () => {
+      const { signup, user } = useAuth();
+      const nav = useNav();
+      const [email, setEmail] = useState('');
+      const [pw, setPw] = useState('');
+      const [conf, setConf] = useState('');
+      const [err, setErr] = useState('');
+      const [loading, setLoading] = useState(false);
+
+      useEffect(() => { if (user) nav(user.setupComplete ? '/calendar' : '/setup'); }, [user]);
+
+      const submit = (e) => {
+        e.preventDefault(); setErr('');
+        if (pw !== conf) return setErr('Passwords do not match.');
+        if (pw.length < 6) return setErr('Password must be at least 6 characters.');
+        setLoading(true);
+        const r = signup(email, pw);
+        setLoading(false);
+        if (!r.success) setErr(r.error);
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center px-4">
+          <div className="w-full max-w-sm">
+            <div className="text-center mb-12">
+              <div className="text-5xl mb-4">🎫</div>
+              <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">TikCal</h1>
+              <p className="text-gray-600 text-sm">Join your friends' concert calendar</p>
+            </div>
+
+            <form onSubmit={submit} className="space-y-4">
+              <Inp label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required />
+              <Inp label="Password" type="password" value={pw} onChange={setPw} placeholder="Min. 6 characters" required />
+              <Inp label="Confirm Password" type="password" value={conf} onChange={setConf} placeholder="••••••••" required />
+              {err && <p className="text-red-400 text-xs text-center py-1">{err}</p>}
+              <Btn type="submit" disabled={loading} cls="w-full flex justify-center">
+                {loading ? 'Creating account…' : 'Create account'}
+              </Btn>
+            </form>
+
+            <p className="text-center text-gray-600 text-sm mt-6">
+              Already have an account?{' '}
+              <button onClick={() => nav('/login')} className="text-[#6DAA67] hover:underline">Sign in</button>
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    // ─── PROFILE SETUP PAGE ───────────────────────────────────────────────────
+
+    const SetupPage = () => {
+      const { user, updateProfile } = useAuth();
+      const nav = useNav();
+      const [name, setName] = useState(user?.name || '');
+      const [bio, setBio] = useState(user?.bio || '');
+      const [venue, setVenue] = useState(user?.favoriteVenue || '');
+      const [totem, setTotem] = useState(user?.totem || '');
+      const [saving, setSaving] = useState(false);
+
+      const submit = (e) => {
+        e.preventDefault();
+        if (!name.trim() || !totem || !venue) return;
+        setSaving(true);
+        updateProfile({ name: name.trim(), bio, favoriteVenue: venue, totem, setupComplete: true });
+        // Seed mock events
+        const existing = S.userEvents(user.id);
+        if (existing.length === 0) {
+          MOCK_EVENTS.forEach(ev => S.createEvent({ ...ev, userId: user.id }));
+        }
+        setTimeout(() => { setSaving(false); nav('/calendar'); }, 400);
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+          <div className="w-full max-w-sm">
+            <div className="text-center mb-10">
+              <h1 className="text-2xl font-semibold text-white mb-2">Set up your profile</h1>
+              <p className="text-gray-600 text-sm">Tell the crew who you are</p>
+            </div>
+
+            <form onSubmit={submit} className="space-y-6">
+              <Inp label="Name" value={name} onChange={setName} placeholder="Your name" required />
+              <Txta label="Bio (optional)" value={bio} onChange={setBio} placeholder="What's your vibe?" rows={2} />
+              <Sel label="Favorite NYC Venue" value={venue} onChange={setVenue} options={NYC_VENUES} />
+              <div>
+                <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-3">Your Totem</label>
+                <TotemSel value={totem} onChange={setTotem} />
+              </div>
+              <Btn type="submit" disabled={!name.trim() || !totem || !venue || saving} cls="w-full flex justify-center mt-2">
+                {saving ? 'Saving…' : "Let's go →"}
+              </Btn>
+            </form>
+          </div>
+        </div>
+      );
+    };
+
+    // ─── CALENDAR PAGE ────────────────────────────────────────────────────────
+
+    const CalendarPage = () => {
+      const { user } = useAuth();
+      const nav = useNav();
+      const [events, setEvents] = useState([]);
+      const [selDate, setSelDate] = useState(null);
+      const [tab, setTab] = useState('upcoming');
+
+      const load = () => {
+        const evs = S.userEvents(user.id).sort((a, b) => a.date.localeCompare(b.date));
+        setEvents(evs);
+      };
+      useEffect(() => { if (user) load(); }, [user]);
+
+      const del = (id) => { S.deleteEvent(id); load(); };
+
+      const today = new Date().toISOString().slice(0, 10);
+      const upcoming = events.filter(e => e.date >= today);
+      const past = events.filter(e => e.date < today);
+      const selEvs = selDate ? events.filter(e => e.date === selDate) : [];
+
+      return (
+        <Wrap>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-xl font-semibold text-white">
+                {user?.name ? `${user.name.split(' ')[0]}'s calendar` : 'My Calendar'}
+              </h1>
+              <p className="text-gray-600 text-xs mt-0.5">{events.length} show{events.length !== 1 ? 's' : ''} tracked</p>
+            </div>
+            <Btn onClick={() => nav('/calendar/add')}>+ Add Show</Btn>
+          </div>
+
+          {/* Tab toggle */}
+          <div className="flex gap-1 mb-6 bg-white/[0.04] rounded-xl p-1 w-fit">
+            {['upcoming', 'calendar'].map(t => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`px-4 py-1.5 rounded-lg text-xs transition-all capitalize ${tab === t ? 'bg-white/10 text-white' : 'text-gray-600 hover:text-gray-300'}`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          {tab === 'calendar' ? (
+            <div>
+              <CalGrid
+                events={events}
+                selectedDate={selDate}
+                onDayClick={(d) => setSelDate(selDate === d ? null : d)}
+              />
+              {selDate && selEvs.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">
+                    {new Date(selDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  </h3>
+                  <div className="space-y-2">
+                    {selEvs.map(ev => <EventCard key={ev.id} event={ev} onDelete={del} />)}
+                  </div>
+                </div>
+              )}
+              {events.length === 0 && (
+                <div className="text-center py-20 text-gray-700">
+                  <div className="text-4xl mb-3">🎵</div>
+                  <p className="text-sm">No shows yet. Add your first one.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              {upcoming.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Upcoming</h2>
+                  <div className="space-y-2">
+                    {upcoming.map(ev => <EventCard key={ev.id} event={ev} onDelete={del} />)}
+                  </div>
+                </div>
+              )}
+              {past.length > 0 && (
+                <div>
+                  <h2 className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Past</h2>
+                  <div className="space-y-2">
+                    {past.map(ev => <EventCard key={ev.id} event={ev} />)}
+                  </div>
+                </div>
+              )}
+              {events.length === 0 && (
+                <div className="text-center py-20 text-gray-700">
+                  <div className="text-4xl mb-3">🎵</div>
+                  <p className="text-sm">No shows yet. Add your first one.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </Wrap>
+      );
+    };
+
+    // ─── ADD EVENT PAGE ───────────────────────────────────────────────────────
+
+    const AddPage = () => {
+      const { user } = useAuth();
+      const nav = useNav();
+      const fileRef = useRef(null);
+      const [form, setForm] = useState({ title: '', artist: '', date: '', venue: '', notes: '' });
+      const [shot, setShot] = useState(null);
+      const [saving, setSaving] = useState(false);
+
+      const set = (k) => (v) => setForm(f => ({ ...f, [k]: v }));
+
+      const onFile = (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const r = new FileReader();
+        r.onload = (ev) => setShot(ev.target.result);
+        r.readAsDataURL(f);
+      };
+
+      const submit = (e) => {
+        e.preventDefault();
+        if (!form.title || !form.date || !form.venue) return;
+        setSaving(true);
+        S.createEvent({ ...form, userId: user.id, screenshot: shot || null });
+        setTimeout(() => { setSaving(false); nav('/calendar'); }, 300);
+      };
+
+      return (
+        <Wrap>
+          <div className="flex items-center gap-3 mb-8">
+            <button onClick={() => nav('/calendar')} className="text-gray-600 hover:text-white transition-colors text-lg">
+              ←
+            </button>
+            <h1 className="text-xl font-semibold text-white">Add a Show</h1>
+          </div>
+
+          <form onSubmit={submit} className="space-y-5">
+            <Inp label="Event / Night Title" value={form.title} onChange={set('title')} placeholder="e.g. Superior Ingredients" required />
+            <Inp label="Artist(s)" value={form.artist} onChange={set('artist')} placeholder="e.g. Dee Vault" />
+
+            <div className="grid grid-cols-2 gap-4">
+              <Inp label="Date" type="date" value={form.date} onChange={set('date')} required />
+              <Sel label="Venue" value={form.venue} onChange={set('venue')} options={NYC_VENUES} />
+            </div>
+
+            <Txta label="Notes (optional)" value={form.notes} onChange={set('notes')} placeholder="Doors at 10, tickets at will call…" />
+
+            {/* Screenshot upload */}
+            <div>
+              <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-2">Screenshot / Flyer (optional)</label>
+              <div
+                onClick={() => fileRef.current?.click()}
+                className={`border border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all hover:border-[#6DAA67]/40 ${shot ? 'border-[#6DAA67]/30' : 'border-white/10'}`}
+              >
+                {shot ? (
+                  <div>
+                    <img src={shot} alt="Preview" className="max-h-28 mx-auto rounded-xl object-cover mb-2" />
+                    <p className="text-[11px] text-gray-600">Click to change</p>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-2xl mb-2 opacity-40">📸</div>
+                    <p className="text-xs text-gray-700">Upload flyer or screenshot</p>
+                  </div>
+                )}
+              </div>
+              <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Btn type="submit" disabled={!form.title || !form.date || !form.venue || saving} cls="flex-1 flex justify-center">
+                {saving ? 'Adding…' : 'Add to Calendar'}
+              </Btn>
+              <Btn variant="ghost" onClick={() => nav('/calendar')}>Cancel</Btn>
+            </div>
+          </form>
+        </Wrap>
+      );
+    };
+
+    // ─── PROFILE PAGE ─────────────────────────────────────────────────────────
+
+    const ProfilePage = () => {
+      const { user, logout } = useAuth();
+      const nav = useNav();
+      const [events, setEvents] = useState([]);
+      const [copied, setCopied] = useState(false);
+
+      useEffect(() => { if (user) setEvents(S.userEvents(user.id)); }, [user]);
+
+      const today = new Date().toISOString().slice(0, 10);
+      const upcoming = events.filter(e => e.date >= today).length;
+      const venues = new Set(events.map(e => e.venue)).size;
+
+      const shareLink = `${window.location.origin}${window.location.pathname}#/signup`;
+      const copy = () => {
+        navigator.clipboard.writeText(shareLink).then(() => {
+          setCopied(true); setTimeout(() => setCopied(false), 2000);
+        });
+      };
+
+      const initials = user?.name
+        ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+        : '?';
+
+      return (
+        <Wrap>
+          {/* Profile card */}
+          <div className="border border-white/[0.08] rounded-2xl p-6 mb-4">
+            <div className="flex items-start gap-5">
+              <div className="w-16 h-16 rounded-full bg-[#6DAA67]/15 border border-[#6DAA67]/25 flex items-center justify-center shrink-0">
+                <span className="text-[#6DAA67] font-semibold text-lg">{initials}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <h2 className="text-white font-semibold text-lg leading-tight">{user?.name}</h2>
+                  <span className="flex items-center">{renderTotem(user?.totem, 22)}</span>
+                </div>
+                {user?.bio && <p className="text-gray-400 text-sm mb-3 leading-relaxed">{user.bio}</p>}
+                <div className="flex flex-wrap gap-3 text-xs text-gray-600">
+                  {user?.favoriteVenue && <span>📍 {user.favoriteVenue}</span>}
+                  <span>🎟 {events.length} shows</span>
+                  <span>🗓 {upcoming} upcoming</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            {[
+              { label: 'Total', value: events.length },
+              { label: 'Upcoming', value: upcoming },
+              { label: 'Venues', value: venues },
+            ].map(s => (
+              <div key={s.label} className="border border-white/[0.08] rounded-2xl p-4 text-center">
+                <div className="text-2xl font-semibold text-white mb-0.5">{s.value}</div>
+                <div className="text-[10px] text-gray-600 uppercase tracking-widest">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Invite */}
+          <div className="border border-white/[0.08] rounded-2xl p-5 mb-4">
+            <h3 className="text-sm font-medium text-white mb-1">Invite friends</h3>
+            <p className="text-gray-600 text-xs mb-3">Share this link so friends can create their own account</p>
+            <div className="flex gap-2">
+              <div className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-gray-500 truncate font-mono">
+                {shareLink}
+              </div>
+              <Btn onClick={copy} variant={copied ? 'ghost' : 'primary'} cls="shrink-0 text-xs px-3">
+                {copied ? '✓ Copied' : 'Copy'}
+              </Btn>
+            </div>
+          </div>
+
+          {/* Account */}
+          <div className="border border-white/[0.08] rounded-2xl p-5">
+            <h3 className="text-sm font-medium text-white mb-1">Account</h3>
+            <p className="text-gray-600 text-xs mb-4">{user?.email}</p>
+            <div className="flex gap-2">
+              <Btn variant="ghost" onClick={() => nav('/setup')} cls="text-xs px-3">Edit Profile</Btn>
+              <Btn variant="danger" onClick={() => { logout(); nav('/login'); }} cls="text-xs px-3">Sign out</Btn>
+            </div>
+          </div>
+        </Wrap>
+      );
+    };
+
+    // ─── APP ──────────────────────────────────────────────────────────────────
+
+    const App = () => {
+      const { user, loading } = useAuth();
+      const path = usePath();
+
+      if (loading) return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-gray-800 text-sm tracking-widest">···</div>
+        </div>
+      );
+
+      // Public routes
+      if (path === '/login') return <LoginPage />;
+      if (path === '/signup') return <SignupPage />;
+
+      // Gate
+      if (!user) return <Redirect to="/login" />;
+      if (!user.setupComplete && path !== '/setup') return <Redirect to="/setup" />;
+      if (path === '/setup') return <SetupPage />;
+      if (user.setupComplete && path === '/') return <Redirect to="/calendar" />;
+
+      // Protected with nav
+      return (
+        <div className="min-h-screen">
+          <Nav />
+          {path === '/calendar' && <CalendarPage />}
+          {path === '/calendar/add' && <AddPage />}
+          {path === '/profile' && <ProfilePage />}
+          {!['/calendar', '/calendar/add', '/profile'].includes(path) && <Redirect to="/calendar" />}
+        </div>
+      );
+    };
+
+    // ─── RENDER ───────────────────────────────────────────────────────────────
+
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      <RouterProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </RouterProvider>
+    );
+  </script>
+</body>
+</html>
