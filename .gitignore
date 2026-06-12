@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.local
+.DS_Store
+*.log
+
+# Local Claude Code / skills tooling
+.claude/settings.local.json
+.agents/
+skills-lock.json
+.claude/skills/
