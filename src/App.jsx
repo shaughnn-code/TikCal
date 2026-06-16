@@ -7,6 +7,7 @@ import Landing from './pages/Landing.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Setup from './pages/Setup.jsx'
+import Welcome from './pages/Welcome.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import EventDetail from './pages/EventDetail.jsx'
 import AddEvent from './pages/AddEvent.jsx'
@@ -22,6 +23,16 @@ const SetupGate = () => {
   return <Setup />
 }
 
+// First-run intro: needs auth + completed setup, plays once until seen.
+const WelcomeGate = () => {
+  const { user, profile, loading } = useAuth()
+  if (loading || (user && profile === null)) return <Spinner />
+  if (!user) return <Navigate to="/login" replace />
+  if (!profile.setup_complete) return <Navigate to="/setup" replace />
+  if (profile.seen_intro) return <Navigate to="/calendar" replace />
+  return <Welcome />
+}
+
 export default function App() {
   return (
     <Routes>
@@ -30,6 +41,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/setup" element={<SetupGate />} />
+      <Route path="/welcome" element={<WelcomeGate />} />
 
       {/* Protected (shared Nav) */}
       <Route element={<ProtectedRoute />}>

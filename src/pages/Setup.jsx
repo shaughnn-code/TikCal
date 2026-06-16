@@ -18,6 +18,8 @@ export default function Setup() {
   const submit = async (e) => {
     e.preventDefault()
     if (!name.trim() || !totem || !venue) return
+    // Only first-time setup leads to the welcome intro (not later profile edits).
+    const firstTime = !profile?.setup_complete && !profile?.seen_intro
     setSaving(true)
     setErr('')
     const { error } = await updateProfile({
@@ -29,7 +31,7 @@ export default function Setup() {
     })
     setSaving(false)
     if (error) return setErr(error)
-    navigate('/calendar', { replace: true })
+    navigate(firstTime ? '/welcome' : '/calendar', { replace: true })
   }
 
   return (
