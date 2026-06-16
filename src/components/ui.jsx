@@ -11,7 +11,6 @@ export const GridBg = ({ lite = false, glow = true }) => (
   <div className={`fixed inset-0 z-0 overflow-hidden pointer-events-none ${lite ? 'grid-lite' : ''}`}>
     {glow && <div className="grid-glow" />}
     <div className="grid-floor" />
-    <div className="grid-horizon" />
     <div className="scanlines" />
   </div>
 )
