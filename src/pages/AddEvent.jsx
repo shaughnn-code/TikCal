@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
 import { fetchMyCrews } from '../lib/db.js'
 import { Wrap, Inp, Txta, Sel, Btn } from '../components/ui.jsx'
+import { SmartAdd } from '../components/SmartAdd.jsx'
 import { NYC_VENUES } from '../lib/constants.js'
 
 export default function AddEvent() {
@@ -33,6 +34,32 @@ export default function AddEvent() {
     const r = new FileReader()
     r.onload = (ev) => setPreview(ev.target.result)
     r.readAsDataURL(f)
+  }
+
+  // Apply Smart Add results to the form. Map the extracted venue onto the
+  // dropdown when it matches a known venue; otherwise fall back to "Other"
+  // and preserve the real name in notes so nothing is lost.
+  const applyFields = (f) => {
+    const match = NYC_VENUES.find(
+      (v) => v.toLowerCase() === (f.venue || '').trim().toLowerCase(),
+    )
+    let venue = ''
+    let notes = f.notes || ''
+    if (f.venue) {
+      if (match) {
+        venue = match
+      } else {
+        venue = 'Other'
+        notes = `Venue: ${f.venue}${notes ? `\n${notes}` : ''}`
+      }
+    }
+    setForm({
+      title: f.title || '',
+      artist: f.artist || '',
+      event_date: f.event_date || '',
+      venue,
+      notes,
+    })
   }
 
   const toggleCrew = (id) =>
@@ -88,6 +115,8 @@ export default function AddEvent() {
         </button>
         <h1 className="heading-type text-xl text-white">Add a Show</h1>
       </div>
+
+      <SmartAdd onResult={applyFields} />
 
       <form onSubmit={submit} className="space-y-5">
         <Inp label="Event / Night Title" value={form.title} onChange={set('title')} placeholder="e.g. Superior Ingredients" required />
