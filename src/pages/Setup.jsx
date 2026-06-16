@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { Inp, Txta, Sel, Btn } from '../components/ui.jsx'
+import { Inp, Txta, Btn } from '../components/ui.jsx'
 import { TotemSel } from '../components/TotemSel.jsx'
-import { NYC_VENUES } from '../lib/constants.js'
+import { VenuePicker } from '../components/VenuePicker.jsx'
 
 export default function Setup() {
   const { profile, updateProfile } = useAuth()
@@ -43,7 +43,7 @@ export default function Setup() {
         <form onSubmit={submit} className="space-y-6">
           <Inp label="Name" value={name} onChange={setName} placeholder="Your name" required />
           <Txta label="Bio (optional)" value={bio} onChange={setBio} placeholder="What's your vibe?" rows={2} />
-          <Sel label="Favorite NYC Venue" value={venue} onChange={setVenue} options={NYC_VENUES} />
+          <VenuePicker label="Favorite NYC Venue" value={venue} onChange={setVenue} placeholder="Type in your favorite venue" />
           <div>
             <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-3">Your Totem</label>
             <TotemSel value={totem} onChange={setTotem} />

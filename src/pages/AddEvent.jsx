@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
 import { fetchMyCrews } from '../lib/db.js'
-import { Wrap, Inp, Txta, Sel, Btn } from '../components/ui.jsx'
+import { Wrap, Inp, Txta, Btn } from '../components/ui.jsx'
 import { SmartAdd } from '../components/SmartAdd.jsx'
-import { NYC_VENUES } from '../lib/constants.js'
+import { VenuePicker } from '../components/VenuePicker.jsx'
 
 export default function AddEvent() {
   const { user } = useAuth()
@@ -36,29 +36,15 @@ export default function AddEvent() {
     r.readAsDataURL(f)
   }
 
-  // Apply Smart Add results to the form. Map the extracted venue onto the
-  // dropdown when it matches a known venue; otherwise fall back to "Other"
-  // and preserve the real name in notes so nothing is lost.
+  // Apply Smart Add results to the form. VenuePicker accepts free-text venues,
+  // so the extracted venue is kept as-is (it shows under "Other" if unlisted).
   const applyFields = (f) => {
-    const match = NYC_VENUES.find(
-      (v) => v.toLowerCase() === (f.venue || '').trim().toLowerCase(),
-    )
-    let venue = ''
-    let notes = f.notes || ''
-    if (f.venue) {
-      if (match) {
-        venue = match
-      } else {
-        venue = 'Other'
-        notes = `Venue: ${f.venue}${notes ? `\n${notes}` : ''}`
-      }
-    }
     setForm({
       title: f.title || '',
       artist: f.artist || '',
       event_date: f.event_date || '',
-      venue,
-      notes,
+      venue: f.venue || '',
+      notes: f.notes || '',
     })
   }
 
@@ -124,7 +110,7 @@ export default function AddEvent() {
 
         <div className="grid grid-cols-2 gap-4">
           <Inp label="Date" type="date" value={form.event_date} onChange={set('event_date')} required />
-          <Sel label="Venue" value={form.venue} onChange={set('venue')} options={NYC_VENUES} />
+          <VenuePicker label="Venue" value={form.venue} onChange={set('venue')} />
         </div>
 
         <Txta label="Notes (optional)" value={form.notes} onChange={set('notes')} placeholder="Doors at 10, tickets at will call…" />
