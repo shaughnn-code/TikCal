@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TikCal — merged totems + hover vibes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+<style>
+  :root{--bg:#0a0e12;--text:#e8f4f8;--muted:#647585;--ice:#4cc9f0;--mint:#6EE7B7;--border:rgba(76,201,240,.22);--dim:rgba(255,255,255,.08)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#040608;color:var(--text);font-family:'Inter';padding:40px 26px 90px}
+  .ptitle{text-align:center;font-family:'Saira';font-weight:800;font-size:26px;color:#fff}
+  .psub{text-align:center;color:#6b7280;font-size:12.5px;margin:6px 0 34px;font-family:'IBM Plex Mono'}
+  .center{display:flex;justify-content:center}
+  .scr{width:360px;min-height:780px;border-radius:22px;overflow:visible;position:relative;background:var(--bg);border:1px solid rgba(255,255,255,.08)}
+  .pad{position:relative;z-index:3;padding:22px 18px}
+  .scan{position:absolute;inset:0;z-index:2;pointer-events:none;background-image:repeating-linear-gradient(to bottom,rgba(255,255,255,.016) 0 1px,transparent 1px 3px);opacity:.6;border-radius:22px}
+  .kick{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:.16em;color:var(--ice)}
+  .h1{font-family:'Saira';font-weight:800;font-size:23px;color:var(--text);text-transform:uppercase;margin:3px 0 6px}
+  .seclbl{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:14px}
+  .tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .totem{position:relative;padding:11px 4px;border:1px solid var(--dim);border-radius:7px;display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(255,255,255,.015);cursor:pointer;transition:border-color .15s,transform .12s}
+  .totem:hover{border-color:rgba(76,201,240,.5);transform:translateY(-2px)}
+  .totem.sel{border-color:var(--mint);background:rgba(110,231,183,.1);box-shadow:0 0 14px rgba(110,231,183,.2)}
+  .totem iconify-icon{font-size:26px}
+  .tn{font-family:'Saira';font-weight:700;font-size:9px;color:var(--text);text-align:center;line-height:1.05}
+  .vibe{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);width:158px;background:#0c141c;border:1px solid var(--mint);border-radius:7px;padding:9px 11px;font-family:'Inter';font-size:10px;line-height:1.4;color:var(--text);opacity:0;pointer-events:none;transition:opacity .14s;z-index:30;box-shadow:0 10px 24px rgba(0,0,0,.7)}
+  .vibe::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--mint)}
+  .totem:hover .vibe,.totem.demo .vibe{opacity:1}
+  .btn{width:100%;border:none;border-radius:4px;padding:14px;font-family:'IBM Plex Mono';font-weight:700;font-size:12px;letter-spacing:.06em;cursor:pointer;background:var(--mint);color:#04221a;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .note{max-width:360px;margin:14px auto 0;text-align:center;font-family:'IBM Plex Mono';font-size:10px;color:#7681a8;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="ptitle">TikCal · totems — merged (20) + hover vibes</div>
+<div class="psub">Practical → party → after-hours. Hover any totem for its vibe.</div>
+
+<div class="center"><div class="scr">
+  <div class="scan"></div>
+  <div class="pad">
+    <div class="kick">// INITIALIZE PROFILE</div>
+    <div class="h1">Pick your poison</div>
+    <span class="seclbl">▸ what's in your pocket / on the floor — hover for the vibe</span>
+    <div class="tgrid" id="grid"></div>
+    <button class="btn"><iconify-icon icon="ph:arrow-right-bold"></iconify-icon> LET'S GO</button>
+  </div>
+</div></div>
+<div class="note">↑ live page: hover any totem. (“Bumps” is shown pre-hovered so you can see the vibe card.)</div>
+
+<script>
+  const TOTEMS = [
+    ['noto:headphone','Earplugs','Still hears tomorrow. The responsible legend.'],
+    ['noto:pill','The Press','You know the one. Sender of two-day weekends.'],
+    ['noto:candy','Gum','Jaw’s been working overtime since 1am.'],
+    ['noto:sunglasses','Shades','It’s 7am and the sun is the enemy.'],
+    ['noto:sparkler','Glow Stick','Main character. Visible from space.'],
+    ['noto:cup-with-straw','Hydration','Logs water like it’s a whole personality.'],
+    ['noto:key','Lost Keys','Future-you’s problem. Probably fine.'],
+    ['noto:battery','Dead Battery','Off-grid by 2am. Only memories, no photos.'],
+    ['noto:folding-hand-fan','Hand Fan','Dramatic, devastating, staying cool.'],
+    ['noto:money-with-wings','Crumpled Cash','Arrived with $200, leaving with lint.'],
+    ['noto:snowflake','Bumps','Talking your ear off in the smoking area.'],
+    ['noto:herb',"Devil's Lettuce",'Horizontal energy. Vibes only.'],
+    ['noto:mushroom','Shrooms','The walls are breathing and that’s fine.'],
+    ['noto:cigarette','Last Cig','Always bumming, never carrying.'],
+    ['noto:woozy-face','Woozy','One too many. Sending it regardless.'],
+    ['noto:sweat-droplets','Sweaty','Front row, soaked through, no regrets.'],
+    ['noto:tongue','Tongue','No thoughts. Just lights and bass.'],
+    ['noto:peach','Peach','Here for the after-after-party.'],
+    ['noto:eggplant','Eggplant','Confidence unmatched. Knows the assignment.'],
+    ['noto:smiling-face-with-horns','Menace','Up to no good and proud of it.'],
+  ];
+  const g=document.getElementById('grid');
+  TOTEMS.forEach(([ic,nm,vibe],i)=>g.insertAdjacentHTML('beforeend',
+    `<div class="totem${i===1?' sel':''}${nm==='Bumps'?' demo':''}">
+       <div class="vibe">${vibe}</div>
+       <iconify-icon icon="${ic}"></iconify-icon><span class="tn">${nm}</span>
+     </div>`));
+</script>
+</body>
+</html>

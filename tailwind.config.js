@@ -4,14 +4,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        accent: '#6DAA67',
-        ink: '#0F0F0F',
+        ink: '#0a0e12', // base
+        ink2: '#040608', // deeper
+        ice: '#4cc9f0', // primary accent
+        mint: '#6EE7B7', // secondary / positive
+        accent: '#4cc9f0', // legacy alias → ice
       },
       fontFamily: {
-        // Spec fonts
-        logo: ['Barlow', 'system-ui', 'sans-serif'],       // 800 italic
-        heading: ['Syne', 'system-ui', 'sans-serif'],        // 700/800
-        sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'], // body
+        display: ['Saira', 'system-ui', 'sans-serif'], // headings / wordmark
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'], // labels / data
+        sans: ['Inter', 'system-ui', 'sans-serif'], // body
       },
     },
   },

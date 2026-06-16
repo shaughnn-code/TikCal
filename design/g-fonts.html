@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TikCal — G: font & color iterations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&family=JetBrains+Mono:wght@400;700&family=Rajdhani:wght@500;600;700&family=Space+Mono:wght@400;700&family=Saira:wght@500;700;800&family=Saira+Semi+Condensed:wght@600;700&family=Inter:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@400;600;800&family=Archivo:wght@500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#020203;color:#fff;font-family:'Inter',system-ui,sans-serif;padding:40px 24px 90px;-webkit-font-smoothing:antialiased}
+  .ptitle{text-align:center;font-family:'Saira';font-weight:800;font-size:26px}
+  .psub{text-align:center;color:#6b7280;font-size:13px;margin:6px 0 40px}
+  .grid{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;max-width:2200px;margin:0 auto}
+  .col{width:360px;font-family:var(--body)}
+  .oname{font-family:'Saira';font-weight:800;font-size:17px;color:var(--c1)}
+  .ofonts{font-size:10.5px;color:#8b95a3;margin:5px 0 12px;line-height:1.5;font-family:'IBM Plex Mono',monospace}
+  .screen{border-radius:20px;overflow:hidden;height:700px;position:relative;border:1px solid rgba(255,255,255,.07);background:var(--bg)}
+  .pad{position:relative;z-index:3;padding:18px 15px}
+  .glow{position:absolute;top:-90px;left:50%;transform:translateX(-50%);width:340px;height:230px;z-index:0;filter:blur(20px);background:radial-gradient(ellipse,color-mix(in srgb,var(--c1) 16%,transparent),transparent 70%)}
+  .floor{position:absolute;left:-20%;right:-20%;bottom:-2px;height:40%;z-index:0;background-image:linear-gradient(color-mix(in srgb,var(--c1) 42%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--c1) 42%,transparent) 1px,transparent 1px);background-size:32px 32px;transform:perspective(250px) rotateX(73deg);transform-origin:bottom center;-webkit-mask-image:linear-gradient(to top,#000 5%,transparent 80%);mask-image:linear-gradient(to top,#000 5%,transparent 80%)}
+  .horizon{position:absolute;left:0;right:0;bottom:38%;height:2px;z-index:1;background:color-mix(in srgb,var(--c1) 70%,transparent);box-shadow:0 0 24px 5px color-mix(in srgb,var(--c1) 45%,transparent)}
+  .scan{position:absolute;inset:0;z-index:2;pointer-events:none;background-image:repeating-linear-gradient(to bottom,rgba(255,255,255,.02) 0 1px,transparent 1px 3px);opacity:.55}
+  nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .logo2{font-family:var(--disp);font-weight:800;font-size:22px;letter-spacing:-.01em;color:var(--c1)}
+  .nl{display:flex;gap:13px;font-family:var(--mono);font-size:9.5px;color:var(--muted);align-items:center}
+  .kick{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--c1)}
+  .h1{font-family:var(--disp);font-weight:800;font-size:22px;color:var(--text);margin-top:3px;text-transform:uppercase;letter-spacing:.01em}
+  .bento{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+  .s2{grid-column:span 2}
+  .box{padding:13px;position:relative;background:var(--panel);border:1px solid color-mix(in srgb,var(--c1) 26%,transparent);border-radius:4px;color:var(--c1)}
+  .box.dim{border-color:rgba(255,255,255,.09)}
+  .hud::before,.hud::after{content:'';position:absolute;width:9px;height:9px;border:2px solid currentColor;opacity:.85}
+  .hud::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+  .hud::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
+  .ttl{font-family:var(--disp);font-weight:800;font-size:18px;color:var(--text);text-transform:uppercase}
+  .sub{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .statn{font-family:var(--disp);font-weight:800;font-size:30px;line-height:1;color:var(--text)}
+  .statl{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px;letter-spacing:.08em}
+  .evrow{display:flex;align-items:center;gap:9px;padding:7px 0}
+  .ini{width:28px;height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:var(--mono)}
+  .evt{font-family:var(--disp);font-weight:700;font-size:12px;color:var(--text);text-transform:uppercase}
+  .evm{font-family:var(--mono);font-size:9px;color:var(--muted)}
+  .cd{font-family:var(--mono);font-size:10px;color:var(--c1)}
+  .cta{width:100%;font-family:var(--mono);font-weight:700;font-size:12px;padding:11px;cursor:pointer;border:none;border-radius:4px;letter-spacing:.06em;background:var(--c2);color:#04130d}
+</style>
+</head>
+<body>
+<div class="ptitle">TikCal · Option G — 5 font &amp; color systems</div>
+<div class="psub">Same grid + HUD-bracket bento. Only the typography and palette change. Each is labelled with its fonts.</div>
+<div class="grid">
+
+  <!-- G1 -->
+  <div class="col" style="--bg:#06080C;--panel:rgba(255,255,255,.025);--text:#fff;--muted:#6b7280;--c1:#22E3FF;--c2:#6EE7B7;--disp:'Chakra Petch';--body:'Space Grotesk';--mono:'JetBrains Mono'">
+    <div class="oname">G1 · HUD Tech</div>
+    <div class="ofonts">Chakra Petch · JetBrains Mono · cyan + mint</div>
+    <div class="screen"><div class="glow"></div><div class="floor"></div><div class="horizon"></div><div class="scan"></div>
+      <div class="pad">
+        <nav><span class="logo2">TikCal</span><div class="nl"><span style="color:var(--c1)">CALENDAR</span><span>CREW</span><span>◐</span></div></nav>
+        <div class="kick">// SESSION ACTIVE</div>
+        <div class="h1"><span style="color:var(--c1)">{</span>NICK'S<span style="color:var(--c1)">}</span> CALENDAR</div>
+        <div class="bento">
+          <div class="hud box s2"><div class="sub" style="color:var(--c1)">▸ NEXT UP · T-5D</div><div class="ttl" style="margin-top:5px">Open Air</div><div class="sub">FJAAK · NOWADAYS · 2026.06.21</div></div>
+          <div class="hud box"><div class="statn">07</div><div class="statl">SHOWS</div></div>
+          <div class="hud box" style="color:#FFB000"><div class="statn" style="color:#FFB000">03</div><div class="statl">CREW</div></div>
+          <div class="hud box s2"><div class="sub">▸ UPCOMING</div>
+            <div class="evrow" style="border-bottom:1px solid color-mix(in srgb,var(--c1) 12%,transparent)"><div class="ini" style="color:#FFB000;border:1px solid #FFB00066;background:#FFB00014">PT</div><div style="flex:1"><div class="evt">Nite Chemistry</div><div class="evm">06.28 · ELSEWHERE</div></div><span class="cd">T-12D</span></div>
+            <div class="evrow"><div class="ini" style="color:var(--c1);border:1px solid color-mix(in srgb,var(--c1) 40%,transparent);background:color-mix(in srgb,var(--c1) 8%,transparent)">DV</div><div style="flex:1"><div class="evt">Superior Ingredients</div><div class="evm">07.04 · THE ROOF</div></div><span class="cd" style="color:var(--muted)">T-18D</span></div>
+          </div>
+          <div class="s2"><button class="cta">+ ADD SHOW ▸</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- G2 -->
+  <div class="col" style="--bg:#070510;--panel:rgba(255,255,255,.03);--text:#eaf0ff;--muted:#7681a8;--c1:#3da9fc;--c2:#ff3dda;--disp:'Rajdhani';--body:'Rajdhani';--mono:'Space Mono'">
+    <div class="oname">G2 · Condensed Signal</div>
+    <div class="ofonts">Rajdhani · Space Mono · blue + magenta</div>
+    <div class="screen"><div class="glow"></div><div class="floor"></div><div class="horizon"></div><div class="scan"></div>
+      <div class="pad">
+        <nav><span class="logo2">TikCal</span><div class="nl"><span style="color:var(--c1)">CALENDAR</span><span>CREW</span><span>◐</span></div></nav>
+        <div class="kick">// SESSION ACTIVE</div>
+        <div class="h1"><span style="color:var(--c1)">{</span>NICK'S<span style="color:var(--c1)">}</span> CALENDAR</div>
+        <div class="bento">
+          <div class="hud box s2"><div class="sub" style="color:var(--c1)">▸ NEXT UP · T-5D</div><div class="ttl" style="margin-top:5px">Open Air</div><div class="sub">FJAAK · NOWADAYS · 2026.06.21</div></div>
+          <div class="hud box"><div class="statn">07</div><div class="statl">SHOWS</div></div>
+          <div class="hud box" style="color:#ff3dda"><div class="statn" style="color:#ff3dda">03</div><div class="statl">CREW</div></div>
+          <div class="hud box s2"><div class="sub">▸ UPCOMING</div>
+            <div class="evrow" style="border-bottom:1px solid color-mix(in srgb,var(--c1) 12%,transparent)"><div class="ini" style="color:#ff3dda;border:1px solid #ff3dda66;background:#ff3dda14">PT</div><div style="flex:1"><div class="evt">Nite Chemistry</div><div class="evm">06.28 · ELSEWHERE</div></div><span class="cd">T-12D</span></div>
+            <div class="evrow"><div class="ini" style="color:var(--c1);border:1px solid color-mix(in srgb,var(--c1) 40%,transparent);background:color-mix(in srgb,var(--c1) 8%,transparent)">DV</div><div style="flex:1"><div class="evt">Superior Ingredients</div><div class="evm">07.04 · THE ROOF</div></div><span class="cd" style="color:var(--muted)">T-18D</span></div>
+          </div>
+          <div class="s2"><button class="cta" style="color:#fff">+ ADD SHOW ▸</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- G3 -->
+  <div class="col" style="--bg:#0a0e12;--panel:rgba(255,255,255,.025);--text:#e8f4f8;--muted:#64748b;--c1:#4cc9f0;--c2:#4cc9f0;--disp:'Saira';--body:'Inter';--mono:'IBM Plex Mono'">
+    <div class="oname">G3 · Wide Ice</div>
+    <div class="ofonts">Saira · IBM Plex Mono · ice blue (minimal)</div>
+    <div class="screen"><div class="glow"></div><div class="floor"></div><div class="horizon"></div><div class="scan"></div>
+      <div class="pad">
+        <nav><span class="logo2">TikCal</span><div class="nl"><span style="color:var(--c1)">CALENDAR</span><span>CREW</span><span>◐</span></div></nav>
+        <div class="kick">// SESSION ACTIVE</div>
+        <div class="h1"><span style="color:var(--c1)">{</span>NICK'S<span style="color:var(--c1)">}</span> CALENDAR</div>
+        <div class="bento">
+          <div class="hud box s2"><div class="sub" style="color:var(--c1)">▸ NEXT UP · T-5D</div><div class="ttl" style="margin-top:5px">Open Air</div><div class="sub">FJAAK · NOWADAYS · 2026.06.21</div></div>
+          <div class="hud box"><div class="statn">07</div><div class="statl">SHOWS</div></div>
+          <div class="hud box dim" style="color:#94a3b8"><div class="statn" style="color:#e8f4f8">03</div><div class="statl">CREW</div></div>
+          <div class="hud box s2"><div class="sub">▸ UPCOMING</div>
+            <div class="evrow" style="border-bottom:1px solid rgba(255,255,255,.07)"><div class="ini" style="color:#94a3b8;border:1px solid #94a3b855;background:#94a3b814">PT</div><div style="flex:1"><div class="evt">Nite Chemistry</div><div class="evm">06.28 · ELSEWHERE</div></div><span class="cd">T-12D</span></div>
+            <div class="evrow"><div class="ini" style="color:var(--c1);border:1px solid color-mix(in srgb,var(--c1) 40%,transparent);background:color-mix(in srgb,var(--c1) 8%,transparent)">DV</div><div style="flex:1"><div class="evt">Superior Ingredients</div><div class="evm">07.04 · THE ROOF</div></div><span class="cd" style="color:var(--muted)">T-18D</span></div>
+          </div>
+          <div class="s2"><button class="cta" style="color:#04222e">+ ADD SHOW ▸</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- G4 -->
+  <div class="col" style="--bg:#0b0c10;--panel:rgba(255,255,255,.03);--text:#f5f3ee;--muted:#7d7a72;--c1:#ffb454;--c2:#2dd4bf;--disp:'Sora';--body:'Sora';--mono:'Space Mono'">
+    <div class="oname">G4 · Soft Amber</div>
+    <div class="ofonts">Sora · Space Mono · amber + teal (premium)</div>
+    <div class="screen"><div class="glow"></div><div class="floor"></div><div class="horizon"></div><div class="scan"></div>
+      <div class="pad">
+        <nav><span class="logo2">TikCal</span><div class="nl"><span style="color:var(--c1)">CALENDAR</span><span>CREW</span><span>◐</span></div></nav>
+        <div class="kick">// SESSION ACTIVE</div>
+        <div class="h1"><span style="color:var(--c1)">{</span>NICK'S<span style="color:var(--c1)">}</span> CALENDAR</div>
+        <div class="bento">
+          <div class="hud box s2"><div class="sub" style="color:var(--c1)">▸ NEXT UP · T-5D</div><div class="ttl" style="margin-top:5px;text-transform:none">Open Air</div><div class="sub">FJAAK · NOWADAYS · 2026.06.21</div></div>
+          <div class="hud box"><div class="statn">07</div><div class="statl">SHOWS</div></div>
+          <div class="hud box" style="color:#2dd4bf"><div class="statn" style="color:#2dd4bf">03</div><div class="statl">CREW</div></div>
+          <div class="hud box s2"><div class="sub">▸ UPCOMING</div>
+            <div class="evrow" style="border-bottom:1px solid rgba(255,255,255,.07)"><div class="ini" style="color:#2dd4bf;border:1px solid #2dd4bf55;background:#2dd4bf14">PT</div><div style="flex:1"><div class="evt" style="text-transform:none">Nite Chemistry</div><div class="evm">06.28 · ELSEWHERE</div></div><span class="cd">T-12D</span></div>
+            <div class="evrow"><div class="ini" style="color:var(--c1);border:1px solid color-mix(in srgb,var(--c1) 40%,transparent);background:color-mix(in srgb,var(--c1) 8%,transparent)">DV</div><div style="flex:1"><div class="evt" style="text-transform:none">Superior Ingredients</div><div class="evm">07.04 · THE ROOF</div></div><span class="cd" style="color:var(--muted)">T-18D</span></div>
+          </div>
+          <div class="s2"><button class="cta" style="color:#04221e">+ ADD SHOW ▸</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- G5 -->
+  <div class="col" style="--bg:#060807;--panel:rgba(255,255,255,.025);--text:#fff;--muted:#6b7280;--c1:#c5ff3a;--c2:#22E3FF;--disp:'Archivo';--body:'Archivo';--mono:'JetBrains Mono'">
+    <div class="oname">G5 · Acid Archivo</div>
+    <div class="ofonts">Archivo · JetBrains Mono · acid lime + cyan</div>
+    <div class="screen"><div class="glow"></div><div class="floor"></div><div class="horizon"></div><div class="scan"></div>
+      <div class="pad">
+        <nav><span class="logo2">TikCal</span><div class="nl"><span style="color:var(--c1)">CALENDAR</span><span>CREW</span><span>◐</span></div></nav>
+        <div class="kick">// SESSION ACTIVE</div>
+        <div class="h1"><span style="color:var(--c1)">{</span>NICK'S<span style="color:var(--c1)">}</span> CALENDAR</div>
+        <div class="bento">
+          <div class="hud box s2"><div class="sub" style="color:var(--c1)">▸ NEXT UP · T-5D</div><div class="ttl" style="margin-top:5px">Open Air</div><div class="sub">FJAAK · NOWADAYS · 2026.06.21</div></div>
+          <div class="hud box"><div class="statn">07</div><div class="statl">SHOWS</div></div>
+          <div class="hud box" style="color:#22E3FF"><div class="statn" style="color:#22E3FF">03</div><div class="statl">CREW</div></div>
+          <div class="hud box s2"><div class="sub">▸ UPCOMING</div>
+            <div class="evrow" style="border-bottom:1px solid color-mix(in srgb,var(--c1) 12%,transparent)"><div class="ini" style="color:#22E3FF;border:1px solid #22E3FF66;background:#22E3FF14">PT</div><div style="flex:1"><div class="evt">Nite Chemistry</div><div class="evm">06.28 · ELSEWHERE</div></div><span class="cd">T-12D</span></div>
+            <div class="evrow"><div class="ini" style="color:var(--c1);border:1px solid color-mix(in srgb,var(--c1) 40%,transparent);background:color-mix(in srgb,var(--c1) 10%,transparent)">DV</div><div style="flex:1"><div class="evt">Superior Ingredients</div><div class="evm">07.04 · THE ROOF</div></div><span class="cd" style="color:var(--muted)">T-18D</span></div>
+          </div>
+          <div class="s2"><button class="cta" style="color:#04130d">+ ADD SHOW ▸</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

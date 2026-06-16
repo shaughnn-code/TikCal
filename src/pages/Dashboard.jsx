@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchVisibleEvents } from '../lib/db.js'
-import { Wrap, Btn, Spinner } from '../components/ui.jsx'
+import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
+import { Icon } from '../components/icons.jsx'
 import { EventCard } from '../components/EventCard.jsx'
 import { CalGrid } from '../components/CalGrid.jsx'
 
@@ -26,100 +27,137 @@ export default function Dashboard() {
     }
   }, [])
 
-  const ownerLabel = (e) =>
-    e.owner_id === user.id ? null : e.owner?.name?.split(' ')[0] || 'Friend'
+  const ownerLabel = (e) => (e.owner_id === user.id ? null : e.owner?.name?.split(' ')[0] || 'Friend')
 
   const today = new Date().toISOString().slice(0, 10)
   const upcoming = events.filter((e) => e.event_date >= today)
   const past = events.filter((e) => e.event_date < today)
   const selEvs = selDate ? events.filter((e) => e.event_date === selDate) : []
+  const venues = new Set(events.map((e) => e.venue).filter(Boolean)).size
+  const next = upcoming[0]
+  const nextCountdown = next
+    ? Math.ceil((new Date(next.event_date + 'T12:00:00') - new Date()) / 86400000)
+    : null
 
   if (loading) return <Spinner />
 
   const Empty = () => (
-    <div className="text-center py-20 text-gray-700">
-      <div className="text-4xl mb-3">🎵</div>
-      <p className="text-sm">No shows yet. Add your first one.</p>
+    <div className="text-center py-20 text-slate-600">
+      <Icon name="calendar-blank" size={36} className="mx-auto mb-3 text-slate-700" />
+      <p className="font-mono text-xs">NO SHOWS YET. ADD YOUR FIRST ONE.</p>
     </div>
   )
 
   return (
-    <Wrap>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="heading-type text-xl text-white">
-            {profile?.name ? `${profile.name.split(' ')[0]}'s calendar` : 'My Calendar'}
-          </h1>
-          <p className="text-gray-600 text-xs mt-0.5">
-            {events.length} show{events.length !== 1 ? 's' : ''} in view
-          </p>
+    <>
+      <GridBg />
+      <Wrap>
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <Kicker className="mb-1">// SESSION ACTIVE</Kicker>
+            <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8]">
+              <span className="text-ice">{'{'}</span>
+              {profile?.name ? `${profile.name.split(' ')[0]}'s` : 'My'}
+              <span className="text-ice">{'}'}</span> Calendar
+            </h1>
+          </div>
+          <Btn variant="mint" onClick={() => navigate('/calendar/add')}>
+            <Icon name="plus-bold" size={14} /> Add Show
+          </Btn>
         </div>
-        <Btn onClick={() => navigate('/calendar/add')}>+ Add Show</Btn>
-      </div>
 
-      {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
+        {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
 
-      {/* Tab toggle */}
-      <div className="flex gap-1 mb-6 bg-white/[0.04] rounded-xl p-1 w-fit">
-        {['upcoming', 'calendar'].map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-lg text-xs transition-all capitalize ${
-              tab === t ? 'bg-white/10 text-white' : 'text-gray-600 hover:text-gray-300'
-            }`}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {tab === 'calendar' ? (
-        <div>
-          <CalGrid events={events} selectedDate={selDate} onDayClick={(d) => setSelDate(selDate === d ? null : d)} />
-          {selDate && selEvs.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">
-                {new Date(selDate + 'T12:00:00').toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </h3>
-              <div className="space-y-2">
-                {selEvs.map((ev) => (
-                  <EventCard key={ev.id} event={ev} ownerLabel={ownerLabel(ev)} />
-                ))}
+        {/* stat tiles */}
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          {[
+            { n: events.length, l: 'Shows', i: 'ticket', tone: 'ice' },
+            { n: upcoming.length, l: 'Upcoming', i: 'calendar-dots', tone: 'mint' },
+            { n: venues, l: 'Venues', i: 'map-pin', tone: 'ice' },
+          ].map((s) => (
+            <HudBox key={s.l} tone={s.tone} className="p-3 text-center">
+              <div className={`font-display font-extrabold text-2xl ${s.tone === 'mint' ? 'text-mint' : 'text-[#e8f4f8]'}`}>
+                {String(s.n).padStart(2, '0')}
               </div>
-            </div>
-          )}
-          {events.length === 0 && <Empty />}
+              <div className="font-mono text-[9px] text-slate-500 uppercase mt-1 flex items-center justify-center gap-1">
+                <Icon name={s.i} size={10} className={s.tone === 'mint' ? 'text-mint' : 'text-ice'} /> {s.l}
+              </div>
+            </HudBox>
+          ))}
         </div>
-      ) : (
-        <div>
-          {upcoming.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Upcoming</h2>
-              <div className="space-y-2">
-                {upcoming.map((ev) => (
-                  <EventCard key={ev.id} event={ev} ownerLabel={ownerLabel(ev)} />
-                ))}
-              </div>
-            </div>
-          )}
-          {past.length > 0 && (
-            <div>
-              <h2 className="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Past</h2>
-              <div className="space-y-2">
-                {past.map((ev) => (
-                  <EventCard key={ev.id} event={ev} ownerLabel={ownerLabel(ev)} />
-                ))}
-              </div>
-            </div>
-          )}
-          {events.length === 0 && <Empty />}
+
+        {/* tab toggle */}
+        <div className="flex gap-1 mb-6 bg-white/[0.04] rounded p-1 w-fit">
+          {['upcoming', 'calendar'].map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`px-4 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
+                tab === t ? 'bg-white/10 text-ice' : 'text-slate-600 hover:text-slate-300'
+              }`}
+            >
+              {t}
+            </button>
+          ))}
         </div>
-      )}
-    </Wrap>
+
+        {tab === 'calendar' ? (
+          <div>
+            <CalGrid events={events} selectedDate={selDate} onDayClick={(d) => setSelDate(selDate === d ? null : d)} />
+            {selDate && selEvs.length > 0 && (
+              <div className="mt-6">
+                <SecLabel className="mb-3">
+                  ▸ {new Date(selDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                </SecLabel>
+                <div className="space-y-2">
+                  {selEvs.map((ev) => (
+                    <EventCard key={ev.id} event={ev} ownerLabel={ownerLabel(ev)} />
+                  ))}
+                </div>
+              </div>
+            )}
+            {events.length === 0 && <Empty />}
+          </div>
+        ) : (
+          <div>
+            {/* Next-up hero */}
+            {next && (
+              <HudBox hero className="p-4 mb-6 cursor-pointer" onClick={() => navigate(`/events/${next.id}`)}>
+                <div className="font-mono text-[9px] tracking-[0.12em] text-ice">
+                  ▸ NEXT UP {nextCountdown === 0 ? '· TONIGHT' : `· T-${nextCountdown}D`}
+                </div>
+                <div className="font-display font-bold text-xl text-[#e8f4f8] mt-1.5">{next.title}</div>
+                <div className="font-mono text-[10px] text-slate-500 mt-1 uppercase flex items-center gap-1.5">
+                  {next.artist && <span>{next.artist}</span>}
+                  {next.venue && <><span className="text-slate-700">·</span><span>{next.venue}</span></>}
+                </div>
+              </HudBox>
+            )}
+
+            {upcoming.length > 1 && (
+              <div className="mb-8">
+                <SecLabel className="mb-3">▸ Upcoming</SecLabel>
+                <div className="space-y-2">
+                  {upcoming.slice(1).map((ev) => (
+                    <EventCard key={ev.id} event={ev} ownerLabel={ownerLabel(ev)} />
+                  ))}
+                </div>
+              </div>
+            )}
+            {past.length > 0 && (
+              <div>
+                <SecLabel className="mb-3">▸ Past</SecLabel>
+                <div className="space-y-2">
+                  {past.map((ev) => (
+                    <EventCard key={ev.id} event={ev} ownerLabel={ownerLabel(ev)} />
+                  ))}
+                </div>
+              </div>
+            )}
+            {events.length === 0 && <Empty />}
+          </div>
+        )}
+      </Wrap>
+    </>
   )
 }

@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import { supabase } from '../supabaseClient.js'
-import { Inp, Txta, Btn } from './ui.jsx'
+import { Inp, Txta, Btn, HudBox } from './ui.jsx'
+import { Icon } from './icons.jsx'
 
-// Reads a File as bare base64 (no data: prefix), for Claude vision.
 const fileToBase64 = (file) =>
   new Promise((resolve, reject) => {
     const r = new FileReader()
@@ -12,19 +12,19 @@ const fileToBase64 = (file) =>
   })
 
 const TABS = [
-  { id: 'link', label: 'Link' },
-  { id: 'text', label: 'Paste text' },
-  { id: 'image', label: 'Screenshot' },
+  { id: 'link', label: 'LINK' },
+  { id: 'text', label: 'TEXT' },
+  { id: 'image', label: 'SHOT' },
 ]
 
 // "Smart Add" — sends a ticket source to the `ingest` Edge Function and hands
-// the extracted fields back to the parent to prefill the form.
+// extracted fields back to prefill the form.
 export function SmartAdd({ onResult }) {
   const [tab, setTab] = useState('link')
   const [url, setUrl] = useState('')
   const [text, setText] = useState('')
   const [imgName, setImgName] = useState('')
-  const [imgData, setImgData] = useState(null) // { image_base64, media_type }
+  const [imgData, setImgData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState('')
   const [done, setDone] = useState(false)
@@ -51,19 +51,15 @@ export function SmartAdd({ onResult }) {
       if (!imgData) return setErr('Choose a screenshot first.')
       body = { type: 'image', ...imgData }
     }
-
     setLoading(true)
     try {
       const { data, error } = await supabase.functions.invoke('ingest', { body })
       if (error) {
-        // Edge function returns { error } with a non-2xx status.
         let msg = 'Could not read that source.'
         try {
           const j = await error.context?.json?.()
           if (j?.error) msg = j.error
-        } catch {
-          /* ignore */
-        }
+        } catch { /* ignore */ }
         throw new Error(msg)
       }
       onResult(data.fields)
@@ -76,24 +72,21 @@ export function SmartAdd({ onResult }) {
   }
 
   return (
-    <div className="border border-accent/20 bg-accent/[0.04] rounded-2xl p-4 mb-6">
+    <HudBox tone="mint" className="p-4 mb-6 border-mint/30 bg-mint/[0.05]">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-lg">🪩</span>
-        <h2 className="heading-type text-white text-sm">Smart Add</h2>
-        <span className="text-gray-600 text-[11px]">— drop a ticket and we’ll fill it in</span>
+        <Icon name="sparkle" size={16} className="text-mint" />
+        <h2 className="font-display font-bold text-[#e8f4f8] text-sm">Smart Add</h2>
+        <span className="font-mono text-[10px] text-slate-500">— drop a ticket</span>
       </div>
 
-      <div className="flex gap-1 mb-3 bg-white/[0.04] rounded-xl p-1 w-fit">
+      <div className="flex gap-1 mb-3 bg-white/[0.04] rounded p-1 w-fit">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
-            onClick={() => {
-              setTab(t.id)
-              setErr('')
-            }}
-            className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
-              tab === t.id ? 'bg-white/10 text-white' : 'text-gray-600 hover:text-gray-300'
+            onClick={() => { setTab(t.id); setErr('') }}
+            className={`px-3 py-1.5 rounded font-mono text-[10px] tracking-wide transition-all ${
+              tab === t.id ? 'bg-white/10 text-mint' : 'text-slate-600 hover:text-slate-300'
             }`}
           >
             {t.label}
@@ -101,33 +94,29 @@ export function SmartAdd({ onResult }) {
         ))}
       </div>
 
-      {tab === 'link' && (
-        <Inp value={url} onChange={setUrl} placeholder="https://ra.co/events/… or any ticket link" />
-      )}
-      {tab === 'text' && (
-        <Txta value={text} onChange={setText} placeholder="Paste the confirmation email or event details…" rows={3} />
-      )}
+      {tab === 'link' && <Inp value={url} onChange={setUrl} placeholder="https://ra.co/events/… or any ticket link" />}
+      {tab === 'text' && <Txta value={text} onChange={setText} placeholder="Paste the confirmation email or event details…" rows={3} />}
       {tab === 'image' && (
-        <div>
+        <>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="w-full border border-dashed border-white/15 hover:border-accent/40 rounded-xl px-4 py-3 text-left text-xs text-gray-500 transition-colors"
+            className="w-full border border-dashed border-white/15 hover:border-mint/40 rounded px-4 py-3 text-left font-mono text-[11px] text-slate-500 transition-colors flex items-center gap-2"
           >
-            {imgName ? `📸 ${imgName}` : '📸 Choose a screenshot / flyer'}
+            <Icon name="camera" size={14} /> {imgName || 'Choose a screenshot / flyer'}
           </button>
           <input ref={fileRef} type="file" accept="image/*" onChange={pickImage} className="hidden" />
-        </div>
+        </>
       )}
 
       {err && <p className="text-red-400 text-xs mt-2">{err}</p>}
-      {done && !err && <p className="text-accent text-xs mt-2">✓ Filled in below — review and save.</p>}
+      {done && !err && <p className="text-mint text-xs mt-2">✓ Filled in below — review and save.</p>}
 
       <div className="mt-3">
-        <Btn onClick={run} disabled={loading} cls="text-xs">
+        <Btn variant="mint" onClick={run} disabled={loading}>
           {loading ? 'Reading…' : 'Auto-fill ↓'}
         </Btn>
       </div>
-    </div>
+    </HudBox>
   )
 }

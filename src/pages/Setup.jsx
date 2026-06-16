@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { Inp, Txta, Btn } from '../components/ui.jsx'
+import { GridBg, Logo, Inp, Txta, Btn, Kicker, SecLabel } from '../components/ui.jsx'
 import { TotemSel } from '../components/TotemSel.jsx'
 import { VenuePicker } from '../components/VenuePicker.jsx'
 
@@ -33,11 +33,13 @@ export default function Setup() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-10">
-          <h1 className="heading-type text-2xl text-white mb-2">Set up your profile</h1>
-          <p className="text-gray-600 text-sm">Tell the crew who you are</p>
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <GridBg lite />
+      <div className="relative z-10 w-full max-w-sm">
+        <div className="mb-8">
+          <div className="flex justify-center mb-4"><Logo size="sm" /></div>
+          <Kicker className="mb-1">// INITIALIZE PROFILE</Kicker>
+          <h1 className="font-display font-extrabold text-2xl uppercase text-[#e8f4f8]">Set up your profile</h1>
         </div>
 
         <form onSubmit={submit} className="space-y-6">
@@ -45,11 +47,11 @@ export default function Setup() {
           <Txta label="Bio (optional)" value={bio} onChange={setBio} placeholder="What's your vibe?" rows={2} />
           <VenuePicker label="Favorite NYC Venue" value={venue} onChange={setVenue} placeholder="Type in your favorite venue" />
           <div>
-            <label className="block text-[10px] text-gray-500 uppercase tracking-widest mb-3">Your Totem</label>
+            <SecLabel className="mb-3">Pick your poison — hover for the vibe</SecLabel>
             <TotemSel value={totem} onChange={setTotem} />
           </div>
           {err && <p className="text-red-400 text-xs text-center">{err}</p>}
-          <Btn type="submit" disabled={!name.trim() || !totem || !venue || saving} cls="w-full flex justify-center mt-2">
+          <Btn type="submit" variant="mint" disabled={!name.trim() || !totem || !venue || saving} cls="w-full">
             {saving ? 'Saving…' : "Let's go →"}
           </Btn>
         </form>

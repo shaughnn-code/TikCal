@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TikCal — icon catalogues (live)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<!-- Iconify web component: pulls icons on-demand from the Iconify catalogue API -->
+<script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+<style>
+  :root{--text:#e8f4f8;--muted:#647585;--ice:#4cc9f0;--mint:#6EE7B7;--border:rgba(76,201,240,.22);--dim:rgba(255,255,255,.09)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#040608;color:var(--text);font-family:'Inter';padding:40px 26px 90px}
+  .ptitle{text-align:center;font-family:'Saira';font-weight:800;font-size:26px;color:#fff}
+  .psub{text-align:center;color:#6b7280;font-size:12.5px;margin:6px 0 34px;font-family:'IBM Plex Mono'}
+  .wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  .panel{border:1px solid var(--border);border-radius:12px;padding:20px 22px;background:#0a0e12}
+  .sname{font-family:'Saira';font-weight:800;font-size:16px;color:var(--ice)}
+  .scap{font-family:'IBM Plex Mono';font-size:11px;color:var(--muted);margin:3px 0 16px}
+  .wrow{display:grid;grid-template-columns:90px repeat(8,1fr);align-items:center;gap:10px;margin-bottom:12px}
+  .wlab{font-family:'IBM Plex Mono';font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  iconify-icon{color:var(--ice);font-size:30px}
+  .glow{filter:drop-shadow(0 0 5px rgba(76,201,240,.5))}
+  .cell{display:flex;align-items:center;justify-content:center}
+  .names{display:grid;grid-template-columns:90px repeat(8,1fr);gap:10px;margin-top:4px}
+  .nm{font-family:'IBM Plex Mono';font-size:7.5px;color:#475569;text-align:center}
+  /* totem grid */
+  .tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;width:320px}
+  .totem{aspect-ratio:1;border:1px solid var(--dim);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+  .totem.sel{border-color:var(--mint);background:rgba(110,231,183,.08)}
+  .totem iconify-icon{font-size:26px}
+  .totem.sel iconify-icon{color:var(--mint)}
+  .tn{font-family:'IBM Plex Mono';font-size:6.5px;color:var(--muted)}
+  .cmp{display:grid;grid-template-columns:90px repeat(6,1fr);align-items:center;gap:12px;margin-bottom:10px}
+  .cmp iconify-icon{font-size:28px}
+</style>
+</head>
+<body>
+<div class="ptitle">TikCal · icons pulled from catalogues (live)</div>
+<div class="psub">Real icons via Iconify. Phosphor weights = the main decision; comparison shows other sets.</div>
+<div class="wrap">
+
+  <!-- PHOSPHOR WEIGHTS -->
+  <div class="panel">
+    <div class="sname">Phosphor — recommended · same icons, 4 weights</div>
+    <div class="scap">One consistent family that actually has the nightlife totems (disco-ball, ear, fan…). Pick a weight.</div>
+
+    <div class="wrow"><span class="wlab">Regular</span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:disco-ball"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:headphones"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:ear"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:sparkle"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:sunglasses"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:fan"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:camera"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:battery-charging"></iconify-icon></span>
+    </div>
+    <div class="wrow"><span class="wlab">Bold</span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:disco-ball-bold"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:headphones-bold"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:ear-bold"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:sparkle-bold"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:sunglasses-bold"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:fan-bold"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:camera-bold"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:battery-charging-bold"></iconify-icon></span>
+    </div>
+    <div class="wrow"><span class="wlab" style="color:var(--ice)">Duotone ★</span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:disco-ball-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:headphones-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:ear-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:sparkle-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:sunglasses-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:fan-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:camera-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:battery-charging-duotone"></iconify-icon></span>
+    </div>
+    <div class="wrow"><span class="wlab">Fill</span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:disco-ball-fill"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:headphones-fill"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:ear-fill"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:sparkle-fill"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:sunglasses-fill"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:fan-fill"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:camera-fill"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:battery-charging-fill"></iconify-icon></span>
+    </div>
+    <div class="names"><span></span><span class="nm">DISCO</span><span class="nm">EARPLUG</span><span class="nm">EAR</span><span class="nm">GLOW</span><span class="nm">DIFFRACT</span><span class="nm">FAN</span><span class="nm">POLAROID</span><span class="nm">CHARGER</span></div>
+  </div>
+
+  <!-- TOTEM GRID IN CONTEXT (duotone) -->
+  <div class="panel">
+    <div class="sname">Totem picker — Phosphor Duotone, in context</div>
+    <div class="scap">Selected totem in mint; the rest in ice.</div>
+    <div class="tgrid">
+      <div class="totem sel"><iconify-icon icon="ph:disco-ball-duotone"></iconify-icon><span class="tn">DISCO</span></div>
+      <div class="totem"><iconify-icon icon="ph:headphones-duotone"></iconify-icon><span class="tn">EARPLUG</span></div>
+      <div class="totem"><iconify-icon icon="ph:sparkle-duotone"></iconify-icon><span class="tn">GLOW</span></div>
+      <div class="totem"><iconify-icon icon="ph:sunglasses-duotone"></iconify-icon><span class="tn">DIFFRACT</span></div>
+      <div class="totem"><iconify-icon icon="ph:fan-duotone"></iconify-icon><span class="tn">FAN</span></div>
+      <div class="totem"><iconify-icon icon="ph:camera-duotone"></iconify-icon><span class="tn">POLAROID</span></div>
+      <div class="totem"><iconify-icon icon="ph:battery-charging-duotone"></iconify-icon><span class="tn">CHARGER</span></div>
+      <div class="totem"><iconify-icon icon="ph:martini-duotone"></iconify-icon><span class="tn">DRINK</span></div>
+    </div>
+  </div>
+
+  <!-- CROSS-CATALOGUE COMPARISON -->
+  <div class="panel">
+    <div class="sname">Other catalogues — same UI icons</div>
+    <div class="scap">For the universal UI icons. (Disco-ball / ear / fan only exist in Phosphor among these.)</div>
+    <div class="cmp"><span class="wlab" style="color:var(--ice)">Phosphor</span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:headphones-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:map-pin-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:users-three-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:ticket-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:calendar-dots-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="ph:sparkle-duotone"></iconify-icon></span>
+    </div>
+    <div class="cmp"><span class="wlab">Tabler</span>
+      <span class="cell"><iconify-icon class="glow" icon="tabler:headphones"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="tabler:map-pin"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="tabler:users"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="tabler:ticket"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="tabler:calendar"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="tabler:sparkles"></iconify-icon></span>
+    </div>
+    <div class="cmp"><span class="wlab">Lucide</span>
+      <span class="cell"><iconify-icon class="glow" icon="lucide:headphones"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="lucide:map-pin"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="lucide:users"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="lucide:ticket"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="lucide:calendar"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="lucide:sparkles"></iconify-icon></span>
+    </div>
+    <div class="cmp"><span class="wlab">Solar</span>
+      <span class="cell"><iconify-icon class="glow" icon="solar:headphones-round-bold-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="solar:map-point-bold-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="solar:users-group-rounded-bold-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="solar:ticket-bold-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="solar:calendar-bold-duotone"></iconify-icon></span>
+      <span class="cell"><iconify-icon class="glow" icon="solar:magic-stick-3-bold-duotone"></iconify-icon></span>
+    </div>
+    <div class="names"><span></span><span class="nm">EARPLUG</span><span class="nm">VENUE</span><span class="nm">CREW</span><span class="nm">TICKET</span><span class="nm">CALENDAR</span><span class="nm">SMART</span></div>
+  </div>
+
+</div>
+</body>
+</html>

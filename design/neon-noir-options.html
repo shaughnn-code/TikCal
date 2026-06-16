@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TikCal — Neon Noir options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@1,800&family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=Orbitron:wght@700&family=Space+Mono:wght@700&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#020203;color:#fff;font-family:'Space Grotesk',system-ui,sans-serif;padding:40px 24px 80px;-webkit-font-smoothing:antialiased}
+  .page-title{text-align:center;margin-bottom:6px;font-family:'Syne';font-weight:800;font-size:26px;letter-spacing:-.01em}
+  .page-sub{text-align:center;color:#6b7280;font-size:13px;margin-bottom:40px}
+  .grid{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;max-width:1300px;margin:0 auto}
+  .col{width:380px}
+  .opt-head{margin-bottom:14px}
+  .opt-name{font-family:'Syne';font-weight:800;font-size:18px}
+  .opt-desc{color:#9ca3af;font-size:12px;margin-top:3px;line-height:1.5}
+  .swatches{display:flex;gap:6px;margin-top:10px}
+  .sw{width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,255,255,.12)}
+  /* phone screen */
+  .screen{border-radius:28px;overflow:hidden;height:680px;position:relative;border:1px solid rgba(255,255,255,.06)}
+  .scr-pad{position:relative;z-index:2;padding:22px 18px}
+  .logo{font-family:'Barlow';font-weight:800;font-style:italic;letter-spacing:-.02em;font-size:24px}
+  nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}
+  .navlinks{display:flex;gap:16px;align-items:center;font-size:12.5px;color:#7b8694}
+  .h-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .h-title{font-family:'Syne';font-weight:800;font-size:19px}
+  .h-sub{font-size:11px;color:#6b7280;margin-top:2px}
+  .btn{font-size:12.5px;font-weight:600;padding:9px 14px;border-radius:12px;cursor:pointer;border:none}
+  .tabs{display:inline-flex;gap:4px;padding:4px;border-radius:12px;margin-bottom:18px;background:rgba(255,255,255,.04)}
+  .tab{font-size:11.5px;padding:6px 14px;border-radius:9px;color:#7b8694}
+  .card{border-radius:18px;padding:15px;margin-bottom:11px;position:relative}
+  .card-top{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+  .card-title{font-weight:600;font-size:14px}
+  .chip{font-size:9px;padding:2px 8px;border-radius:999px;font-weight:600}
+  .artist{font-size:11.5px;margin-bottom:9px}
+  .meta{display:flex;gap:8px;align-items:center;font-size:10.5px;color:#6b7280}
+  .dot{opacity:.4}
+  .ini{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+  .card-flex{display:flex;gap:12px;align-items:flex-start}
+  .scanlines{position:absolute;inset:0;z-index:1;pointer-events:none;background-image:repeating-linear-gradient(to bottom,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);opacity:.5}
+</style>
+</head>
+<body>
+<div class="page-title">TikCal · Neon Noir — three directions</div>
+<div class="page-sub">Same screen, three takes. Pick one — or mix elements (e.g. “A's background + B's borders”).</div>
+
+<div class="grid">
+
+  <!-- ============ OPTION A — DEEP FOG ============ -->
+  <div class="col">
+    <div class="opt-head">
+      <div class="opt-name" style="color:#22E3FF">A · Deep Fog</div>
+      <div class="opt-desc">Calm &amp; cinematic. Near-black with a soft cyan fog, glassmorphism cards, gentle outer glows, faint scanlines. Amber only for time/countdowns. The closest to BR2049.</div>
+      <div class="swatches">
+        <div class="sw" style="background:#06080C"></div>
+        <div class="sw" style="background:#22E3FF"></div>
+        <div class="sw" style="background:#FFB000"></div>
+      </div>
+    </div>
+    <div class="screen" style="background:#06080C">
+      <div class="scanlines"></div>
+      <div style="position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:420px;height:300px;background:radial-gradient(ellipse,rgba(34,227,255,.18),transparent 70%);z-index:0;filter:blur(20px)"></div>
+      <div class="scr-pad">
+        <nav>
+          <span class="logo" style="color:#22E3FF;text-shadow:0 0 18px rgba(34,227,255,.55)">TikCal</span>
+          <div class="navlinks"><span style="color:#22E3FF">Calendar</span><span>Crew</span><span>◐</span></div>
+        </nav>
+        <div class="h-row">
+          <div><div class="h-title">Nick's calendar</div><div class="h-sub">7 shows in view</div></div>
+          <button class="btn" style="background:#22E3FF;color:#021014;box-shadow:0 0 22px rgba(34,227,255,.4)">+ Add Show</button>
+        </div>
+        <div class="tabs"><span class="tab" style="background:rgba(34,227,255,.12);color:#22E3FF">upcoming</span><span class="tab">calendar</span></div>
+
+        <div class="card" style="background:rgba(255,255,255,.04);border:1px solid rgba(34,227,255,.18);backdrop-filter:blur(8px);box-shadow:0 0 24px rgba(34,227,255,.06)">
+          <div class="card-flex">
+            <div class="ini" style="font-family:'Bebas Neue';background:rgba(34,227,255,.14);color:#22E3FF;border:1px solid rgba(34,227,255,.4)">FJ</div>
+            <div style="flex:1">
+              <div class="card-top"><span class="card-title">Open Air</span><span class="chip" style="color:#FFB000;border:1px solid rgba(255,176,0,.35)">5d</span></div>
+              <div class="artist" style="color:#7b8694">FJAAK</div>
+              <div class="meta"><span>Sat, Jun 21</span><span class="dot">·</span><span>Nowadays</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);backdrop-filter:blur(8px)">
+          <div class="card-flex">
+            <div class="ini" style="font-family:'Orbitron';background:rgba(255,176,0,.12);color:#FFB000;border:1px solid rgba(255,176,0,.35)">PT</div>
+            <div style="flex:1">
+              <div class="card-top"><span class="card-title">Nite Chemistry</span><span class="chip" style="color:#FFB000;border:1px solid rgba(255,176,0,.35)">12d</span></div>
+              <div class="artist" style="color:#7b8694">Palms Trax</div>
+              <div class="meta"><span>Thu, Jun 28</span><span class="dot">·</span><span>Elsewhere</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05)">
+          <div class="card-flex">
+            <div class="ini" style="font-family:'Space Mono';background:rgba(34,227,255,.08);color:#6aa8c8;border:1px solid rgba(106,168,200,.3)">DV</div>
+            <div style="flex:1">
+              <div class="card-top"><span class="card-title">Superior Ingredients</span></div>
+              <div class="artist" style="color:#7b8694">Dee Vault</div>
+              <div class="meta"><span>Fri, Jul 4</span><span class="dot">·</span><span>The Roof</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ OPTION B — HOLO EDGE ============ -->
+  <div class="col">
+    <div class="opt-head">
+      <div class="opt-name" style="color:#26f0d0">B · Holo Edge</div>
+      <div class="opt-desc">Sharp &amp; HUD-like. Flat black, crisp gradient hairline borders (cyan→magenta), tighter corners, time data in mono. Higher contrast, more “interface”.</div>
+      <div class="swatches">
+        <div class="sw" style="background:#050507"></div>
+        <div class="sw" style="background:#26F0D0"></div>
+        <div class="sw" style="background:#FF3DDA"></div>
+      </div>
+    </div>
+    <div class="screen" style="background:#050507;border:1px solid rgba(38,240,208,.14)">
+      <div class="scr-pad">
+        <nav>
+          <span class="logo" style="color:#fff;text-shadow:0 0 14px rgba(38,240,208,.5)">TikCal</span>
+          <div class="navlinks"><span style="color:#26F0D0">Calendar</span><span>Crew</span><span>◐</span></div>
+        </nav>
+        <div class="h-row">
+          <div><div class="h-title">Nick's calendar</div><div class="h-sub" style="font-family:'Space Mono';font-size:10px">7 SHOWS IN VIEW</div></div>
+          <button class="btn" style="background:transparent;color:#26F0D0;border:1px solid #26F0D0;border-radius:8px;box-shadow:0 0 14px rgba(38,240,208,.25)">+ Add Show</button>
+        </div>
+        <div class="tabs" style="border-radius:8px"><span class="tab" style="border-radius:5px;background:rgba(38,240,208,.12);color:#26F0D0">upcoming</span><span class="tab" style="border-radius:5px">calendar</span></div>
+
+        <div style="border-radius:12px;padding:1px;background:linear-gradient(135deg,#26F0D0,#FF3DDA);margin-bottom:11px">
+          <div class="card" style="margin:0;border-radius:11px;background:#08080c">
+            <div class="card-flex">
+              <div class="ini" style="border-radius:7px;font-family:'Bebas Neue';background:rgba(38,240,208,.12);color:#26F0D0;border:1px solid rgba(38,240,208,.5)">FJ</div>
+              <div style="flex:1">
+                <div class="card-top"><span class="card-title">Open Air</span><span class="chip" style="border-radius:5px;color:#FF3DDA;border:1px solid rgba(255,61,218,.5);font-family:'Space Mono'">5D</span></div>
+                <div class="artist" style="color:#8891a0">FJAAK</div>
+                <div class="meta" style="font-family:'Space Mono';font-size:10px"><span>SAT JUN 21</span><span class="dot">·</span><span>NOWADAYS</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-radius:11px;background:#08080c;border:1px solid rgba(255,255,255,.09)">
+          <div class="card-flex">
+            <div class="ini" style="border-radius:7px;font-family:'Orbitron';background:rgba(255,61,218,.1);color:#FF3DDA;border:1px solid rgba(255,61,218,.45)">PT</div>
+            <div style="flex:1">
+              <div class="card-top"><span class="card-title">Nite Chemistry</span><span class="chip" style="border-radius:5px;color:#26F0D0;border:1px solid rgba(38,240,208,.45);font-family:'Space Mono'">12D</span></div>
+              <div class="artist" style="color:#8891a0">Palms Trax</div>
+              <div class="meta" style="font-family:'Space Mono';font-size:10px"><span>THU JUN 28</span><span class="dot">·</span><span>ELSEWHERE</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-radius:11px;background:#08080c;border:1px solid rgba(255,255,255,.06)">
+          <div class="card-flex">
+            <div class="ini" style="border-radius:7px;font-family:'Space Mono';background:rgba(38,240,208,.06);color:#6aa8c8;border:1px solid rgba(106,168,200,.35)">DV</div>
+            <div style="flex:1">
+              <div class="card-top"><span class="card-title">Superior Ingredients</span></div>
+              <div class="artist" style="color:#8891a0">Dee Vault</div>
+              <div class="meta" style="font-family:'Space Mono';font-size:10px"><span>FRI JUL 4</span><span class="dot">·</span><span>THE ROOF</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ OPTION C — VAPOR MIST ============ -->
+  <div class="col">
+    <div class="opt-head">
+      <div class="opt-name" style="color:#b388ff">C · Vapor Mist</div>
+      <div class="opt-desc">Dreamy &amp; nightlife. Atmospheric cyan→magenta→amber fog, big soft blurs, rounder cards, dual-tone glow. Less “tech”, more “after-hours”.</div>
+      <div class="swatches">
+        <div class="sw" style="background:#0a0712"></div>
+        <div class="sw" style="background:#3df0ff"></div>
+        <div class="sw" style="background:#ff5cc8"></div>
+      </div>
+    </div>
+    <div class="screen" style="background:#0a0712">
+      <div style="position:absolute;inset:0;z-index:0;background:
+        radial-gradient(circle at 15% 0%,rgba(61,240,255,.18),transparent 45%),
+        radial-gradient(circle at 90% 25%,rgba(255,92,200,.18),transparent 45%),
+        radial-gradient(circle at 50% 100%,rgba(255,176,0,.10),transparent 50%);filter:blur(8px)"></div>
+      <div class="scr-pad">
+        <nav>
+          <span class="logo" style="background:linear-gradient(90deg,#3df0ff,#ff5cc8);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 22px rgba(255,92,200,.3)">TikCal</span>
+          <div class="navlinks"><span style="color:#ff8fde">Calendar</span><span>Crew</span><span>◐</span></div>
+        </nav>
+        <div class="h-row">
+          <div><div class="h-title">Nick's calendar</div><div class="h-sub">7 shows in view</div></div>
+          <button class="btn" style="background:linear-gradient(90deg,#3df0ff,#ff5cc8);color:#0a0712;box-shadow:0 0 26px rgba(255,92,200,.45)">+ Add Show</button>
+        </div>
+        <div class="tabs" style="border-radius:14px"><span class="tab" style="border-radius:11px;background:rgba(255,92,200,.14);color:#ff8fde">upcoming</span><span class="tab" style="border-radius:11px">calendar</span></div>
+
+        <div class="card" style="border-radius:22px;background:rgba(255,255,255,.05);border:1px solid rgba(255,92,200,.25);backdrop-filter:blur(14px);box-shadow:0 8px 40px rgba(255,92,200,.1)">
+          <div class="card-flex">
+            <div class="ini" style="border-radius:12px;font-family:'Bebas Neue';background:rgba(61,240,255,.14);color:#3df0ff;border:1px solid rgba(61,240,255,.4)">FJ</div>
+            <div style="flex:1">
+              <div class="card-top"><span class="card-title">Open Air</span><span class="chip" style="color:#ff8fde;border:1px solid rgba(255,92,200,.4)">5d</span></div>
+              <div class="artist" style="color:#9a8fb0">FJAAK</div>
+              <div class="meta" style="color:#7d7390"><span>Sat, Jun 21</span><span class="dot">·</span><span>Nowadays</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-radius:22px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(14px)">
+          <div class="card-flex">
+            <div class="ini" style="border-radius:12px;font-family:'Orbitron';background:rgba(255,92,200,.12);color:#ff5cc8;border:1px solid rgba(255,92,200,.4)">PT</div>
+            <div style="flex:1">
+              <div class="card-top"><span class="card-title">Nite Chemistry</span><span class="chip" style="color:#3df0ff;border:1px solid rgba(61,240,255,.4)">12d</span></div>
+              <div class="artist" style="color:#9a8fb0">Palms Trax</div>
+              <div class="meta" style="color:#7d7390"><span>Thu, Jun 28</span><span class="dot">·</span><span>Elsewhere</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-radius:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);backdrop-filter:blur(14px)">
+          <div class="card-flex">
+            <div class="ini" style="border-radius:12px;font-family:'Space Mono';background:rgba(61,240,255,.08);color:#8fd4e0;border:1px solid rgba(106,168,200,.3)">DV</div>
+            <div style="flex:1">
+              <div class="card-top"><span class="card-title">Superior Ingredients</span></div>
+              <div class="artist" style="color:#9a8fb0">Dee Vault</div>
+              <div class="meta" style="color:#7d7390"><span>Fri, Jul 4</span><span class="dot">·</span><span>The Roof</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

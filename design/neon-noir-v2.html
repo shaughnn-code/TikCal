@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TikCal — Neon Noir v2 (grid / brutalist / bento)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@1,800&family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Orbitron:wght@700&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#020203;color:#fff;font-family:'Space Grotesk',system-ui,sans-serif;padding:40px 24px 90px;-webkit-font-smoothing:antialiased}
+  .ptitle{text-align:center;font-family:'Syne';font-weight:800;font-size:26px;letter-spacing:-.01em}
+  .psub{text-align:center;color:#6b7280;font-size:13px;margin:6px 0 40px}
+  .grid{display:flex;gap:34px;justify-content:center;flex-wrap:wrap;max-width:1360px;margin:0 auto}
+  .col{width:400px}
+  .oh{margin-bottom:14px}
+  .oname{font-family:'Syne';font-weight:800;font-size:18px}
+  .odesc{color:#9ca3af;font-size:12px;margin-top:3px;line-height:1.55}
+  .sw{display:flex;gap:6px;margin-top:10px}
+  .sw i{width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,255,255,.12);display:block}
+  .screen{border-radius:24px;overflow:hidden;height:720px;position:relative;border:1px solid rgba(255,255,255,.06)}
+  .pad{position:relative;z-index:3;padding:20px 16px}
+  .logo{font-family:'Barlow';font-weight:800;font-style:italic;letter-spacing:-.02em;font-size:23px}
+  nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+  .nl{display:flex;gap:14px;align-items:center;font-size:12px;color:#7b8694}
+  .mono{font-family:'Space Mono',monospace}
+  .bento{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .s2{grid-column:span 2}
+  .box{padding:14px;position:relative}
+  .lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6b7280}
+  .big{font-family:'Syne';font-weight:800;font-size:15px;line-height:1.1}
+  .statn{font-family:'Syne';font-weight:800;font-size:30px;line-height:1}
+  .evrow{display:flex;align-items:center;gap:10px;padding:8px 0}
+  .ini{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .scan{position:absolute;inset:0;z-index:2;pointer-events:none;background-image:repeating-linear-gradient(to bottom,rgba(255,255,255,.022) 0 1px,transparent 1px 3px)}
+  .cta{font-size:12.5px;font-weight:700;padding:10px 16px;cursor:pointer;border:none}
+  /* tron grid floor */
+  .floor{position:absolute;left:-20%;right:-20%;bottom:-2px;height:46%;z-index:0;
+    background-image:linear-gradient(rgba(34,227,255,.45) 1px,transparent 1px),linear-gradient(90deg,rgba(34,227,255,.45) 1px,transparent 1px);
+    background-size:34px 34px;transform:perspective(260px) rotateX(72deg);transform-origin:bottom center;
+    -webkit-mask-image:linear-gradient(to top,#000 5%,transparent 80%);mask-image:linear-gradient(to top,#000 5%,transparent 80%)}
+  .horizon{position:absolute;left:0;right:0;bottom:44%;height:2px;z-index:1;background:rgba(34,227,255,.7);box-shadow:0 0 26px 6px rgba(34,227,255,.5)}
+</style>
+</head>
+<body>
+<div class="ptitle">TikCal · Neon Noir v2 — grid · brutalist · bento</div>
+<div class="psub">Fusing the A/B looks you liked with Tron gridlines, Blade Runner atmosphere, Vespid's brutalist panels, and a bento layout.</div>
+
+<div class="grid">
+
+  <!-- ===================== D · GRID RUNNER ===================== -->
+  <div class="col">
+    <div class="oh">
+      <div class="oname" style="color:#22E3FF">D · Grid Runner</div>
+      <div class="odesc">Deep Fog mood + a Tron grid horizon. Glassmorphism bento boxes float above a cyan grid receding to a glowing vanishing point. Cinematic, atmospheric, readable.</div>
+      <div class="sw"><i style="background:#06080C"></i><i style="background:#22E3FF"></i><i style="background:#FFB000"></i></div>
+    </div>
+    <div class="screen" style="background:#06080C">
+      <div style="position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:380px;height:260px;background:radial-gradient(ellipse,rgba(34,227,255,.16),transparent 70%);z-index:0;filter:blur(20px)"></div>
+      <div class="floor"></div><div class="horizon"></div><div class="scan" style="opacity:.5"></div>
+      <div class="pad">
+        <nav>
+          <span class="logo" style="color:#22E3FF;text-shadow:0 0 18px rgba(34,227,255,.55)">TikCal</span>
+          <div class="nl"><span style="color:#22E3FF">Calendar</span><span>Crew</span><span>◐</span></div>
+        </nav>
+        <div class="bento">
+          <!-- hero -->
+          <div class="box s2" style="border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(34,227,255,.22);backdrop-filter:blur(10px);box-shadow:0 0 30px rgba(34,227,255,.08)">
+            <div class="lbl" style="color:#22E3FF">↳ Next up · in 5 days</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+              <div class="ini" style="width:46px;height:46px;font-family:'Bebas Neue';font-size:18px;background:rgba(34,227,255,.14);color:#22E3FF;border:1px solid rgba(34,227,255,.4)">FJ</div>
+              <div><div class="big">Open Air</div><div style="font-size:12px;color:#8b95a3;margin-top:2px">FJAAK · Nowadays</div></div>
+            </div>
+          </div>
+          <!-- stats -->
+          <div class="box" style="border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)">
+            <div class="statn" style="color:#fff">7</div><div class="lbl" style="margin-top:4px">Shows</div></div>
+          <div class="box" style="border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)">
+            <div class="statn" style="color:#FFB000">3</div><div class="lbl" style="margin-top:4px">Crew</div></div>
+          <!-- upcoming -->
+          <div class="box s2" style="border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(10px)">
+            <div class="lbl" style="margin-bottom:4px">↳ Upcoming</div>
+            <div class="evrow" style="border-bottom:1px solid rgba(255,255,255,.05)">
+              <div class="ini" style="font-family:'Orbitron';background:rgba(255,176,0,.12);color:#FFB000;border:1px solid rgba(255,176,0,.35)">PT</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">Nite Chemistry</div><div class="mono" style="font-size:10px;color:#6b7280">JUN 28 · ELSEWHERE</div></div>
+              <span class="mono" style="font-size:10px;color:#FFB000">12D</span>
+            </div>
+            <div class="evrow">
+              <div class="ini" style="font-family:'Space Mono';background:rgba(34,227,255,.08);color:#6aa8c8;border:1px solid rgba(106,168,200,.3)">DV</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">Superior Ingredients</div><div class="mono" style="font-size:10px;color:#6b7280">JUL 04 · THE ROOF</div></div>
+              <span class="mono" style="font-size:10px;color:#6b7280">18D</span>
+            </div>
+          </div>
+          <div class="s2"><button class="cta" style="width:100%;border-radius:14px;background:#22E3FF;color:#021014;box-shadow:0 0 22px rgba(34,227,255,.4)">+ ADD SHOW</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== E · BRUTALIST BENTO ===================== -->
+  <div class="col">
+    <div class="oh">
+      <div class="oname" style="color:#6EE7B7">E · Brutalist Bento</div>
+      <div class="odesc">Vespid-inspired. Chamfered angular panels, monospace micro-labels with ↳ arrows, {bracket} headings, circuit connectors, a mint CTA. Hard-edged, structured, brand-defining.</div>
+      <div class="sw"><i style="background:#0b0a0f"></i><i style="background:#2fe0ff"></i><i style="background:#6EE7B7"></i><i style="background:#a855f7"></i></div>
+    </div>
+    <div class="screen" style="background:#0b0a0f">
+      <div style="position:absolute;top:-60px;right:-40px;width:300px;height:300px;background:radial-gradient(circle,rgba(168,85,247,.22),transparent 65%);z-index:0;filter:blur(10px)"></div>
+      <div class="pad">
+        <nav>
+          <span class="logo" style="color:#fff">TikCal</span>
+          <div class="nl mono" style="font-size:10px;letter-spacing:.08em"><span style="color:#6EE7B7">CALENDAR</span><span>CREW</span><span>↳ OUT</span></div>
+        </nav>
+        <div style="margin-bottom:16px">
+          <div class="mono" style="font-size:9px;color:#6b7280;letter-spacing:.14em">↳ YOUR CALENDAR</div>
+          <div style="font-family:'Syne';font-weight:800;font-size:26px;line-height:1;margin-top:4px">
+            <span style="color:#2fe0ff">{</span>NICK'S<span style="color:#2fe0ff">}</span> SHOWS</div>
+        </div>
+        <div class="bento">
+          <!-- hero chamfered -->
+          <div class="box s2" style="background:#121118;border:1px solid rgba(47,224,255,.25);clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))">
+            <div class="mono" style="font-size:9px;color:#6EE7B7;letter-spacing:.12em">↳ NEXT UP — IN 5 DAYS</div>
+            <div style="font-family:'Syne';font-weight:800;font-size:19px;margin-top:6px">OPEN AIR</div>
+            <div class="mono" style="font-size:11px;color:#8b95a3;margin-top:3px">FJAAK · NOWADAYS · JUN 21</div>
+          </div>
+          <!-- stats chamfered -->
+          <div class="box" style="background:#121118;border:1px solid rgba(255,255,255,.1);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)">
+            <div class="statn">07</div><div class="mono" style="font-size:9px;color:#6b7280;margin-top:4px;letter-spacing:.1em">SHOWS</div></div>
+          <div class="box" style="background:#121118;border:1px solid rgba(255,255,255,.1);clip-path:polygon(0 0,100% 0,100% 100%,12px 100%,0 calc(100% - 12px))">
+            <div class="statn" style="color:#6EE7B7">04</div><div class="mono" style="font-size:9px;color:#6b7280;margin-top:4px;letter-spacing:.1em">VENUES</div></div>
+          <!-- upcoming list -->
+          <div class="box s2" style="background:#121118;border:1px solid rgba(255,255,255,.1);clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))">
+            <div class="mono" style="font-size:9px;color:#6b7280;letter-spacing:.12em;margin-bottom:6px">↳ UPCOMING</div>
+            <div class="evrow" style="border-bottom:1px solid rgba(255,255,255,.06)">
+              <div class="ini" style="border-radius:0;font-family:'Orbitron';background:rgba(168,85,247,.14);color:#c084fc;border:1px solid rgba(168,85,247,.4)">PT</div>
+              <div style="flex:1"><div class="mono" style="font-size:12px;font-weight:700">NITE CHEMISTRY</div><div class="mono" style="font-size:9px;color:#6b7280">JUN 28 · ELSEWHERE</div></div>
+              <span class="mono" style="font-size:10px;color:#6EE7B7">12D</span>
+            </div>
+            <div class="evrow">
+              <div class="ini" style="border-radius:0;font-family:'Bebas Neue';background:rgba(47,224,255,.1);color:#2fe0ff;border:1px solid rgba(47,224,255,.4)">DV</div>
+              <div style="flex:1"><div class="mono" style="font-size:12px;font-weight:700">SUPERIOR INGREDIENTS</div><div class="mono" style="font-size:9px;color:#6b7280">JUL 04 · THE ROOF</div></div>
+              <span class="mono" style="font-size:10px;color:#6b7280">18D</span>
+            </div>
+          </div>
+          <div class="s2"><button class="cta mono" style="width:100%;background:#6EE7B7;color:#04130d;letter-spacing:.06em;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))">+ ADD SHOW ↳</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== F · TRON HUD ===================== -->
+  <div class="col">
+    <div class="oh">
+      <div class="oname" style="color:#26f0ff">F · Tron HUD</div>
+      <div class="odesc">Holo Edge maxed out. Faint cyan gridlines across the whole screen, L-shaped HUD corner brackets on every box, glowing borders, monospace data. Pure Tron interface.</div>
+      <div class="sw"><i style="background:#04060a"></i><i style="background:#26F0FF"></i><i style="background:#FF3DDA"></i></div>
+    </div>
+    <div class="screen" style="background:#04060a;border:1px solid rgba(38,240,255,.18)">
+      <div style="position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(38,240,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(38,240,255,.06) 1px,transparent 1px);background-size:28px 28px"></div>
+      <div class="scan" style="opacity:.6"></div>
+      <div class="pad">
+        <nav>
+          <span class="logo" style="color:#26F0FF;text-shadow:0 0 16px rgba(38,240,255,.6)">TikCal</span>
+          <div class="nl mono" style="font-size:10px"><span style="color:#26F0FF">CALENDAR</span><span>CREW</span><span>◐</span></div>
+        </nav>
+        <div style="margin-bottom:14px">
+          <div class="mono" style="font-size:9px;color:#26F0FF;letter-spacing:.16em">// SESSION ACTIVE</div>
+          <div style="font-family:'Syne';font-weight:800;font-size:22px;margin-top:3px">NICK'S CALENDAR</div>
+        </div>
+        <div class="bento">
+          <div class="hud box s2" style="background:rgba(38,240,255,.04);border:1px solid rgba(38,240,255,.3);border-radius:4px;box-shadow:inset 0 0 24px rgba(38,240,255,.06)">
+            <div class="mono" style="font-size:9px;color:#26F0FF;letter-spacing:.12em">▸ NEXT UP · T-5D</div>
+            <div style="font-family:'Syne';font-weight:800;font-size:18px;margin-top:5px">OPEN AIR</div>
+            <div class="mono" style="font-size:10px;color:#8b95a3;margin-top:3px">FJAAK · NOWADAYS · 2026.06.21</div>
+          </div>
+          <div class="hud box" style="background:rgba(255,255,255,.02);border:1px solid rgba(38,240,255,.2);border-radius:4px">
+            <div class="statn" style="color:#26F0FF">07</div><div class="mono" style="font-size:9px;color:#6b7280;margin-top:4px">SHOWS</div></div>
+          <div class="hud box" style="background:rgba(255,255,255,.02);border:1px solid rgba(255,61,218,.25);border-radius:4px">
+            <div class="statn" style="color:#FF3DDA">03</div><div class="mono" style="font-size:9px;color:#6b7280;margin-top:4px">CREW</div></div>
+          <div class="hud box s2" style="background:rgba(255,255,255,.02);border:1px solid rgba(38,240,255,.2);border-radius:4px">
+            <div class="mono" style="font-size:9px;color:#6b7280;letter-spacing:.12em;margin-bottom:6px">▸ UPCOMING</div>
+            <div class="evrow" style="border-bottom:1px solid rgba(38,240,255,.08)">
+              <div class="ini" style="border-radius:3px;font-family:'Orbitron';background:rgba(255,61,218,.1);color:#FF3DDA;border:1px solid rgba(255,61,218,.4)">PT</div>
+              <div style="flex:1"><div class="mono" style="font-size:12px;font-weight:700">NITE CHEMISTRY</div><div class="mono" style="font-size:9px;color:#6b7280">06.28 · ELSEWHERE</div></div>
+              <span class="mono" style="font-size:10px;color:#26F0FF">T-12D</span>
+            </div>
+            <div class="evrow">
+              <div class="ini" style="border-radius:3px;font-family:'Bebas Neue';background:rgba(38,240,255,.08);color:#26F0FF;border:1px solid rgba(38,240,255,.4)">DV</div>
+              <div style="flex:1"><div class="mono" style="font-size:12px;font-weight:700">SUPERIOR INGREDIENTS</div><div class="mono" style="font-size:9px;color:#6b7280">07.04 · THE ROOF</div></div>
+              <span class="mono" style="font-size:10px;color:#6b7280">T-18D</span>
+            </div>
+          </div>
+          <div class="s2"><button class="cta mono" style="width:100%;background:transparent;color:#26F0FF;border:1px solid #26F0FF;border-radius:4px;letter-spacing:.08em;box-shadow:0 0 16px rgba(38,240,255,.3)">+ ADD SHOW</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  /* L-shaped HUD corner brackets for option F boxes */
+  .hud{position:relative}
+  .hud::before,.hud::after{content:'';position:absolute;width:10px;height:10px;border:2px solid #26F0FF;opacity:.8}
+  .hud::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+  .hud::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
+</style>
+</body>
+</html>

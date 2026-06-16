@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { Inp, Btn } from '../components/ui.jsx'
+import { GridBg, Logo, Inp, Btn, Kicker } from '../components/ui.jsx'
 
 export default function Login() {
   const { signIn, user, profile } = useAuth()
@@ -25,26 +25,25 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-4">
+      <GridBg lite />
+      <div className="relative z-10 w-full max-w-sm">
         <div className="text-center mb-12">
-          <div className="text-5xl mb-4">🎫</div>
-          <h1 className="logo-type text-4xl text-accent mb-2">TikCal</h1>
-          <p className="text-gray-600 text-sm">Your concert calendar</p>
+          <Logo size="md" />
+          <p className="text-slate-600 text-sm mt-3 font-mono">your concert calendar</p>
         </div>
-
+        <Kicker className="mb-3">// ACCESS</Kicker>
         <form onSubmit={submit} className="space-y-4">
           <Inp label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required />
           <Inp label="Password" type="password" value={pw} onChange={setPw} placeholder="••••••••" required />
           {err && <p className="text-red-400 text-xs text-center py-1">{err}</p>}
-          <Btn type="submit" disabled={loading} cls="w-full flex justify-center">
+          <Btn type="submit" variant="ice" disabled={loading} cls="w-full">
             {loading ? 'Signing in…' : 'Sign in'}
           </Btn>
         </form>
-
-        <p className="text-center text-gray-600 text-sm mt-6">
+        <p className="text-center text-slate-600 text-sm mt-6">
           No account?{' '}
-          <Link to="/signup" className="text-accent hover:underline">
+          <Link to="/signup" className="text-ice hover:underline">
             Create one
           </Link>
         </p>

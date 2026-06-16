@@ -20,32 +20,31 @@ export const CalGrid = ({ events, onDayClick, selectedDate }) => {
   const cells = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMo }, (_, i) => i + 1)]
 
   const ds = (d) => `${yr}-${String(mo + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-  const isToday = (d) =>
-    now.getFullYear() === yr && now.getMonth() === mo && now.getDate() === d
+  const isToday = (d) => now.getFullYear() === yr && now.getMonth() === mo && now.getDate() === d
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         <button
           onClick={() => setView(new Date(yr, mo - 1, 1))}
-          className="text-gray-500 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5"
+          className="text-slate-500 hover:text-ice transition-colors w-8 h-8 flex items-center justify-center rounded hover:bg-white/5"
         >
           ‹
         </button>
-        <span className="text-white text-sm font-medium">
+        <span className="font-display font-bold text-sm uppercase tracking-wide text-[#e8f4f8]">
           {view.toLocaleString('default', { month: 'long' })} {yr}
         </span>
         <button
           onClick={() => setView(new Date(yr, mo + 1, 1))}
-          className="text-gray-500 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5"
+          className="text-slate-500 hover:text-ice transition-colors w-8 h-8 flex items-center justify-center rounded hover:bg-white/5"
         >
           ›
         </button>
       </div>
 
       <div className="grid grid-cols-7 mb-1">
-        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
-          <div key={d} className="text-center text-[9px] text-gray-700 uppercase tracking-widest py-2">
+        {['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].map((d) => (
+          <div key={d} className="text-center font-mono text-[8px] text-slate-600 tracking-widest py-2">
             {d}
           </div>
         ))}
@@ -63,16 +62,12 @@ export const CalGrid = ({ events, onDayClick, selectedDate }) => {
             <button
               key={d}
               onClick={() => hasEv && onDayClick(date)}
-              className={`relative flex flex-col items-center pt-1.5 pb-1 px-0.5 gap-0.5 rounded-xl transition-all min-h-[52px]
-                ${isToday(d) ? 'ring-1 ring-accent/40' : ''}
-                ${isSelected ? 'bg-accent/10' : hasEv ? 'hover:bg-white/[0.04]' : ''}
+              className={`relative flex flex-col items-center pt-1.5 pb-1 px-0.5 gap-0.5 rounded transition-all min-h-[52px]
+                ${isToday(d) ? 'ring-1 ring-ice/40' : ''}
+                ${isSelected ? 'bg-ice/10' : hasEv ? 'hover:bg-white/[0.04]' : ''}
                 ${hasEv ? 'cursor-pointer' : 'cursor-default'}`}
             >
-              <span
-                className={`text-[11px] leading-none ${
-                  isToday(d) ? 'text-accent font-semibold' : 'text-gray-500'
-                }`}
-              >
+              <span className={`font-mono text-[10px] leading-none ${isToday(d) ? 'text-ice font-semibold' : 'text-slate-500'}`}>
                 {d}
               </span>
               {evs.slice(0, 2).map((ev) => {
@@ -81,23 +76,15 @@ export const CalGrid = ({ events, onDayClick, selectedDate }) => {
                   <div
                     key={ev.id}
                     title={`${ev.artist || ''} — ${ev.title}`}
-                    style={{
-                      fontFamily: s.font,
-                      color: s.color,
-                      backgroundColor: s.bg,
-                      borderColor: s.color,
-                      fontSize: '8px',
-                      lineHeight: 1,
-                      letterSpacing: '0.03em',
-                    }}
-                    className="w-full border rounded text-center px-0.5 py-[3px] overflow-hidden font-bold"
+                    style={{ color: s.color, backgroundColor: s.bg, borderColor: s.color + '99' }}
+                    className="w-full border rounded-[2px] text-center px-0.5 py-[3px] overflow-hidden font-mono font-bold text-[8px] leading-none"
                   >
                     {getInitials(ev.artist)}
                   </div>
                 )
               })}
               {evs.length > 2 && (
-                <span className="text-[7px] text-gray-600 leading-none">+{evs.length - 2}</span>
+                <span className="font-mono text-[7px] text-slate-600 leading-none">+{evs.length - 2}</span>
               )}
             </button>
           )
