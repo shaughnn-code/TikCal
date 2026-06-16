@@ -97,6 +97,27 @@
     pointer-events: none;
     background: rgba(76, 201, 240, 0.55);
     box-shadow: 0 0 24px 5px rgba(76, 201, 240, 0.34);
+    /* Only show in the gutters beside the centered content column (≈672px),
+       fading out before the text. On narrow screens the band covers the whole
+       width, so the line simply doesn't show across content. */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      #000 0,
+      #000 calc(50% - 360px),
+      transparent calc(50% - 336px),
+      transparent calc(50% + 336px),
+      #000 calc(50% + 360px),
+      #000 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      #000 0,
+      #000 calc(50% - 360px),
+      transparent calc(50% - 336px),
+      transparent calc(50% + 336px),
+      #000 calc(50% + 360px),
+      #000 100%
+    );
   }
   /* dimmed/lowered variant behind dense content */
   .grid-lite .grid-floor {
