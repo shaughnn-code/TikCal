@@ -2,6 +2,10 @@
 // webhook (from an inbound-email provider: SendGrid Parse / Postmark / generic),
 // gets routed to a user by their import token, parsed by Claude, and filed as an
 // event. Public webhook: verify_jwt = false, gated by INBOUND_SECRET.
+//
+// Special case: Gmail's "Forwarding Confirmation" email is detected and the
+// confirmation code + verify link are relayed to the user's real inbox (via the
+// SendGrid mail API) so they can finish setting up auto-forwarding.
 import Anthropic from 'npm:@anthropic-ai/sdk@^0.69.0'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -20,14 +24,23 @@ const tokenFromLocal = (lp: string) => {
   const i = lp.lastIndexOf('-')
   return i >= 0 ? lp.slice(i + 1) : lp
 }
-
 function stripHtml(html: string): string {
   return html
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')
     .replace(/[ \t]+/g, ' ').replace(/\n\s*\n\s*\n+/g, '\n\n').trim()
+}
+async function sendViaSendGrid(key: string, to: string, subject: string, body: string) {
+  await fetch('https://api.sendgrid.com/v3/mail/send', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: to }] }],
+      from: { email: 'noreply@tikcal.nyc', name: 'TikCal' },
+      subject,
+      content: [{ type: 'text/plain', value: body }],
+    }),
+  })
 }
 
 const SCHEMA = {
@@ -52,20 +65,19 @@ Deno.serve(async (req) => {
     return new Response('forbidden', { status: 401 })
   }
 
-  // ── Parse provider payload (JSON or form-data) into {recipients, subject, text}
-  let recipients = ''
-  let subject = ''
-  let text = ''
+  let recipients = '', from = '', subject = '', text = ''
   try {
     const ct = req.headers.get('content-type') || ''
     if (ct.includes('application/json')) {
       const b: Record<string, unknown> = await req.json()
       recipients = [b.To, b.OriginalRecipient, b.Recipient, b.to, JSON.stringify(b.ToFull || ''), JSON.stringify(b.envelope || '')].filter(Boolean).join(' ')
+      from = String(b.From || b.from || JSON.stringify(b.FromFull || ''))
       subject = String(b.Subject || b.subject || '')
       text = String(b.TextBody || b.text || (b.HtmlBody ? stripHtml(String(b.HtmlBody)) : '') || (b.html ? stripHtml(String(b.html)) : ''))
     } else {
       const f = await req.formData()
       recipients = [f.get('to'), f.get('envelope'), f.get('recipient')].filter(Boolean).join(' ')
+      from = String(f.get('from') || '')
       subject = String(f.get('subject') || '')
       const t = f.get('text') || f.get('email') || ''
       const h = f.get('html') || ''
@@ -83,6 +95,33 @@ Deno.serve(async (req) => {
   const { data: inbox } = await admin.from('user_inbox').select('user_id').eq('token', token).maybeSingle()
   if (!inbox) return ok('unknown-token')
 
+  // ── Gmail forwarding-confirmation relay ────────────────────────────────
+  const isGmailConfirm =
+    /forwarding-noreply@google\.com/i.test(from) || /forwarding confirmation/i.test(subject)
+  if (isGmailConfirm) {
+    const sgKey = Deno.env.get('SENDGRID_API_KEY')
+    const { data: u } = await admin.auth.admin.getUserById(inbox.user_id)
+    const userEmail = u?.user?.email
+    const code =
+      subject.match(/\(#\s*(\d{4,})\)/)?.[1] ||
+      text.match(/confirmation code[^0-9]*(\d{5,})/i)?.[1] ||
+      text.match(/\b(\d{6,12})\b/)?.[1] || ''
+    const link = text.match(/https?:\/\/[^\s"'<>]*google\.com[^\s"'<>]*/i)?.[0] || ''
+    if (sgKey && userEmail) {
+      await sendViaSendGrid(
+        sgKey, userEmail,
+        'Confirm your TikCal email auto-import',
+        `Gmail wants you to confirm forwarding to your TikCal import address.\n\n` +
+        `Confirmation code: ${code || '(see the link below)'}\n\n` +
+        `Confirm here: ${link || '(or open Gmail → Settings → Forwarding and enter the code)'}\n\n` +
+        `Once confirmed, your forwarded ticket emails will auto-import into TikCal.`,
+      )
+      return ok('relayed-gmail-confirmation')
+    }
+    return ok('gmail-confirmation-no-key')
+  }
+
+  // ── normal event extraction ─────────────────────────────────────────────
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
   if (!apiKey) return ok('no-api-key')
 
@@ -113,13 +152,9 @@ Deno.serve(async (req) => {
 
   if (!fields.title || !fields.event_date) return ok('not-an-event')
 
-  // dedupe: same owner + date + title
   const { data: dup } = await admin
-    .from('events')
-    .select('id')
-    .eq('owner_id', inbox.user_id)
-    .eq('event_date', fields.event_date)
-    .ilike('title', fields.title)
+    .from('events').select('id')
+    .eq('owner_id', inbox.user_id).eq('event_date', fields.event_date).ilike('title', fields.title)
     .maybeSingle()
   if (dup) return ok('duplicate')
 
