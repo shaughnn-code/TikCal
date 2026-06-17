@@ -43,6 +43,16 @@ export async function fetchEvent(id) {
   return { ...event, owner: owner || null, crews: ec || [] }
 }
 
+// The current user's email-import token (creates one on first read).
+export async function getInboxToken(userId) {
+  let { data } = await supabase.from('user_inbox').select('token').eq('user_id', userId).maybeSingle()
+  if (!data) {
+    const ins = await supabase.from('user_inbox').insert({ user_id: userId }).select('token').single()
+    data = ins.data
+  }
+  return data?.token || null
+}
+
 // Crews the current user belongs to.
 export async function fetchMyCrews() {
   const { data, error } = await supabase
