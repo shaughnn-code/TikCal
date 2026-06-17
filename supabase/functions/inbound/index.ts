@@ -30,8 +30,8 @@ function stripHtml(html: string): string {
     .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')
     .replace(/[ \t]+/g, ' ').replace(/\n\s*\n\s*\n+/g, '\n\n').trim()
 }
-async function sendViaSendGrid(key: string, to: string, subject: string, body: string) {
-  await fetch('https://api.sendgrid.com/v3/mail/send', {
+async function sendViaSendGrid(key: string, to: string, subject: string, body: string): Promise<Response> {
+  return await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
       text.match(/\b(\d{6,12})\b/)?.[1] || ''
     const link = text.match(/https?:\/\/[^\s"'<>]*google\.com[^\s"'<>]*/i)?.[0] || ''
     if (sgKey && userEmail) {
-      await sendViaSendGrid(
+      const resp = await sendViaSendGrid(
         sgKey, userEmail,
         'Confirm your TikCal email auto-import',
         `Gmail wants you to confirm forwarding to your TikCal import address.\n\n` +
@@ -121,8 +121,11 @@ Deno.serve(async (req) => {
         `Confirm here: ${link || '(or open Gmail → Settings → Forwarding and enter the code)'}\n\n` +
         `Once confirmed, your forwarded ticket emails will auto-import into TikCal.`,
       )
+      const detail = resp.status >= 400 ? await resp.text() : ''
+      console.log(`gmail-relay → ${userEmail} · sendgrid ${resp.status} ${detail}`)
       return ok('relayed-gmail-confirmation')
     }
+    console.log(`gmail-confirmation: missing ${sgKey ? 'user email' : 'SENDGRID_API_KEY'}`)
     return ok('gmail-confirmation-no-key')
   }
 
