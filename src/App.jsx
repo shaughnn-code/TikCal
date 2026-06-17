@@ -6,6 +6,8 @@ import { Spinner } from './components/ui.jsx'
 import Landing from './pages/Landing.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
+import ForgotPassword from './pages/ForgotPassword.jsx'
+import ResetPassword from './pages/ResetPassword.jsx'
 import Setup from './pages/Setup.jsx'
 import Welcome from './pages/Welcome.jsx'
 import Dashboard from './pages/Dashboard.jsx'
@@ -40,6 +42,8 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot" element={<ForgotPassword />} />
+      <Route path="/reset" element={<ResetPassword />} />
       <Route path="/setup" element={<SetupGate />} />
       <Route path="/welcome" element={<WelcomeGate />} />
 

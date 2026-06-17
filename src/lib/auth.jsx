@@ -67,6 +67,22 @@ export const AuthProvider = ({ children }) => {
     setProfile(null)
   }
 
+  // Send a password-reset email (link lands on /reset to set a new password).
+  const resetPassword = (email) =>
+    supabase.auth
+      .resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset` })
+      .then(({ error }) => (error ? { error: error.message } : { ok: true }))
+
+  // Passwordless: email a one-time sign-in link (lands signed-in on /calendar).
+  const sendMagicLink = (email) =>
+    supabase.auth
+      .signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/calendar`, shouldCreateUser: false } })
+      .then(({ error }) => (error ? { error: error.message } : { ok: true }))
+
+  // Set a new password (used on /reset, where a recovery session is active).
+  const updatePassword = (password) =>
+    supabase.auth.updateUser({ password }).then(({ error }) => (error ? { error: error.message } : { ok: true }))
+
   const updateProfile = async (patch) => {
     const userId = session?.user?.id
     if (!userId) return { error: 'Not signed in' }
@@ -90,6 +106,9 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signOut,
     updateProfile,
+    resetPassword,
+    sendMagicLink,
+    updatePassword,
     refreshProfile: () => loadProfile(session?.user?.id),
   }
 
