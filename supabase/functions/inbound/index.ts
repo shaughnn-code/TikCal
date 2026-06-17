@@ -48,10 +48,15 @@ const SCHEMA = {
   schema: {
     type: 'object',
     properties: {
+      kind: {
+        type: 'string',
+        enum: ['confirmation', 'promotion', 'other'],
+        description: 'confirmation = recipient actually bought a ticket / registered / RSVPed and is going; promotion = ad, on-sale, recommendation, lineup announcement; other = anything else.',
+      },
       title: { type: 'string' }, artist: { type: 'string' }, event_date: { type: 'string' },
       venue: { type: 'string' }, notes: { type: 'string' },
     },
-    required: ['title', 'artist', 'event_date', 'venue', 'notes'],
+    required: ['kind', 'title', 'artist', 'event_date', 'venue', 'notes'],
     additionalProperties: false,
   },
 } as const
@@ -129,15 +134,17 @@ Deno.serve(async (req) => {
   const source = `${subject}\n\n${text}`.slice(0, 12000)
   if (source.trim().length < 8) return ok('empty')
 
-  let fields: { title: string; artist: string; event_date: string; venue: string; notes: string }
+  let fields: { kind: string; title: string; artist: string; event_date: string; venue: string; notes: string }
   try {
     const msg = await new Anthropic({ apiKey }).messages.create({
       model: MODEL,
       max_tokens: 1024,
       system:
-        `Extract concert/club-show details from this forwarded ticket confirmation email into structured JSON for a NYC events calendar. ` +
-        `Today is ${today} (America/New_York). event_date MUST be YYYY-MM-DD. "title" is the event/night name, "artist" the performer(s), "venue" the location. ` +
-        `If the email is not a real ticket/event confirmation, return empty strings for every field.`,
+        `You triage a forwarded email for a NYC events calendar and extract show details as JSON.\n` +
+        `Set "kind" = "confirmation" ONLY if the recipient has actually purchased a ticket, registered, RSVPed, or is otherwise confirmed to attend — signals: an order/booking confirmation, order number, receipt, "your ticket(s)", "you're going", QR/barcode, booking reference, "order confirmed".\n` +
+        `Set "kind" = "promotion" for marketing where the recipient has NOT bought anything — on-sale alerts, recommendations, "get tickets", "don't miss", "tickets available", lineup/announcement, price teasers, newsletters.\n` +
+        `Set "kind" = "other" for anything else (forwarding/verification emails, password resets, non-event receipts).\n` +
+        `Also extract title (event/night name), artist (performer(s)), venue, and event_date as YYYY-MM-DD when present (even for promotions). Today is ${today} (America/New_York). Use empty strings for unknown fields.`,
       messages: [{ role: 'user', content: source }],
       output_config: { format: SCHEMA },
     } as Anthropic.MessageCreateParamsNonStreaming)
@@ -150,6 +157,8 @@ Deno.serve(async (req) => {
     return ok('parse-failed')
   }
 
+  // Only genuine purchase/RSVP confirmations become events — never ads/promos.
+  if (fields.kind !== 'confirmation') return ok(`skipped-${fields.kind || 'nonconfirmation'}`)
   if (!fields.title || !fields.event_date) return ok('not-an-event')
 
   const { data: dup } = await admin
