@@ -31,13 +31,13 @@ export const HudBox = ({ children, className = '', tone = 'ice', hero = false, .
 
 // mono section label, e.g. "▸ Upcoming"
 export const SecLabel = ({ children, className = '' }) => (
-  <span className={`block font-mono text-[9px] tracking-[0.14em] uppercase text-slate-500 ${className}`}>
+  <span className={`block font-mono text-[11px] tracking-[0.14em] uppercase text-slate-400 ${className}`}>
     {children}
   </span>
 )
 
 export const Kicker = ({ children, className = '' }) => (
-  <div className={`font-mono text-[9px] tracking-[0.16em] text-ice ${className}`}>{children}</div>
+  <div className={`font-mono text-[11px] tracking-[0.16em] text-ice ${className}`}>{children}</div>
 )
 
 export const Inp = ({ label, type = 'text', value, onChange, placeholder, required, cls = '' }) => (

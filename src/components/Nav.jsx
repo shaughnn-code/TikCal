@@ -11,7 +11,7 @@ export const Nav = () => {
     <NavLink to={to}>
       {({ isActive }) => (
         <span
-          className={`flex items-center gap-1.5 font-mono text-[10px] tracking-wide uppercase transition-colors ${
+          className={`flex items-center gap-1.5 font-mono text-[12px] tracking-wide uppercase transition-colors ${
             isActive ? 'text-ice' : 'text-slate-500 hover:text-white'
           }`}
         >
@@ -34,7 +34,7 @@ export const Nav = () => {
           {link('/friends', 'users-three', 'Crew')}
           <NavLink to="/profile">
             {({ isActive }) => (
-              <span className={`flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors ${isActive ? 'text-ice' : 'text-slate-500 hover:text-white'}`}>
+              <span className={`flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-wide transition-colors ${isActive ? 'text-ice' : 'text-slate-500 hover:text-white'}`}>
                 {profile?.totem ? <Totem icon={profile.totem} size={16} /> : <Icon name="user" size={14} />}
                 You
               </span>

@@ -30,16 +30,16 @@ export const EventCard = ({ event, ownerLabel }) => {
       }`}
       style={{ '--hud-color': isPast ? '#334155' : s.color }}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3.5">
         <span
-          className="w-8 h-8 rounded-[3px] flex items-center justify-center font-mono text-[10px] font-bold shrink-0 border"
+          className="w-11 h-11 rounded flex items-center justify-center font-mono text-[13px] font-bold shrink-0 border"
           style={{ color: s.color, backgroundColor: s.bg, borderColor: s.color + '66' }}
         >
           {getInitials(event.artist)}
         </span>
         <div className="flex-1 min-w-0">
-          <div className="font-display font-bold text-[13px] text-[#e8f4f8] truncate">{event.title}</div>
-          <div className="font-mono text-[9px] text-slate-500 truncate flex items-center gap-1.5">
+          <div className="font-display font-bold text-base text-[#e8f4f8] truncate">{event.title}</div>
+          <div className="font-mono text-[11px] text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
             <span>{fmt}</span>
             {event.venue && (
               <>
@@ -50,15 +50,15 @@ export const EventCard = ({ event, ownerLabel }) => {
             {ownerLabel && (
               <>
                 <span className="text-slate-700">·</span>
-                <span className="text-ice/70 normal-case flex items-center gap-0.5">
-                  <Icon name="users-three" size={10} /> {ownerLabel}
+                <span className="text-ice/80 normal-case flex items-center gap-0.5">
+                  <Icon name="users-three" size={12} /> {ownerLabel}
                 </span>
               </>
             )}
           </div>
         </div>
         {countdown && !isPast && (
-          <span className="font-mono text-[10px] shrink-0" style={{ color: s.color }}>
+          <span className="font-mono text-[12px] font-semibold shrink-0" style={{ color: s.color }}>
             {countdown}
           </span>
         )}

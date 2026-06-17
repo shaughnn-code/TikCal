@@ -10,6 +10,8 @@
   }
   html {
     background-color: #040608;
+    /* Global scale-up for readability (lifts all rem-based text + spacing ~13%). */
+    font-size: 112.5%;
   }
   body {
     margin: 0;
