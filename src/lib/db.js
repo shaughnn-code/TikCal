@@ -153,6 +153,65 @@ export async function disconnectGoogle(userId) {
   await supabase.from('profiles').update({ google_calendar_email: null }).eq('id', userId)
 }
 
+// ─── MUSIC TASTE (Spotify / Apple Music) ────────────────────────────────────
+
+// Kick off Spotify OAuth: returns the authorize URL to redirect to.
+export async function startSpotifyConnect() {
+  const { data, error } = await supabase.functions.invoke('spotify-oauth-start')
+  if (error) throw error
+  if (data?.error) throw new Error(data.error)
+  return data.url
+}
+
+// Re-pull the user's Spotify artists (refreshes the token server-side).
+export async function syncSpotify() {
+  const { data, error } = await supabase.functions.invoke('spotify-sync')
+  if (error) throw error
+  return data
+}
+
+export async function disconnectSpotify(userId) {
+  await supabase.from('music_connections').delete().eq('user_id', userId).eq('provider', 'spotify')
+  await supabase.from('music_artists').delete().eq('user_id', userId).eq('provider', 'spotify')
+  await supabase.from('profiles').update({ spotify_name: null }).eq('id', userId)
+}
+
+// The user's saved artists (across providers), lowest rank = most listened.
+export async function fetchMyArtists(userId) {
+  const { data } = await supabase
+    .from('music_artists')
+    .select('provider, artist_name, artist_norm, rank')
+    .eq('user_id', userId)
+    .order('rank', { ascending: true })
+  return data || []
+}
+
+// ─── DISCOVERY (Ticketmaster) ────────────────────────────────────────────────
+
+// Search upcoming NYC music events. Returns { configured, events }.
+export async function fetchTicketmaster(params = {}) {
+  try {
+    const { data, error } = await supabase.functions.invoke('ticketmaster-events', { body: params })
+    if (error || !data) return { configured: false, events: [] }
+    return data
+  } catch {
+    return { configured: false, events: [] }
+  }
+}
+
+// Add a discovered show to the user's own calendar.
+export async function addDiscoveredEvent(userId, ev) {
+  return supabase.from('events').insert({
+    owner_id: userId,
+    title: ev.title,
+    artist: ev.artist || '',
+    event_date: ev.date,
+    venue: ev.venue || '',
+    notes: ev.url ? `Tickets: ${ev.url}` : '',
+    share_friends: false,
+  })
+}
+
 // Crews the current user belongs to.
 export async function fetchMyCrews() {
   const { data, error } = await supabase

@@ -17,7 +17,7 @@ export const Nav = () => {
         >
           {isActive && <span className="w-1.5 h-1.5 rounded-full bg-mint shadow-[0_0_8px_#6EE7B7]" />}
           <Icon name={icon} size={14} />
-          {label}
+          <span className="hidden sm:inline">{label}</span>
         </span>
       )}
     </NavLink>
@@ -29,15 +29,16 @@ export const Nav = () => {
         <button onClick={() => navigate('/calendar')}>
           <Logo size="sm" />
         </button>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-3.5 sm:gap-5">
           {link('/calendar', 'calendar-dots', 'Cal')}
+          {link('/discover', 'compass', 'Find')}
           {link('/plan', 'magic-wand', 'Plan')}
           {link('/friends', 'users-three', 'Crew')}
           <NavLink to="/profile">
             {({ isActive }) => (
               <span className={`flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-wide transition-colors ${isActive ? 'text-ice' : 'text-slate-500 hover:text-white'}`}>
                 {profile?.totem ? <Totem icon={profile.totem} size={16} /> : <Icon name="user" size={14} />}
-                You
+                <span className="hidden sm:inline">You</span>
               </span>
             )}
           </NavLink>

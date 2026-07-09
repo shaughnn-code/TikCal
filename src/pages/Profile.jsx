@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
-import { getInboxToken, getFeedToken, rotateFeedToken, feedUrls, startGoogleConnect, disconnectGoogle } from '../lib/db.js'
+import { getInboxToken, getFeedToken, rotateFeedToken, feedUrls, startGoogleConnect, disconnectGoogle, startSpotifyConnect, disconnectSpotify, syncSpotify } from '../lib/db.js'
 import { GridBg, Wrap, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 import { totemByIcon } from '../lib/constants.js'
@@ -57,6 +57,24 @@ export default function Profile() {
   const rotateFeed = async () => {
     if (!confirm('Generate a new link? Your current subscriptions will stop updating.')) return
     setFeedToken(await rotateFeedToken(user.id))
+  }
+
+  const connectSpotify = async () => {
+    setConnecting(true)
+    setGErr('')
+    try {
+      window.location.href = await startSpotifyConnect()
+    } catch (e) {
+      setGErr(e.message || 'Could not start the Spotify connection.')
+      setConnecting(false)
+    }
+  }
+  const unlinkSpotify = async () => {
+    await disconnectSpotify(user.id)
+    refreshProfile?.()
+  }
+  const resyncSpotify = async () => {
+    try { await syncSpotify() } catch { /* ignore */ }
   }
 
   if (events === null) return <Spinner />
@@ -222,6 +240,48 @@ export default function Profile() {
             </>
           )}
           {gErr && <p className="text-red-400 text-[11px] mt-2">{gErr}</p>}
+        </HudBox>
+
+        {/* Spotify — powers Discover / "For You" */}
+        <HudBox className="p-4 mb-3">
+          <SecLabel className="mb-2 flex items-center gap-1.5">
+            <Icon name="spotify-logo" size={12} className="text-mint" /> Spotify
+          </SecLabel>
+          {profile?.spotify_name ? (
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-mono text-[11px] text-slate-400 truncate">
+                <span className="text-mint">✓ Connected</span> · {profile.spotify_name}
+              </p>
+              <div className="flex gap-2 shrink-0">
+                <Btn variant="ghost" onClick={resyncSpotify} cls="!px-3 !py-2">Refresh</Btn>
+                <Btn variant="ghost" onClick={unlinkSpotify} cls="!px-3 !py-2">Disconnect</Btn>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-slate-400 text-xs mb-3 leading-relaxed">
+                Connect Spotify so <button onClick={() => navigate('/discover')} className="text-ice underline">Discover</button> can
+                float shows by the artists you actually listen to.
+              </p>
+              <Btn variant="mint" onClick={connectSpotify} disabled={connecting}>
+                {connecting ? 'Opening…' : 'Connect Spotify'}
+              </Btn>
+            </>
+          )}
+        </HudBox>
+
+        {/* Apple Music — needs Apple Developer setup (see functions/README) */}
+        <HudBox className="p-4 mb-3">
+          <SecLabel className="mb-2 flex items-center gap-1.5">
+            <Icon name="apple-logo" size={12} className="text-slate-300" /> Apple Music
+          </SecLabel>
+          {profile?.apple_music_on ? (
+            <p className="font-mono text-[11px] text-mint">✓ Connected</p>
+          ) : (
+            <p className="text-slate-500 text-xs leading-relaxed">
+              Coming once the Apple Music key is configured. It’ll add your Apple Music artists to Discover, just like Spotify.
+            </p>
+          )}
         </HudBox>
 
         {/* Account */}

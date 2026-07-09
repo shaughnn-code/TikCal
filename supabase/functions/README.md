@@ -72,6 +72,45 @@ supabase secrets set APP_URL=https://tikcal.nyc     # where callback returns the
      `https://pirlflebmiylgusmqhhk.supabase.co/functions/v1/google-oauth-callback`
 5. Copy the client ID/secret into the `supabase secrets set` commands above.
 
+## Music + discovery (Spotify / Apple Music / Ticketmaster / RA / DICE)
+
+Apply `0003_music_taste_and_discovery.sql`, then deploy:
+
+```bash
+supabase functions deploy spotify-oauth-start
+supabase functions deploy spotify-oauth-callback --no-verify-jwt
+supabase functions deploy spotify-sync
+supabase functions deploy ticketmaster-events
+supabase functions deploy apple-music-token
+```
+
+Secrets:
+
+```bash
+# Spotify — https://developer.spotify.com/dashboard (create an app)
+#   Redirect URI: https://pirlflebmiylgusmqhhk.supabase.co/functions/v1/spotify-oauth-callback
+supabase secrets set SPOTIFY_CLIENT_ID=xxxx
+supabase secrets set SPOTIFY_CLIENT_SECRET=xxxx
+
+# Ticketmaster — https://developer.ticketmaster.com (free Discovery API key)
+supabase secrets set TICKETMASTER_API_KEY=xxxx
+
+# Apple Music — requires Apple Developer Program ($99/yr) + a MusicKit key (.p8)
+supabase secrets set APPLE_MUSIC_TEAM_ID=xxxx
+supabase secrets set APPLE_MUSIC_KEY_ID=xxxx
+supabase secrets set APPLE_MUSIC_PRIVATE_KEY="$(cat AuthKey_XXXX.p8)"
+```
+
+**DICE & Resident Advisor** have no official public API. They are handled ToS-safely
+by the existing **Smart Add** — paste an event link or screenshot on the Add page.
+(An unofficial RA GraphQL endpoint exists but is against their terms; not used.)
+
+**Apple Music note:** `apple-music-token` mints the MusicKit developer token
+(server half, standard ES256 — not yet verified end-to-end). The browser half
+(load MusicKit JS, `music.authorize()`, read `/v1/me/library/artists`, then write
+rows to `music_artists` with provider `apple`) is the remaining step, gated on the
+Apple Developer account.
+
 ## Feature status
 
 | Integration | Ships via | Needs |
@@ -79,3 +118,6 @@ supabase secrets set APP_URL=https://tikcal.nyc     # where callback returns the
 | Per-event Add-to-Calendar (Google/Outlook/.ics) | GitHub Pages (live) | nothing |
 | `.ics` subscribe feed | Pages UI + `ics` fn | `0002` migration + deploy `ics` |
 | Google Calendar (free/busy in Plan) | Pages UI + 3 Google fns | `0002` + deploy fns + Google secrets |
+| Discover / "For You" (Spotify + Ticketmaster) | Pages UI + fns | `0003` + deploy fns + Spotify/TM keys |
+| DICE / Resident Advisor | Smart Add (live) | nothing (paste link/screenshot) |
+| Apple Music | `apple-music-token` fn + TODO frontend | Apple Developer account |
