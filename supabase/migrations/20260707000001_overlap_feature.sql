@@ -213,9 +213,47 @@ begin
 end;
 $$;
 
+-- TikCal-source busy fill + shared-event detection (spec §4a). Runs as definer
+-- so every viewer — including guests who are nobody's friend — sees a consistent
+-- picture, WITHOUT leaking event titles: only opaque event ids + dates escape,
+-- and only for participants who opted their TikCal data in (sources.tikcal).
+-- The app buckets these into the NIGHT daypart (TikCal is a nightlife app; the
+-- events table stores a date only, no time).
+create or replace function public.session_event_busy(p_session_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_session public.overlap_sessions;
+  v_rows jsonb;
+begin
+  select * into v_session from public.overlap_sessions where id = p_session_id;
+  if not found then return '[]'::jsonb; end if;
+  if v_session.expires_at < now() then return '[]'::jsonb; end if;
+
+  select coalesce(jsonb_agg(jsonb_build_object(
+           'participant_id', p.id,
+           'event_id',       e.id,
+           'event_date',     e.event_date
+         )), '[]'::jsonb)
+    into v_rows
+    from public.overlap_participants p
+    join public.events e on e.owner_id = p.user_id
+   where p.session_id = p_session_id
+     and p.user_id is not null
+     and coalesce((p.sources->>'tikcal')::boolean, false)
+     and e.event_date between v_session.range_start and v_session.range_end;
+
+  return v_rows;
+end;
+$$;
+
 grant execute on function public.get_session(uuid)                         to anon, authenticated;
 grant execute on function public.join_session(uuid, text, uuid)            to anon, authenticated;
 grant execute on function public.update_availability(uuid, uuid, jsonb, jsonb) to anon, authenticated;
+grant execute on function public.session_event_busy(uuid)                  to anon, authenticated;
 
 -- ── Realtime + expiry cleanup ────────────────────────────────────────────────
 

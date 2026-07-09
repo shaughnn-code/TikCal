@@ -15,6 +15,8 @@ import EventDetail from './pages/EventDetail.jsx'
 import AddEvent from './pages/AddEvent.jsx'
 import Profile from './pages/Profile.jsx'
 import Friends from './pages/Friends.jsx'
+import Overlap from './pages/Overlap.jsx'
+import OverlapSession from './pages/OverlapSession.jsx'
 
 // Guards the onboarding / profile-edit route: needs auth, renders full-screen
 // (no Nav). Doubles as the editor once setup is complete.
@@ -46,6 +48,8 @@ export default function App() {
       <Route path="/reset" element={<ResetPassword />} />
       <Route path="/setup" element={<SetupGate />} />
       <Route path="/welcome" element={<WelcomeGate />} />
+      {/* Shared by link: guests join with a display name, no account. */}
+      <Route path="/overlap/:sessionId" element={<OverlapSession />} />
 
       {/* Protected (shared Nav) */}
       <Route element={<ProtectedRoute />}>
@@ -54,6 +58,7 @@ export default function App() {
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/friends" element={<Friends />} />
+        <Route path="/overlap" element={<Overlap />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

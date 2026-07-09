@@ -32,6 +32,7 @@ export const Nav = () => {
         <div className="flex items-center gap-5">
           {link('/calendar', 'calendar-dots', 'Cal')}
           {link('/friends', 'users-three', 'Crew')}
+          {link('/overlap', 'intersect', 'Sync')}
           <NavLink to="/profile">
             {({ isActive }) => (
               <span className={`flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-wide transition-colors ${isActive ? 'text-ice' : 'text-slate-500 hover:text-white'}`}>
