@@ -4,9 +4,31 @@ import { fetchMyCrews } from '../lib/db.js'
 import {
   loadFriends, searchPeople, sendFriendRequest, acceptFriend, removeFriend,
   loadCrewInvites, createCrew, inviteToCrew, acceptCrewInvite, declineCrewInvite, loadCrewMembers,
+  updateCrewColor,
 } from '../lib/social.js'
+import { CREW_COLORS, DEFAULT_CREW_COLOR } from '../lib/constants.js'
 import { GridBg, Wrap, Inp, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
+
+// Row of crew-color swatches. `value` is the selected hex; `onPick(hex)` fires
+// on click. Used both when starting a crew and recoloring one.
+const ColorPicker = ({ value, onPick }) => (
+  <div className="flex flex-wrap gap-2">
+    {CREW_COLORS.map((c) => (
+      <button
+        key={c.hex}
+        type="button"
+        title={c.name}
+        onClick={() => onPick(c.hex)}
+        className={`w-7 h-7 rounded-full transition-transform ${value === c.hex ? 'scale-110' : 'hover:scale-105'}`}
+        style={{
+          backgroundColor: c.hex,
+          boxShadow: value === c.hex ? `0 0 0 2px #0a0e12, 0 0 0 4px ${c.hex}` : `0 0 8px ${c.hex}66`,
+        }}
+      />
+    ))}
+  </div>
+)
 
 const Avatar = ({ profile }) => (
   <div className="w-9 h-9 rounded border border-ice/30 bg-white/5 flex items-center justify-center shrink-0">
@@ -48,6 +70,7 @@ export default function Friends() {
   const [searching, setSearching] = useState(false)
 
   const [newCrew, setNewCrew] = useState('')
+  const [newCrewColor, setNewCrewColor] = useState(DEFAULT_CREW_COLOR)
   const [expanded, setExpanded] = useState(null)
   const [members, setMembers] = useState([])
 
@@ -83,9 +106,15 @@ export default function Friends() {
   const doCreateCrew = async (e) => {
     e.preventDefault()
     if (!newCrew.trim()) return
-    const { error } = await createCrew(newCrew, user.id)
+    const { error } = await createCrew(newCrew, user.id, newCrewColor)
     if (error) return setErr(error.message)
-    setNewCrew(''); reload()
+    setNewCrew(''); setNewCrewColor(DEFAULT_CREW_COLOR); reload()
+  }
+  const doRecolor = async (crewId, hex) => {
+    // Optimistic: reflect the new color locally, then persist.
+    setCrews((cs) => cs.map((c) => (c.id === crewId ? { ...c, color: hex } : c)))
+    const { error } = await updateCrewColor(crewId, hex)
+    if (error) { setErr(error.message); reload() }
   }
   const toggleCrew = async (crewId) => {
     if (expanded === crewId) return setExpanded(null)
@@ -218,9 +247,15 @@ export default function Friends() {
 
             <section>
               <SecLabel className="mb-3">▸ Start a crew</SecLabel>
-              <form onSubmit={doCreateCrew} className="flex gap-2">
-                <Inp value={newCrew} onChange={setNewCrew} placeholder="Crew name" cls="flex-1" />
-                <Btn type="submit" variant="mint" disabled={!newCrew.trim()} cls="shrink-0">Create</Btn>
+              <form onSubmit={doCreateCrew} className="space-y-3">
+                <div className="flex gap-2">
+                  <Inp value={newCrew} onChange={setNewCrew} placeholder="Crew name" cls="flex-1" />
+                  <Btn type="submit" variant="mint" disabled={!newCrew.trim()} cls="shrink-0">Create</Btn>
+                </div>
+                <div>
+                  <SecLabel className="mb-2">Crew color</SecLabel>
+                  <ColorPicker value={newCrewColor} onPick={setNewCrewColor} />
+                </div>
               </form>
             </section>
 
@@ -237,13 +272,23 @@ export default function Friends() {
                       <HudBox key={c.id} className="overflow-hidden p-0">
                         <button onClick={() => toggleCrew(c.id)} className="w-full flex items-center justify-between gap-3 p-4 hover:bg-white/[0.02] transition-colors">
                           <span className="text-sm text-[#e8f4f8] flex items-center gap-2">
-                            <Icon name="users-three" size={16} className="text-ice" /> {c.name}
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{ backgroundColor: c.color || '#4cc9f0', boxShadow: `0 0 7px ${c.color || '#4cc9f0'}` }}
+                            />
+                            {c.name}
                             {c.role === 'owner' && <span className="font-mono text-[9px] text-slate-600">OWNER</span>}
                           </span>
                           <span className="font-mono text-[10px] text-slate-600">{isOpen ? '−' : 'MANAGE'}</span>
                         </button>
                         {isOpen && (
                           <div className="px-4 pb-4 space-y-4 border-t border-white/[0.06] pt-4">
+                            {c.role === 'owner' && (
+                              <div>
+                                <SecLabel className="mb-2">Crew color</SecLabel>
+                                <ColorPicker value={c.color || '#4cc9f0'} onPick={(hex) => doRecolor(c.id, hex)} />
+                              </div>
+                            )}
                             <div>
                               <SecLabel className="mb-2">Members · {members.length}</SecLabel>
                               <div className="flex flex-wrap gap-2">

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { getEventStyle } from '../lib/constants.js'
+import { getEventAccent } from '../lib/constants.js'
 
 // Large, light, high-contrast month grid (sits as a bright panel on the dark app).
 export const CalGrid = ({ events, onDayClick, selectedDate }) => {
@@ -79,7 +79,7 @@ export const CalGrid = ({ events, onDayClick, selectedDate }) => {
               </span>
               <div className="flex flex-col gap-1 mt-0.5">
                 {evs.slice(0, 2).map((ev) => {
-                  const s = getEventStyle(ev.artist)
+                  const s = getEventAccent(ev)
                   return (
                     <div
                       key={ev.id}
