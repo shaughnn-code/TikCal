@@ -35,6 +35,16 @@ Defined in `tailwind.config.js` / `src/index.css`:
 
 See `docs/tikcal-overlap-design.md` for the Overlap feature's cell-state → render contract.
 
+## Database
+
+Linked project: `pirlflebmiylgusmqhhk` (TikCal). Apply migrations with `supabase db push`.
+
+- **Never run `supabase db reset`.** It drops and recreates the database. The remote holds tables built through the dashboard that no local migration reproduces, so a reset destroys unrecoverable data.
+- `supabase/migrations/2026061*_dashboard_baseline.sql` and `20260616*` are intentionally **empty**. They stand in for schema changes made through the dashboard before this repo tracked migrations. The CLI refuses to push when remote history contains versions with no local file; these files satisfy that check. They are already recorded as applied and never re-run. Don't delete them, don't put SQL in them.
+- Postgres grants `EXECUTE` on new functions to `PUBLIC`. Revoking from `anon`/`authenticated` alone does nothing — they inherit through `PUBLIC`. Always `revoke execute ... from public` first, then grant back explicitly.
+- Supabase default privileges may grant DML to `anon` on new public tables. Withholding a `GRANT` is not a control. RLS is: a table with no INSERT/UPDATE/DELETE policy rejects direct writes.
+- Verify security changes against the live DB with the anon key (`curl $VITE_SUPABASE_URL/rest/v1/rpc/<fn>`), not by reading the SQL. That's how the `cleanup_expired_overlaps` hole was caught.
+
 ## Conventions
 
 - Icons via `@iconify/react`, Phosphor set (`ph:`), through `src/components/icons.jsx`.
