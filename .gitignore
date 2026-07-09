@@ -5,6 +5,8 @@ dist
 .DS_Store
 *.log
 
+temporary screenshots/
+
 # Local Claude Code / skills tooling
 .claude/settings.local.json
 .agents/
