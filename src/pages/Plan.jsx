@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { fetchVisibleEvents } from '../lib/db.js'
+import { fetchVisibleEvents, getGoogleBusy } from '../lib/db.js'
 import { loadFriends } from '../lib/social.js'
 import { getEventAccent } from '../lib/constants.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
@@ -12,6 +12,22 @@ const WEEKS_AHEAD = 6
 const NIGHT_DAYS = [4, 5, 6] // Thu, Fri, Sat (0=Sun)
 
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+// Google free/busy intervals → a Set of local YYYY-MM-DD dates that have any
+// busy block, so we can mark "you" busy on those nights.
+function busyToDates(busy) {
+  const set = new Set()
+  for (const b of busy || []) {
+    const start = new Date(b.start)
+    const end = new Date(b.end)
+    if (isNaN(start) || isNaN(end)) continue
+    for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      set.add(iso(new Date(d)))
+      if (set.size > 400) return set // safety cap
+    }
+  }
+  return set
+}
 
 // Upcoming Thu/Fri/Sat dates within the window, as YYYY-MM-DD strings.
 function upcomingNights() {
@@ -31,16 +47,26 @@ export default function Plan() {
   const navigate = useNavigate()
   const [events, setEvents] = useState([])
   const [friends, setFriends] = useState([])
+  const [googleBusyDates, setGoogleBusyDates] = useState(() => new Set())
+  const [googleConnected, setGoogleConnected] = useState(false)
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
 
   useEffect(() => {
     let active = true
-    Promise.all([fetchVisibleEvents(), loadFriends(user.id)])
-      .then(([evs, f]) => {
+    const now = new Date()
+    const end = new Date(now.getTime() + WEEKS_AHEAD * 7 * 86400000)
+    Promise.all([
+      fetchVisibleEvents(),
+      loadFriends(user.id),
+      getGoogleBusy(now.toISOString(), end.toISOString()),
+    ])
+      .then(([evs, f, gb]) => {
         if (!active) return
         setEvents(evs)
         setFriends(f.friends.map((r) => r.other).filter(Boolean))
+        setGoogleConnected(!!gb.connected)
+        setGoogleBusyDates(busyToDates(gb.busy))
       })
       .catch((e) => active && setErr(e.message))
       .finally(() => active && setLoading(false))
@@ -61,11 +87,13 @@ export default function Plan() {
     return upcomingNights().map((date) => {
       const dayEvents = byDate[date] || []
       const busyIds = new Set(dayEvents.map((e) => e.owner_id))
+      // Fold in the current user's real Google calendar busy nights.
+      if (googleBusyDates.has(date)) busyIds.add(user.id)
       const free = crew.filter((p) => !busyIds.has(p.id))
       const busy = crew.filter((p) => busyIds.has(p.id))
       return { date, free, busy, plans: dayEvents }
     })
-  }, [events, crew])
+  }, [events, crew, googleBusyDates, user.id])
 
   if (loading) return <Spinner />
 
@@ -96,9 +124,20 @@ export default function Plan() {
       <Wrap>
         <Kicker className="mb-1">// FREE-TIME RADAR</Kicker>
         <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8] mb-2">Plan a Night</h1>
-        <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+        <p className="text-slate-400 text-sm mb-3 leading-relaxed">
           Upcoming nights and who in your crew is open. Spot a free one, lock the send.
         </p>
+        <div className="mb-6">
+          {googleConnected ? (
+            <span className="font-mono text-[10px] text-mint flex items-center gap-1.5">
+              <Icon name="check-circle" size={12} /> Synced with your Google Calendar
+            </span>
+          ) : (
+            <button onClick={() => navigate('/profile')} className="font-mono text-[10px] text-ice underline">
+              Connect Google Calendar for real availability →
+            </button>
+          )}
+        </div>
 
         {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
 

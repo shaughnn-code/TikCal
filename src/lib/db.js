@@ -102,6 +102,57 @@ export async function getInboxToken(userId) {
   return data?.token || null
 }
 
+// The current user's .ics feed token (creates one on first read).
+export async function getFeedToken(userId) {
+  let { data } = await supabase.from('calendar_feeds').select('token').eq('user_id', userId).maybeSingle()
+  if (!data) {
+    const ins = await supabase.from('calendar_feeds').insert({ user_id: userId }).select('token').single()
+    data = ins.data
+  }
+  return data?.token || null
+}
+
+// Rotate the feed token (invalidates any previously shared subscribe URL).
+export async function rotateFeedToken(userId) {
+  const token = crypto.randomUUID()
+  const { error } = await supabase.from('calendar_feeds').upsert({ user_id: userId, token }, { onConflict: 'user_id' })
+  if (error) throw error
+  return token
+}
+
+// Build the subscribe URLs for a feed token. `webcal:` prompts the OS calendar
+// to subscribe; `https:` is the raw feed (and a Google "add by URL" target).
+export function feedUrls(token) {
+  const base = import.meta.env.VITE_SUPABASE_URL || 'https://pirlflebmiylgusmqhhk.supabase.co'
+  const https = `${base}/functions/v1/ics?token=${token}`
+  return { https, webcal: https.replace(/^https?:/, 'webcal:') }
+}
+
+// Kick off Google Calendar OAuth: returns the consent URL to redirect to.
+export async function startGoogleConnect() {
+  const { data, error } = await supabase.functions.invoke('google-oauth-start')
+  if (error) throw error
+  if (data?.error) throw new Error(data.error)
+  return data.url
+}
+
+// Read the user's Google busy blocks for a window (empty if not connected).
+export async function getGoogleBusy(timeMin, timeMax) {
+  try {
+    const { data, error } = await supabase.functions.invoke('google-freebusy', { body: { timeMin, timeMax } })
+    if (error || !data) return { connected: false, busy: [] }
+    return data
+  } catch {
+    return { connected: false, busy: [] }
+  }
+}
+
+// Forget the Google connection (clears tokens + the connected indicator).
+export async function disconnectGoogle(userId) {
+  await supabase.from('calendar_connections').delete().eq('user_id', userId)
+  await supabase.from('profiles').update({ google_calendar_email: null }).eq('id', userId)
+}
+
 // Crews the current user belongs to.
 export async function fetchMyCrews() {
   const { data, error } = await supabase

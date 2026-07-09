@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
 import { fetchEvent, setRsvp, clearRsvp } from '../lib/db.js'
 import { RSVP_OPTIONS, rsvpByValue, withAlpha } from '../lib/constants.js'
+import { googleCalendarUrl, outlookCalendarUrl, downloadICS } from '../lib/calendar.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 
@@ -206,6 +207,39 @@ export default function EventDetail() {
               <AttendeeRow label="OUT" opt={rsvpByValue('out')} people={groups.out} />
             </div>
           )}
+        </HudBox>
+
+        {/* ── Add to your own calendar ────────────────────────── */}
+        <HudBox className="p-5 mt-5">
+          <SecLabel className="mb-3">▸ Add to your calendar</SecLabel>
+          <div className="grid grid-cols-3 gap-2">
+            <a
+              href={googleCalendarUrl(event)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-white/10 hover:border-white/25 text-slate-300 hover:text-white px-3 py-3 rounded font-mono font-bold text-xs tracking-[0.06em] uppercase transition-all inline-flex items-center justify-center gap-1.5"
+            >
+              <Icon name="google-logo" size={15} /> Google
+            </a>
+            <a
+              href={outlookCalendarUrl(event)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-white/10 hover:border-white/25 text-slate-300 hover:text-white px-3 py-3 rounded font-mono font-bold text-xs tracking-[0.06em] uppercase transition-all inline-flex items-center justify-center gap-1.5"
+            >
+              <Icon name="microsoft-outlook-logo" size={15} /> Outlook
+            </a>
+            <Btn variant="ghost" onClick={() => downloadICS(event)} cls="!w-full !px-3">
+              <Icon name="apple-logo" size={15} /> .ics
+            </Btn>
+          </div>
+          <p className="font-mono text-[10px] text-slate-600 mt-2">
+            Want every show to sync automatically? Subscribe your whole TikCal feed from{' '}
+            <button onClick={() => navigate('/profile')} className="text-ice underline">
+              your profile
+            </button>
+            .
+          </p>
         </HudBox>
 
         {isOwner && (
