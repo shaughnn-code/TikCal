@@ -85,7 +85,11 @@ create policy "overlap_participants realtime select" on public.overlap_participa
 -- ── Privilege grants (tables may not be auto-exposed to the Data API) ─────────
 grant select, insert, update, delete on public.overlap_sessions to authenticated;
 grant select on public.overlap_participants to anon, authenticated;
--- deliberately NO insert/update/delete grant on participants: writes go via RPC.
+-- No insert/update/delete grant here on purpose: writes go through the RPCs.
+-- NOTE: Supabase's default privileges may still hand anon/authenticated DML on
+-- new public tables, so the grant alone is not the control. What actually
+-- blocks direct writes is RLS: this table has no INSERT/UPDATE/DELETE policy,
+-- so every direct write fails. Do not "fix" that by adding one.
 
 -- ── RPCs (SECURITY DEFINER; validate the capability in-body) ─────────────────
 

@@ -1,0 +1,4 @@
+-- Placeholder for a schema change applied via the Supabase dashboard
+-- before this repo tracked migrations. Already recorded as applied in the
+-- remote migration history; this file exists only so the CLI can reconcile
+-- local files against remote versions. Intentionally empty -- never re-run.
