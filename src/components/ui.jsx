@@ -30,8 +30,8 @@ export const HudBox = ({ children, className = '', tone = 'ice', hero = false, .
 }
 
 // mono section label, e.g. "▸ Upcoming"
-export const SecLabel = ({ children, className = '' }) => (
-  <span className={`block font-mono text-[11px] tracking-[0.14em] uppercase text-slate-400 ${className}`}>
+export const SecLabel = ({ children, className = '', ...rest }) => (
+  <span className={`block font-mono text-[11px] tracking-[0.14em] uppercase text-slate-400 ${className}`} {...rest}>
     {children}
   </span>
 )

@@ -11,6 +11,7 @@ import ResetPassword from './pages/ResetPassword.jsx'
 import Setup from './pages/Setup.jsx'
 import Welcome from './pages/Welcome.jsx'
 import Dashboard from './pages/Dashboard.jsx'
+import Plan from './pages/Plan.jsx'
 import EventDetail from './pages/EventDetail.jsx'
 import AddEvent from './pages/AddEvent.jsx'
 import Profile from './pages/Profile.jsx'
@@ -50,6 +51,7 @@ export default function App() {
       {/* Protected (shared Nav) */}
       <Route element={<ProtectedRoute />}>
         <Route path="/calendar" element={<Dashboard />} />
+        <Route path="/plan" element={<Plan />} />
         <Route path="/calendar/add" element={<AddEvent />} />
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/profile" element={<Profile />} />

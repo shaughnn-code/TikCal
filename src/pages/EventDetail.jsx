@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
-import { fetchEvent } from '../lib/db.js'
+import { fetchEvent, setRsvp, clearRsvp } from '../lib/db.js'
+import { RSVP_OPTIONS, rsvpByValue, withAlpha } from '../lib/constants.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 
@@ -14,6 +15,18 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [rsvping, setRsvping] = useState(false)
+
+  const load = useCallback(
+    (spin = true) => {
+      if (spin) setLoading(true)
+      return fetchEvent(id)
+        .then(setEvent)
+        .catch((e) => setErr(e.message))
+        .finally(() => setLoading(false))
+    },
+    [id],
+  )
 
   useEffect(() => {
     let active = true
@@ -49,6 +62,24 @@ export default function EventDetail() {
   const diff = Math.ceil((new Date(event.event_date + 'T12:00:00') - new Date()) / 86400000)
   const cd = diff < 0 ? 'PAST' : diff === 0 ? 'TONIGHT' : `IN ${diff} DAY${diff === 1 ? '' : 'S'}`
 
+  const rsvps = event.rsvps || []
+  const myStatus = rsvps.find((r) => r.user_id === user.id)?.status || null
+  const groups = {
+    in: rsvps.filter((r) => r.status === 'in'),
+    maybe: rsvps.filter((r) => r.status === 'maybe'),
+    out: rsvps.filter((r) => r.status === 'out'),
+  }
+
+  const answer = async (value) => {
+    setRsvping(true)
+    setErr('')
+    // Tapping your current answer again clears it.
+    const { error } = myStatus === value ? await clearRsvp(event.id, user.id) : await setRsvp(event.id, user.id, value)
+    if (error) setErr(error.message)
+    await load(false)
+    setRsvping(false)
+  }
+
   const del = async () => {
     if (!confirm('Remove this show?')) return
     setDeleting(true)
@@ -63,6 +94,27 @@ export default function EventDetail() {
       <div className="font-display font-bold text-sm text-[#e8f4f8] flex items-center gap-1.5">{children}</div>
     </div>
   )
+
+  const AttendeeRow = ({ label, opt, people }) =>
+    people.length === 0 ? null : (
+      <div>
+        <SecLabel className="mb-2" style={{ color: opt.color }}>
+          {label} · {people.length}
+        </SecLabel>
+        <div className="flex flex-wrap gap-2">
+          {people.map((r) => (
+            <span
+              key={r.user_id}
+              className="font-mono text-[10px] text-slate-200 rounded px-2.5 py-1 flex items-center gap-1.5 border"
+              style={{ borderColor: withAlpha(opt.color, 0.35), backgroundColor: withAlpha(opt.color, 0.08) }}
+            >
+              {r.profile?.totem && <Totem icon={r.profile.totem} size={14} />}
+              {r.user_id === user.id ? 'You' : r.profile?.name || 'Someone'}
+            </span>
+          ))}
+        </div>
+      </div>
+    )
 
   return (
     <>
@@ -105,11 +157,53 @@ export default function EventDetail() {
                   <span className="font-mono text-[9px] text-mint border border-mint/40 rounded px-2.5 py-1">FRIENDS</span>
                 )}
                 {event.crews?.map((c) => (
-                  <span key={c.crew_id} className="font-mono text-[9px] text-ice border border-ice/40 rounded px-2.5 py-1">
-                    {(c.crews?.name || 'CREW').toUpperCase()}
+                  <span
+                    key={c.crew_id}
+                    className="font-mono text-[9px] rounded px-2.5 py-1 border flex items-center gap-1.5"
+                    style={{ color: c.color || '#4cc9f0', borderColor: withAlpha(c.color || '#4cc9f0', 0.4) }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color || '#4cc9f0' }} />
+                    {(c.name || 'CREW').toUpperCase()}
                   </span>
                 ))}
               </div>
+            </div>
+          )}
+        </HudBox>
+
+        {/* ── You in? ─────────────────────────────────────────── */}
+        <HudBox tone="mint" className="p-5 mt-5">
+          <SecLabel className="mb-3">▸ You in?</SecLabel>
+          <div className="grid grid-cols-3 gap-2">
+            {RSVP_OPTIONS.map((o) => {
+              const active = myStatus === o.value
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  disabled={rsvping}
+                  onClick={() => answer(o.value)}
+                  className={`flex flex-col items-center justify-center gap-1 rounded border py-3 transition-all ${
+                    rsvping ? 'opacity-60' : ''
+                  }`}
+                  style={
+                    active
+                      ? { borderColor: o.color, backgroundColor: withAlpha(o.color, 0.14), color: o.color }
+                      : { borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }
+                  }
+                >
+                  <Icon name={o.icon} size={20} />
+                  <span className="font-mono text-[10px] uppercase tracking-wide">{o.label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          {(groups.in.length > 0 || groups.maybe.length > 0 || groups.out.length > 0) && (
+            <div className="mt-5 space-y-4 border-t border-white/[0.06] pt-4">
+              <AttendeeRow label="IN" opt={rsvpByValue('in')} people={groups.in} />
+              <AttendeeRow label="MAYBE" opt={rsvpByValue('maybe')} people={groups.maybe} />
+              <AttendeeRow label="OUT" opt={rsvpByValue('out')} people={groups.out} />
             </div>
           )}
         </HudBox>

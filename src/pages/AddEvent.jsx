@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
 import { fetchMyCrews } from '../lib/db.js'
@@ -11,9 +11,12 @@ import { VenuePicker } from '../components/VenuePicker.jsx'
 export default function AddEvent() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const fileRef = useRef(null)
 
-  const [form, setForm] = useState({ title: '', artist: '', event_date: '', venue: '', notes: '' })
+  // The Plan page links here with ?date=YYYY-MM-DD to seed an open night.
+  const seedDate = params.get('date') || ''
+  const [form, setForm] = useState({ title: '', artist: '', event_date: seedDate, venue: '', notes: '' })
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [shareFriends, setShareFriends] = useState(false)
@@ -153,7 +156,18 @@ export default function AddEvent() {
             <div className="space-y-2">
               {audienceBtn(shareFriends, () => setShareFriends((s) => !s), 'All my friends', shareFriends ? '✓ SHARED' : 'PRIVATE')}
               {crews.map((c) =>
-                audienceBtn(selCrews.has(c.id), () => toggleCrew(c.id), `👯 ${c.name}`, selCrews.has(c.id) ? '✓ SHARED' : 'ADD'),
+                audienceBtn(
+                  selCrews.has(c.id),
+                  () => toggleCrew(c.id),
+                  <span className="flex items-center gap-2">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: c.color || '#4cc9f0', boxShadow: `0 0 7px ${c.color || '#4cc9f0'}` }}
+                    />
+                    {c.name}
+                  </span>,
+                  selCrews.has(c.id) ? '✓ SHARED' : 'ADD',
+                ),
               )}
             </div>
             <p className="font-mono text-[10px] text-slate-600 mt-2">Leave everything off to keep this show private to you.</p>

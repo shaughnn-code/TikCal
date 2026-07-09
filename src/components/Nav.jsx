@@ -31,6 +31,7 @@ export const Nav = () => {
         </button>
         <div className="flex items-center gap-5">
           {link('/calendar', 'calendar-dots', 'Cal')}
+          {link('/plan', 'magic-wand', 'Plan')}
           {link('/friends', 'users-three', 'Crew')}
           <NavLink to="/profile">
             {({ isActive }) => (

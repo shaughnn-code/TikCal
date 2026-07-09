@@ -69,8 +69,15 @@ export async function loadCrewInvites(myId) {
   return rows.map((r) => ({ ...r, inviter: profs[r.inviter_id] || null }))
 }
 
-export async function createCrew(name, myId) {
-  return supabase.from('crews').insert({ name: name.trim(), owner_id: myId }).select().single()
+export async function createCrew(name, myId, color) {
+  const row = { name: name.trim(), owner_id: myId }
+  if (color) row.color = color
+  return supabase.from('crews').insert(row).select().single()
+}
+
+// Recolor a crew (owner only — enforced by RLS on the crews table).
+export async function updateCrewColor(crewId, color) {
+  return supabase.from('crews').update({ color }).eq('id', crewId)
 }
 
 export async function inviteToCrew(crewId, inviteeId, myId) {

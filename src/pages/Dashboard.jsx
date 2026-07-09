@@ -39,6 +39,14 @@ export default function Dashboard() {
     ? Math.ceil((new Date(next.event_date + 'T12:00:00') - new Date()) / 86400000)
     : null
 
+  // Crew color legend, derived from the crews tagged on visible events.
+  const crewLegend = Object.values(
+    events.reduce((acc, e) => {
+      for (const c of e.crews || []) if (c.crew_id && !acc[c.crew_id]) acc[c.crew_id] = c
+      return acc
+    }, {}),
+  )
+
   if (loading) return <Spinner />
 
   const Empty = () => (
@@ -85,6 +93,22 @@ export default function Dashboard() {
             </HudBox>
           ))}
         </div>
+
+        {/* crew color legend */}
+        {crewLegend.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-6">
+            <SecLabel>Crews</SecLabel>
+            {crewLegend.map((c) => (
+              <span key={c.crew_id} className="flex items-center gap-1.5 font-mono text-[10px] text-slate-400">
+                <span
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{ backgroundColor: c.color || '#4cc9f0', boxShadow: `0 0 6px ${c.color || '#4cc9f0'}` }}
+                />
+                {c.name || 'Crew'}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* tab toggle */}
         <div className="flex gap-1 mb-6 bg-white/[0.04] rounded p-1 w-fit">

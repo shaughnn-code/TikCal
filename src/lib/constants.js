@@ -84,6 +84,49 @@ export const getEventStyle = (artist) => {
   return EVENT_STYLES[hash % EVENT_STYLES.length]
 }
 
+// ─── CREW COLORS ────────────────────────────────────────────────────────────
+// Neon accents a crew owner can pick. Events shared into a crew borrow its
+// color on cards + the calendar, so you can read at a glance who you're out
+// with. Stored on crews.color as the hex string.
+export const CREW_COLORS = [
+  { name: 'Ice', hex: '#4cc9f0' },
+  { name: 'Mint', hex: '#6EE7B7' },
+  { name: 'Periwinkle', hex: '#6aa8ff' },
+  { name: 'Violet', hex: '#c08bff' },
+  { name: 'Amber', hex: '#ffb454' },
+  { name: 'Hot Pink', hex: '#ff6ec7' },
+  { name: 'Lime', hex: '#a3e635' },
+  { name: 'Coral', hex: '#ff7a6b' },
+  { name: 'Teal', hex: '#2dd4bf' },
+  { name: 'Gold', hex: '#ffd94c' },
+]
+
+export const DEFAULT_CREW_COLOR = CREW_COLORS[0].hex
+
+// Translucent fill matching a solid crew hex (for chip backgrounds).
+export const withAlpha = (hex, alpha = 0.14) => {
+  const a = Math.round(alpha * 255).toString(16).padStart(2, '0')
+  return `${hex}${a}`
+}
+
+// Accent for an event: a shared crew's color wins over the artist-hash color,
+// so crew events read as "that group." Returns { color, bg }.
+export const getEventAccent = (event) => {
+  const crewHex = event?.crews?.map((c) => c.color).find(Boolean)
+  if (crewHex) return { color: crewHex, bg: withAlpha(crewHex) }
+  return getEventStyle(event?.artist)
+}
+
+// ─── RSVP ───────────────────────────────────────────────────────────────────
+// The three ways to answer "you in?" — value stored on event_rsvps.status.
+export const RSVP_OPTIONS = [
+  { value: 'in', label: "I'm in", short: 'IN', color: '#6EE7B7', icon: 'check-circle' },
+  { value: 'maybe', label: 'Maybe', short: 'MAYBE', color: '#ffb454', icon: 'question' },
+  { value: 'out', label: "I'm out", short: 'OUT', color: '#ff7a6b', icon: 'x-circle' },
+]
+
+export const rsvpByValue = (v) => RSVP_OPTIONS.find((o) => o.value === v) || null
+
 export const getInitials = (artist) => {
   if (!artist || !artist.trim()) return '?'
   const words = artist.trim().split(/\s+/)
