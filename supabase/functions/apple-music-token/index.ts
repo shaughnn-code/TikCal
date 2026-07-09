@@ -11,7 +11,9 @@
 // NOTE: This is the server half. The frontend MusicKit JS flow + library read
 // are documented in supabase/functions/README.md and gated on this being
 // configured. Untested end-to-end pending an Apple Developer account.
-import { create, getNumericDate } from 'npm:djwt@3'
+// djwt is a Deno-native module on JSR, not an npm package — `npm:djwt@3` fails
+// to bundle ("Could not find npm package 'djwt'").
+import { create, getNumericDate } from 'jsr:@zaubrik/djwt@^3.0.2'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const cors = {
