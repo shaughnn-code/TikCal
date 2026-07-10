@@ -5,7 +5,8 @@ import { fetchVisibleEvents } from '../lib/db.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { EventCard } from '../components/EventCard.jsx'
-import { CalGrid } from '../components/CalGrid.jsx'
+import CalendarZoom from '../components/calendar/CalendarZoom.jsx'
+import SiteFooter from '../components/SiteFooter.jsx'
 
 export default function Dashboard() {
   const { user, profile } = useAuth()
@@ -14,7 +15,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
   const [selDate, setSelDate] = useState(null)
-  const [tab, setTab] = useState('upcoming')
+  const [tab, setTab] = useState('calendar')
 
   useEffect(() => {
     let active = true
@@ -59,7 +60,7 @@ export default function Dashboard() {
   return (
     <>
       <GridBg />
-      <Wrap>
+      <Wrap wide>
         <div className="flex items-start justify-between mb-6">
           <div>
             <Kicker className="mb-1">// SESSION ACTIVE</Kicker>
@@ -127,7 +128,12 @@ export default function Dashboard() {
 
         {tab === 'calendar' ? (
           <div>
-            <CalGrid events={events} selectedDate={selDate} onDayClick={(d) => setSelDate(selDate === d ? null : d)} />
+            <CalendarZoom
+              events={events}
+              selectedDate={selDate}
+              onSelectDate={(d) => setSelDate(selDate === d ? null : d)}
+              onPickEvent={(ev) => navigate(`/events/${ev.id}`)}
+            />
             {selDate && selEvs.length > 0 && (
               <div className="mt-6">
                 <SecLabel className="mb-3">
@@ -181,6 +187,7 @@ export default function Dashboard() {
             {events.length === 0 && <Empty />}
           </div>
         )}
+        <SiteFooter />
       </Wrap>
     </>
   )

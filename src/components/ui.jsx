@@ -107,8 +107,10 @@ export const Btn = ({ children, onClick, type = 'button', variant = 'mint', disa
   )
 }
 
-export const Wrap = ({ children, cls = '' }) => (
-  <div className={`relative z-10 max-w-2xl mx-auto px-4 py-8 ${cls}`}>{children}</div>
+// `wide` opts into the calendar-zoom layout, which needs room for the 200px
+// rail beside a 7-column grid. Everything else stays on the mobile-first width.
+export const Wrap = ({ children, cls = '', wide = false }) => (
+  <div className={`relative z-10 ${wide ? 'max-w-6xl' : 'max-w-2xl'} mx-auto px-4 py-8 ${cls}`}>{children}</div>
 )
 
 export const Spinner = () => (
