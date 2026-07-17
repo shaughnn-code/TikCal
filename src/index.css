@@ -9,16 +9,16 @@
     box-sizing: border-box;
   }
   html {
-    background-color: #040608;
+    background-color: #000000;
     /* Global scale-up for readability (lifts all rem-based text + spacing ~13%). */
     font-size: 112.5%;
   }
   body {
     margin: 0;
     min-height: 100vh;
-    background-color: #0a0e12;
+    background-color: #000000;
     color: #e8f4f8;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
   ::-webkit-scrollbar {
@@ -45,30 +45,32 @@
 @layer components {
   /* ── 3D extruded wordmark ─────────────────────────────────── */
   .logo-3d {
-    font-family: 'Saira', system-ui, sans-serif;
+    font-family: 'Barlow', system-ui, sans-serif;
     font-weight: 800;
+    font-style: italic;
     letter-spacing: -0.02em;
-    color: #eaf6fa;
+    color: #fff8f5;
     line-height: 1;
     text-shadow:
-      1px 1px 0 #1c4f63,
-      2px 2px 0 #163f50,
-      3px 3px 0 #11323f,
-      4px 4px 0 #0c2530,
-      5px 6px 13px rgba(0, 0, 0, 0.6),
-      0 0 26px rgba(76, 201, 240, 0.45),
-      0 0 46px rgba(110, 231, 183, 0.16);
+      1px 1px 0 #7a2800,
+      2px 2px 0 #5c1c00,
+      3px 3px 0 #3d1000,
+      4px 4px 0 #260800,
+      5px 6px 13px rgba(0, 0, 0, 0.7),
+      0 0 26px rgba(255, 107, 43, 0.5),
+      0 0 50px rgba(255, 107, 43, 0.18);
   }
   .logo-3d-sm {
-    font-family: 'Saira', system-ui, sans-serif;
+    font-family: 'Barlow', system-ui, sans-serif;
     font-weight: 800;
+    font-style: italic;
     letter-spacing: -0.02em;
-    color: #eaf6fa;
+    color: #fff8f5;
     line-height: 1;
     text-shadow:
-      1px 1px 0 #163f50,
-      2px 2px 0 #0c2530,
-      0 0 14px rgba(76, 201, 240, 0.4);
+      1px 1px 0 #5c1c00,
+      2px 2px 0 #260800,
+      0 0 14px rgba(255, 107, 43, 0.45);
   }
 
   /* ── Tron grid-to-horizon background ──────────────────────── */
