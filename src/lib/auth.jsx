@@ -3,6 +3,10 @@ import { supabase } from '../supabaseClient.js'
 
 const AuthCtx = createContext(null)
 
+// window.location.origin resolves to capacitor://localhost inside the native
+// app shell, so auth emails need an explicit real-site origin there.
+const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL || window.location.origin
+
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -70,13 +74,13 @@ export const AuthProvider = ({ children }) => {
   // Send a password-reset email (link lands on /reset to set a new password).
   const resetPassword = (email) =>
     supabase.auth
-      .resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset` })
+      .resetPasswordForEmail(email, { redirectTo: `${PUBLIC_URL}/reset` })
       .then(({ error }) => (error ? { error: error.message } : { ok: true }))
 
   // Passwordless: email a one-time sign-in link (lands signed-in on /calendar).
   const sendMagicLink = (email) =>
     supabase.auth
-      .signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/calendar`, shouldCreateUser: false } })
+      .signInWithOtp({ email, options: { emailRedirectTo: `${PUBLIC_URL}/calendar`, shouldCreateUser: false } })
       .then(({ error }) => (error ? { error: error.message } : { ok: true }))
 
   // Set a new password (used on /reset, where a recovery session is active).
