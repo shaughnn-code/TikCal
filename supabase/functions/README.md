@@ -105,6 +105,27 @@ supabase secrets set APPLE_MUSIC_PRIVATE_KEY="$(cat AuthKey_XXXX.p8)"
 by the existing **Smart Add** — paste an event link or screenshot on the Add page.
 (An unofficial RA GraphQL endpoint exists but is against their terms; not used.)
 
+## Overlap recommendations (spec §6)
+
+`overlap-recommendations` powers the event picks in the Overlap window detail sheet.
+Guest-safe: it authorizes on the session UUID (the capability) and reads
+cross-participant taste + saved events with the service role, so no `verify_jwt`
+change is needed. Ranks two sources against the group's Spotify taste:
+
+- **DICE discovery** — an **unofficial** DICE feed. Off by default and isolated
+  behind config; it fails soft (`dice: []`) until enabled. ⚠️ This is the one place
+  that departs from the ToS-safe stance above — enabled on explicit request.
+- **Crew's saved shows** — events any participant already Smart-Added on that date.
+  Works with no extra config.
+
+```bash
+supabase functions deploy overlap-recommendations
+# Optional — lights up the DICE section (endpoint/headers are best-effort, may
+# need adjusting to whatever DICE contract you have access to):
+supabase secrets set DICE_API_BASE=https://api.dice.fm
+supabase secrets set DICE_API_KEY=xxxx   # only if your endpoint requires one
+```
+
 **Apple Music note:** `apple-music-token` mints the MusicKit developer token
 (server half, standard ES256 — not yet verified end-to-end). The browser half
 (load MusicKit JS, `music.authorize()`, read `/v1/me/library/artists`, then write
@@ -120,4 +141,5 @@ Apple Developer account.
 | Google Calendar (free/busy in Plan) | Pages UI + 3 Google fns | `0002` + deploy fns + Google secrets |
 | Discover / "For You" (Spotify + Ticketmaster) | Pages UI + fns | `0003` + deploy fns + Spotify/TM keys |
 | DICE / Resident Advisor | Smart Add (live) | nothing (paste link/screenshot) |
+| Overlap event picks (DICE + saved × Spotify) | Overlap sheet + `overlap-recommendations` fn | deploy fn; DICE section needs `DICE_API_BASE` secret |
 | Apple Music | `apple-music-token` fn + TODO frontend | Apple Developer account |
