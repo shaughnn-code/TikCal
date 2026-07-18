@@ -1,9 +1,13 @@
 // Overlap event recommendations for a single tapped window (spec §6).
 //
-// Two sources, ranked against the group's Spotify taste:
-//   1. DICE feed (unofficial — see caveat below) — open discovery for the night.
-//   2. The group's own saved TikCal events on that date — shows a participant
-//      already Smart-Added, floated up by taste.
+// Two sources, ranked against the group's Spotify taste (their FOLLOWED + TOP
+// artists, already synced into music_artists by spotify-sync):
+//   1. "For you" — Ticketmaster's music catalog for that night, floated up by
+//      the group's Spotify taste. (Spotify has no public events/concerts API, so
+//      Ticketmaster is the queryable catalog — this is Spotify's own recommended
+//      merge pattern.)
+//   2. "Your crew saved" — the group's own saved TikCal events on that date,
+//      shows a participant already Smart-Added, ranked by the same taste.
 //
 // Guest-capable: the session UUID in the URL is the capability, exactly like
 // get_session / session_event_busy. We therefore DON'T gate on auth.getUser()
@@ -13,13 +17,12 @@
 // contract. Only in-window event details escape, and only for THIS session's
 // participants.
 //
-// ⚠️ DICE has no official public API. TikCal's README documents that DICE/RA are
-// normally handled ToS-safely via Smart Add. This function calls an UNOFFICIAL
-// DICE endpoint on the owner's explicit instruction. It's isolated behind env
-// config and fails soft (dice: []), so it can be pulled or repointed without
-// touching the client: set DICE_API_BASE (+ optional DICE_API_KEY) to enable.
+// The "For you" section stays empty (configured:false) until TICKETMASTER_API_KEY
+// is set — a free key from developer.ticketmaster.com. Same key the existing
+// ticketmaster-events function uses; we call the Discovery API directly here so
+// the request works for guests (that function gates on a signed-in user).
 //
-// Secret (optional): DICE_API_KEY, DICE_API_BASE (default https://api.dice.fm)
+// Secret: TICKETMASTER_API_KEY (free, developer.ticketmaster.com)
 // Deploy: supabase functions deploy overlap-recommendations
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -47,35 +50,8 @@ function tasteMatch(artistNorms: string[], taste: Taste) {
   return best
 }
 
-// ── DICE (unofficial) ────────────────────────────────────────────────────────
-// Fetch a page of upcoming events for the city, then keep those on `date`. DICE
-// event objects vary; we map defensively and skip anything unrecognisable.
-async function fetchDice(date: string, city: string) {
-  const base = Deno.env.get('DICE_API_BASE')
-  if (!base) return { configured: false, events: [] as DiceEvent[] }
-  const key = Deno.env.get('DICE_API_KEY')
-
-  const url = `${base.replace(/\/$/, '')}/v2/events?` +
-    new URLSearchParams({ 'filter[cities][]': city, 'page[size]': '100' }).toString()
-  try {
-    const res = await fetch(url, {
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; TikCalBot/1.0)',
-        ...(key ? { 'x-api-key': key } : {}),
-      },
-    })
-    if (!res.ok) return { configured: true, events: [] as DiceEvent[] }
-    const data = await res.json()
-    const raw: unknown[] = data?.data || data?.events || data?._embedded?.events || []
-    const events = raw.map(mapDice).filter((e): e is DiceEvent => !!e && e.date === date)
-    return { configured: true, events }
-  } catch {
-    return { configured: true, events: [] as DiceEvent[] }
-  }
-}
-
-interface DiceEvent {
+// ── Ticketmaster catalog ─────────────────────────────────────────────────────
+interface CatalogEvent {
   id: string
   title: string
   attractions: string[]
@@ -86,27 +62,57 @@ interface DiceEvent {
   image: string
 }
 
-// deno-lint-ignore no-explicit-any
-function mapDice(e: any): DiceEvent | null {
-  if (!e || typeof e !== 'object') return null
-  const iso: string = e.date || e.dates?.event_start_date || e.event_start_date || ''
-  const date = iso.slice(0, 10)
-  if (!date) return null
-  const timeMatch = /T(\d{2}:\d{2})/.exec(iso)
-  const venueObj = Array.isArray(e.venues) ? e.venues[0] : e.venue
-  const lineup: string[] =
-    e.summary_lineup?.top_artists?.map((a: { name: string }) => a.name) ||
-    e.lineup?.map((a: { name?: string } | string) => (typeof a === 'string' ? a : a.name)) ||
-    (e.artist ? String(e.artist).split(',') : [])
-  return {
-    id: String(e.id ?? e.perm_name ?? crypto.randomUUID()),
-    title: e.name || e.title || 'Untitled',
-    attractions: lineup.filter(Boolean),
-    date,
-    time: timeMatch?.[1] || '',
-    venue: venueObj?.name || venueObj || '',
-    url: e.social_links?.event_url || e.url || e.share_url || '',
-    image: e.event_images?.landscape || e.images?.landscape || e.image || '',
+const NYC_DMA = '345' // New York DMA (covers NYC + boroughs), same as ticketmaster-events.
+
+// The day after `date` as YYYY-MM-DD, so the UTC query window covers an NYC
+// evening/night whose late shows spill past midnight UTC.
+const nextDay = (date: string) => {
+  const d = new Date(date + 'T12:00:00Z')
+  d.setUTCDate(d.getUTCDate() + 1)
+  return d.toISOString().slice(0, 10)
+}
+
+// Query Ticketmaster's Discovery API for that night's NYC music events. Off
+// (configured:false) until TICKETMASTER_API_KEY is set. We filter on the event's
+// local date so tz skew in the UTC window can't leak neighbouring days.
+async function fetchTicketmaster(date: string) {
+  const key = Deno.env.get('TICKETMASTER_API_KEY')
+  if (!key) return { configured: false, events: [] as CatalogEvent[] }
+
+  const p = new URLSearchParams({
+    apikey: key,
+    dmaId: NYC_DMA,
+    classificationName: 'music',
+    sort: 'date,asc',
+    size: '100',
+    startDateTime: `${date}T00:00:00Z`,
+    endDateTime: `${nextDay(date)}T08:00:00Z`,
+  })
+  try {
+    const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${p.toString()}`)
+    if (!res.ok) return { configured: true, events: [] as CatalogEvent[] }
+    const data = await res.json()
+    // deno-lint-ignore no-explicit-any
+    const raw: any[] = data?._embedded?.events || []
+    const events = raw
+      .map((e): CatalogEvent => {
+        const venue = e._embedded?.venues?.[0]
+        const attractions = (e._embedded?.attractions || []).map((a: { name: string }) => a.name)
+        return {
+          id: String(e.id),
+          title: e.name || 'Untitled',
+          attractions: attractions.filter(Boolean),
+          date: e.dates?.start?.localDate || '',
+          time: e.dates?.start?.localTime?.slice(0, 5) || '',
+          venue: venue?.name || '',
+          url: e.url || '',
+          image: (e.images || []).sort((a: { width: number }, b: { width: number }) => b.width - a.width)[0]?.url || '',
+        }
+      })
+      .filter((e) => e.date === date)
+    return { configured: true, events }
+  } catch {
+    return { configured: true, events: [] as CatalogEvent[] }
   }
 }
 
@@ -156,14 +162,12 @@ Deno.serve(async (req) => {
     }
   }
 
-  const city = session.city || 'New York'
-
-  // ── Source 1: DICE discovery, taste-ranked ─────────────────────────────────
-  const dice = await fetchDice(date, city)
-  const diceCards = dice.events
+  // ── Source 1: "For you" — Ticketmaster catalog, Spotify-taste-ranked ────────
+  const catalog = await fetchTicketmaster(date)
+  const forYouCards = catalog.events
     .map((e) => {
       const m = tasteMatch(e.attractions.map(norm), taste)
-      return { ...e, source: 'dice', matched: m?.artist || null, matchedWho: m?.who || [], weight: m?.weight || 0 }
+      return { ...e, source: 'forYou', matched: m?.artist || null, matchedWho: m?.who || [], weight: m?.weight || 0 }
     })
     .sort((a, b) => b.weight - a.weight || (a.time < b.time ? -1 : 1))
 
@@ -209,9 +213,9 @@ Deno.serve(async (req) => {
   }
 
   return json({
-    configured: dice.configured,
+    configured: catalog.configured,
     tasteCount: taste.size,
-    dice: diceCards,
+    forYou: forYouCards,
     saved: savedCards,
   })
 })

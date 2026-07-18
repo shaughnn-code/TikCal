@@ -110,21 +110,29 @@ by the existing **Smart Add** — paste an event link or screenshot on the Add p
 `overlap-recommendations` powers the event picks in the Overlap window detail sheet.
 Guest-safe: it authorizes on the session UUID (the capability) and reads
 cross-participant taste + saved events with the service role, so no `verify_jwt`
-change is needed. Ranks two sources against the group's Spotify taste:
+change is needed. Ranks two sources against the group's Spotify taste — their
+**followed + top artists**, synced into `music_artists` by `spotify-sync`:
 
-- **DICE discovery** — an **unofficial** DICE feed. Off by default and isolated
-  behind config; it fails soft (`dice: []`) until enabled. ⚠️ This is the one place
-  that departs from the ToS-safe stance above — enabled on explicit request.
-- **Crew's saved shows** — events any participant already Smart-Added on that date.
+- **For you** — Ticketmaster's music catalog for that night, floated up by the
+  group's Spotify taste. Spotify has no public events/concerts API, so
+  Ticketmaster is the queryable catalog (Spotify's own recommended merge pattern).
+  Off (`forYou: []`) until `TICKETMASTER_API_KEY` is set — the same free key the
+  `ticketmaster-events` function uses. We call the Discovery API directly here so
+  the request works for guests (that function gates on a signed-in user).
+- **Your crew saved** — events any participant already Smart-Added on that date.
   Works with no extra config.
 
 ```bash
 supabase functions deploy overlap-recommendations
-# Optional — lights up the DICE section (endpoint/headers are best-effort, may
-# need adjusting to whatever DICE contract you have access to):
-supabase secrets set DICE_API_BASE=https://api.dice.fm
-supabase secrets set DICE_API_KEY=xxxx   # only if your endpoint requires one
+# Lights up "For you" — free key from developer.ticketmaster.com (shared with the
+# Discover tab, so setting it once enables both):
+supabase secrets set TICKETMASTER_API_KEY=xxxx
 ```
+
+> DICE / Resident Advisor were evaluated as the catalog and rejected: DICE exposes
+> data only through a partner API that hard-gates on an issued key (401 without
+> one), and RA's only endpoint is the unofficial GraphQL one their terms forbid.
+> Ticketmaster is the one catalog with a legitimate, free, self-serve API.
 
 **Apple Music note:** `apple-music-token` mints the MusicKit developer token
 (server half, standard ES256 — not yet verified end-to-end). The browser half
@@ -141,5 +149,5 @@ Apple Developer account.
 | Google Calendar (free/busy in Plan) | Pages UI + 3 Google fns | `0002` + deploy fns + Google secrets |
 | Discover / "For You" (Spotify + Ticketmaster) | Pages UI + fns | `0003` + deploy fns + Spotify/TM keys |
 | DICE / Resident Advisor | Smart Add (live) | nothing (paste link/screenshot) |
-| Overlap event picks (DICE + saved × Spotify) | Overlap sheet + `overlap-recommendations` fn | deploy fn; DICE section needs `DICE_API_BASE` secret |
+| Overlap event picks (Ticketmaster + saved × Spotify) | Overlap sheet + `overlap-recommendations` fn | deploy fn; "For you" needs `TICKETMASTER_API_KEY` |
 | Apple Music | `apple-music-token` fn + TODO frontend | Apple Developer account |

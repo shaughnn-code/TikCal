@@ -7,15 +7,15 @@ import { downloadICS } from '../../lib/calendar.js'
 
 // Bottom sheet opened by tapping a cell/window: per-participant status in their
 // assigned color, then event recommendations (spec §6) for open windows — two
-// sources ranked against the group's Spotify taste: DICE discovery + the crew's
-// own saved shows on that night.
+// sources ranked against the group's Spotify taste: a "For you" Ticketmaster
+// catalog + the crew's own saved shows on that night.
 export default function CellDetail({ bucket, session, participants, onClose }) {
   const cell = bucket?.cell || {}
   const showRecs = ['all_free', 'partial', 'shared_event'].includes(cell.state)
   const sessionId = session?.id
   const dateStr = bucket?.dateStr
 
-  const [recs, setRecs] = useState(null) // null = loading, else { configured, dice, saved }
+  const [recs, setRecs] = useState(null) // null = loading, else { configured, forYou, saved }
 
   useEffect(() => {
     if (!bucket || !showRecs || !sessionId || !dateStr) return
@@ -179,14 +179,14 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
             ) : (
               <>
                 <RecSection
-                  icon="fire"
-                  label="On DICE"
+                  icon="heart"
+                  label="For you · from Spotify"
                   tint="text-mint"
-                  items={recs.dice}
+                  items={recs.forYou}
                   empty={
                     recs.configured
-                      ? 'No DICE shows for this night.'
-                      : 'DICE feed isn’t switched on yet.'
+                      ? 'No shows for this night.'
+                      : 'Show discovery isn’t switched on yet.'
                   }
                 />
                 <RecSection
