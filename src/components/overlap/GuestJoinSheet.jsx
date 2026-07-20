@@ -18,7 +18,7 @@ export default function GuestJoinSheet({ sessionName, onJoin, error }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <HudBox hero className="w-full max-w-sm p-6 text-center">
-        <div className="font-mono text-[11px] text-ice uppercase tracking-[0.16em] mb-2">{FEATURE_NAME}</div>
+        <div className="font-mono text-[11px] text-violet uppercase tracking-[0.16em] mb-2">{FEATURE_NAME}</div>
         <div className="font-heading font-bold text-xl text-[#e8f4f8] mb-1">{sessionName || 'Find a night'}</div>
         <div className="font-mono text-[11px] text-slate-500 mb-5">
           Add your name to mark when you're free — no account needed.

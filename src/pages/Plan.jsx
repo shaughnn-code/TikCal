@@ -110,7 +110,7 @@ export default function Plan() {
   const Person = ({ p, dim }) => (
     <span
       className={`font-mono text-[10px] rounded px-2 py-1 flex items-center gap-1.5 border ${
-        dim ? 'text-slate-500 border-white/[0.06]' : 'text-slate-200 border-ice/25 bg-white/[0.03]'
+        dim ? 'text-slate-500 border-white/[0.06]' : 'text-slate-200 border-violet/25 bg-white/[0.03]'
       }`}
     >
       {p.totem ? <Totem icon={p.totem} size={13} /> : <Icon name="user" size={11} />}
@@ -133,7 +133,7 @@ export default function Plan() {
               <Icon name="check-circle" size={12} /> Synced with your Google Calendar
             </span>
           ) : (
-            <button onClick={() => navigate('/profile')} className="font-mono text-[10px] text-ice underline">
+            <button onClick={() => navigate('/profile')} className="font-mono text-[10px] text-violet underline">
               Connect Google Calendar for real availability →
             </button>
           )}
@@ -145,7 +145,7 @@ export default function Plan() {
           <HudBox className="p-4 mb-6">
             <p className="font-mono text-[11px] text-slate-400">
               Add friends to see who's free.{' '}
-              <button onClick={() => navigate('/friends')} className="text-ice underline">
+              <button onClick={() => navigate('/friends')} className="text-violet underline">
                 Find your crew →
               </button>
             </p>
@@ -161,7 +161,7 @@ export default function Plan() {
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
                     <div className="text-center shrink-0 w-12">
-                      <div className="font-mono text-[10px] text-ice tracking-wide">{wd}</div>
+                      <div className="font-mono text-[10px] text-violet tracking-wide">{wd}</div>
                       <div className="font-display font-extrabold text-base text-[#e8f4f8] leading-tight">{md}</div>
                     </div>
                     <div>

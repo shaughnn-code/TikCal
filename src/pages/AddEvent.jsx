@@ -107,7 +107,7 @@ export default function AddEvent() {
       <GridBg lite />
       <Wrap>
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate('/calendar')} className="text-slate-500 hover:text-ice transition-colors">
+          <button onClick={() => navigate('/calendar')} className="text-slate-500 hover:text-violet transition-colors">
             <Icon name="arrow-left" size={20} />
           </button>
           <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8]">Add a Show</h1>
@@ -131,8 +131,8 @@ export default function AddEvent() {
             <SecLabel className="mb-2">Screenshot / Flyer (optional)</SecLabel>
             <div
               onClick={() => fileRef.current?.click()}
-              className={`border border-dashed rounded p-6 text-center cursor-pointer transition-all hover:border-ice/40 ${
-                preview ? 'border-ice/30' : 'border-white/10'
+              className={`border border-dashed rounded p-6 text-center cursor-pointer transition-all hover:border-violet/40 ${
+                preview ? 'border-violet/30' : 'border-white/10'
               }`}
             >
               {preview ? (

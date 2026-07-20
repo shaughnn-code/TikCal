@@ -1,0 +1,19 @@
+{
+  "name": "TikCal — your crew's concert calendar",
+  "short_name": "TikCal",
+  "description": "The disco-floor calendar for your crew's nights out. See who's free, find the shows, plan the night.",
+  "id": "/",
+  "start_url": "/calendar",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05070b",
+  "theme_color": "#05070b",
+  "categories": ["music", "entertainment", "social", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-simple-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-master-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-simple-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-master-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

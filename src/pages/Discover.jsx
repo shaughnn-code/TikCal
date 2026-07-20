@@ -116,7 +116,7 @@ export default function Discover() {
           </Btn>
         )}
         {e.url && (
-          <a href={e.url} target="_blank" rel="noopener noreferrer" className="font-mono text-[9px] text-slate-500 hover:text-ice text-center underline">
+          <a href={e.url} target="_blank" rel="noopener noreferrer" className="font-mono text-[9px] text-slate-500 hover:text-violet text-center underline">
             Tickets
           </a>
         )}
@@ -159,7 +159,7 @@ export default function Discover() {
           <HudBox className="p-4 mb-6">
             <p className="font-mono text-[11px] text-slate-400">
               Live show discovery isn’t switched on yet. Add a Ticketmaster API key to the{' '}
-              <span className="text-ice">ticketmaster-events</span> function to light this up.
+              <span className="text-violet">ticketmaster-events</span> function to light this up.
             </p>
           </HudBox>
         )}

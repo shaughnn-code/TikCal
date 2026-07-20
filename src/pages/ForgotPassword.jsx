@@ -55,7 +55,7 @@ export default function ForgotPassword() {
         </Btn>
 
         <p className="text-center text-slate-600 text-sm mt-6">
-          <Link to="/login" className="text-ice hover:underline">← Back to sign in</Link>
+          <Link to="/login" className="text-violet hover:underline">← Back to sign in</Link>
         </p>
       </div>
     </div>

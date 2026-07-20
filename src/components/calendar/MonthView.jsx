@@ -41,12 +41,12 @@ export default function MonthView({ year, month, today, selectedDate, eventsByDa
                 className={`relative min-h-[74px] sm:min-h-[104px] p-1.5 sm:p-2 border-line border-t border-l transition-colors
                   ${i % 7 === 0 ? 'border-l-0' : ''}
                   ${c.out ? 'pointer-events-none' : 'cursor-pointer hover:bg-panel'}
-                  ${isToday ? 'bg-cyan/10' : ''}`}
-                style={isSel ? { outline: '2px solid #2FE6E6', outlineOffset: '-2px' } : undefined}
+                  ${isToday ? 'bg-violet/10' : ''}`}
+                style={isSel ? { outline: '2px solid #8b5cff', outlineOffset: '-2px' } : undefined}
               >
                 <div
                   className={`text-[12.5px] font-bold tabular-nums ${
-                    c.out ? 'text-muted/40' : isToday ? 'text-cyan' : 'text-muted'
+                    c.out ? 'text-muted/40' : isToday ? 'text-violet' : 'text-muted'
                   }`}
                 >
                   {c.date.getDate()}

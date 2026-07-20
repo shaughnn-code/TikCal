@@ -31,8 +31,8 @@ const ColorPicker = ({ value, onPick }) => (
 )
 
 const Avatar = ({ profile }) => (
-  <div className="w-9 h-9 rounded border border-ice/30 bg-white/5 flex items-center justify-center shrink-0">
-    {profile?.totem ? <Totem icon={profile.totem} size={20} /> : <Icon name="user" size={16} className="text-ice" />}
+  <div className="w-9 h-9 rounded border border-violet/30 bg-white/5 flex items-center justify-center shrink-0">
+    {profile?.totem ? <Totem icon={profile.totem} size={20} /> : <Icon name="user" size={16} className="text-violet" />}
   </div>
 )
 
@@ -44,7 +44,7 @@ const Row = ({ profile, right, tone = 'ice' }) => (
         <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{profile?.name || 'Someone'}</div>
         {profile?.favorite_venue && (
           <div className="font-mono text-[10px] text-slate-500 truncate flex items-center gap-1">
-            <Icon name="map-pin" size={10} className="text-ice" /> {profile.favorite_venue}
+            <Icon name="map-pin" size={10} className="text-violet" /> {profile.favorite_venue}
           </div>
         )}
       </div>
@@ -137,7 +137,7 @@ export default function Friends() {
     <button
       onClick={() => setTab(id)}
       className={`px-4 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
-        tab === id ? 'bg-white/10 text-ice' : 'text-slate-600 hover:text-slate-300'
+        tab === id ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
       }`}
     >
       {label}{count > 0 && <span className="ml-1.5 text-mint">{count}</span>}

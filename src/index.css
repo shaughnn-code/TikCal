@@ -9,15 +9,15 @@
     box-sizing: border-box;
   }
   html {
-    background-color: #000000;
+    background-color: #060609;
     /* Global scale-up for readability (lifts all rem-based text + spacing ~13%). */
     font-size: 112.5%;
   }
   body {
     margin: 0;
     min-height: 100vh;
-    background-color: #000000;
-    color: #e8f4f8;
+    background-color: #0b0b11;
+    color: #ececf4;
     font-family: 'Space Grotesk', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -49,115 +49,108 @@
     font-weight: 800;
     font-style: italic;
     letter-spacing: -0.02em;
-    color: #fff8f5;
+    color: #f7f3ff;
     line-height: 1;
     text-shadow:
-      1px 1px 0 #7a2800,
-      2px 2px 0 #5c1c00,
-      3px 3px 0 #3d1000,
-      4px 4px 0 #260800,
+      1px 1px 0 #4a2a80,
+      2px 2px 0 #3a1f66,
+      3px 3px 0 #2a1550,
+      4px 4px 0 #1c0d3a,
       5px 6px 13px rgba(0, 0, 0, 0.7),
-      0 0 26px rgba(255, 107, 43, 0.5),
-      0 0 50px rgba(255, 107, 43, 0.18);
+      0 0 26px rgba(192, 75, 255, 0.5),
+      0 0 50px rgba(139, 92, 255, 0.2);
   }
   .logo-3d-sm {
     font-family: 'Barlow', system-ui, sans-serif;
     font-weight: 800;
     font-style: italic;
     letter-spacing: -0.02em;
-    color: #fff8f5;
+    color: #f7f3ff;
     line-height: 1;
     text-shadow:
-      1px 1px 0 #5c1c00,
-      2px 2px 0 #260800,
-      0 0 14px rgba(255, 107, 43, 0.45);
+      1px 1px 0 #3a1f66,
+      2px 2px 0 #1c0d3a,
+      0 0 14px rgba(192, 75, 255, 0.45);
   }
 
-  /* ── Tron grid-to-horizon background ──────────────────────── */
+  /* ── Aurora light-leak background ─────────────────────────── */
+  /* Signature atmosphere: a magenta→violet→iris bloom sweeps the top of a
+     near-black field, the way stage light bleeds over a dark room. Reuses the
+     GridBg class names (.grid-glow / .grid-floor / .grid-horizon / .scanlines)
+     so every screen keeps working; only the paint changed. */
+  .grid-glow {
+    position: absolute;
+    top: -34%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150%;
+    height: 90%;
+    z-index: 0;
+    pointer-events: none;
+    filter: blur(64px);
+    opacity: 0.95;
+    background:
+      radial-gradient(40% 62% at 68% 4%, rgba(210, 80, 255, 0.62), transparent 68%),
+      radial-gradient(38% 58% at 44% 0%, rgba(150, 100, 255, 0.5), transparent 70%),
+      radial-gradient(32% 52% at 92% 16%, rgba(97, 120, 255, 0.42), transparent 68%),
+      radial-gradient(50% 45% at 22% 6%, rgba(140, 70, 220, 0.3), transparent 74%);
+  }
+  /* faint violet floor grid — keeps the "grid/calendar" identity, quietly */
   .grid-floor {
     position: absolute;
     left: -25%;
     right: -25%;
     bottom: -2px;
-    height: 36%;
+    height: 40%;
     z-index: 0;
     pointer-events: none;
+    opacity: 0.5;
     background-image:
-      linear-gradient(rgba(76, 201, 240, 0.4) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(76, 201, 240, 0.4) 1px, transparent 1px);
-    background-size: 30px 30px;
-    transform: perspective(240px) rotateX(74deg);
+      linear-gradient(rgba(139, 92, 255, 0.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139, 92, 255, 0.14) 1px, transparent 1px);
+    background-size: 46px 46px;
+    transform: perspective(320px) rotateX(76deg);
     transform-origin: bottom center;
-    -webkit-mask-image: linear-gradient(to top, #000 5%, transparent 82%);
-    mask-image: linear-gradient(to top, #000 5%, transparent 82%);
+    -webkit-mask-image: linear-gradient(to top, #000 2%, transparent 70%);
+    mask-image: linear-gradient(to top, #000 2%, transparent 70%);
   }
+  /* second, cooler bloom low-left for depth balance */
   .grid-horizon {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 34%;
-    height: 2px;
+    left: -20%;
+    bottom: -10%;
+    width: 70%;
+    height: 55%;
     z-index: 0;
     pointer-events: none;
-    background: rgba(76, 201, 240, 0.55);
-    box-shadow: 0 0 24px 5px rgba(76, 201, 240, 0.34);
-    /* Only show in the gutters beside the centered content column (≈672px),
-       fading out before the text. On narrow screens the band covers the whole
-       width, so the line simply doesn't show across content. */
-    -webkit-mask-image: linear-gradient(
-      to right,
-      #000 0,
-      #000 calc(50% - 360px),
-      transparent calc(50% - 336px),
-      transparent calc(50% + 336px),
-      #000 calc(50% + 360px),
-      #000 100%
-    );
-    mask-image: linear-gradient(
-      to right,
-      #000 0,
-      #000 calc(50% - 360px),
-      transparent calc(50% - 336px),
-      transparent calc(50% + 336px),
-      #000 calc(50% + 360px),
-      #000 100%
-    );
+    filter: blur(80px);
+    opacity: 0.6;
+    background: radial-gradient(50% 50% at 30% 80%, rgba(91, 107, 255, 0.22), transparent 72%);
   }
-  /* dimmed/lowered variant behind dense content */
+  /* dimmed variant behind dense content (calendar, forms) */
+  .grid-lite .grid-glow {
+    opacity: 0.5;
+    top: -42%;
+  }
   .grid-lite .grid-floor {
-    height: 22%;
-    opacity: 0.4;
+    opacity: 0.28;
   }
   .grid-lite .grid-horizon {
-    bottom: 0;
-    opacity: 0.45;
-    box-shadow: 0 0 18px 4px rgba(76, 201, 240, 0.22);
-  }
-  .grid-glow {
-    position: absolute;
-    top: -90px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 340px;
-    height: 220px;
-    z-index: 0;
-    pointer-events: none;
-    filter: blur(22px);
-    background: radial-gradient(ellipse, rgba(76, 201, 240, 0.14), transparent 70%);
+    opacity: 0.4;
   }
 
-  /* ── scanline overlay ─────────────────────────────────────── */
+  /* ── grain overlay ────────────────────────────────────────── */
   .scanlines {
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
+    opacity: 0.5;
     background-image: repeating-linear-gradient(
       to bottom,
-      rgba(255, 255, 255, 0.016) 0 1px,
+      rgba(255, 255, 255, 0.012) 0 1px,
       transparent 1px 3px
     );
-    opacity: 0.6;
   }
 
   /* ── HUD corner brackets (on .hud, color = currentColor) ──── */
@@ -170,7 +163,7 @@
     position: absolute;
     width: 9px;
     height: 9px;
-    border: 2px solid var(--hud-color, #4cc9f0);
+    border: 2px solid var(--hud-color, #a78bfa);
     opacity: 0.85;
     pointer-events: none;
   }
@@ -188,6 +181,96 @@
   }
 }
 
+/* ── Dance-floor loader ──────────────────────────────────────── */
+@layer components {
+  .floor-scene {
+    position: fixed; inset: 0; z-index: 60; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; padding: 24px; background: #05070b;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    transition: opacity .45s ease;
+  }
+  .floor-scene.done { opacity: 0; pointer-events: none; }
+  .floor-glow {
+    position: absolute; left: 50%; top: 40%; width: 120vw; height: 60vh;
+    transform: translate(-50%, -50%); z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse 42% 50% at 50% 50%, rgba(139,92,255,.14), transparent 70%);
+  }
+  .floor-head { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .floor-logo { font-size: 40px; }
+  .floor-month {
+    font-size: 11px; letter-spacing: .34em; color: #a78bfa; opacity: .8;
+  }
+  .floor-weekdays {
+    position: relative; z-index: 1; display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 6px; width: min(340px, 82vw);
+  }
+  .floor-weekdays span {
+    text-align: center; font-size: 9px; letter-spacing: .1em; color: rgba(255,255,255,.28);
+  }
+  .floor-grid {
+    position: relative; z-index: 1; display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 6px; width: min(340px, 82vw);
+  }
+  .floor-tile {
+    position: relative; aspect-ratio: 1; border-radius: 7px;
+    background: rgba(255,255,255,.03);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+    display: flex; align-items: flex-start; justify-content: flex-start;
+  }
+  .floor-num {
+    font-size: 10px; padding: 4px 0 0 5px; color: rgba(255,255,255,0);
+    transition: color .5s ease;
+  }
+  /* disco: rainbow wave chases diagonally across the floor */
+  .floor-scene.disco .floor-tile {
+    animation: floorPulse 1.15s ease-in-out infinite;
+    animation-delay: var(--wave);
+  }
+  .floor-scene.disco .floor-tile.is-blank { animation-duration: 1.4s; opacity: .6; }
+  @keyframes floorPulse {
+    0%, 100% { background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); }
+    45%, 55% {
+      background: color-mix(in srgb, var(--tile) 82%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tile) 90%, transparent),
+                  0 0 16px color-mix(in srgb, var(--tile) 60%, transparent);
+    }
+  }
+  /* settle: lights calm to the panel, numbers rise, crew nights keep an edge */
+  .floor-scene.settle .floor-tile,
+  .floor-scene.done .floor-tile {
+    animation: none;
+    transition: background .6s ease, box-shadow .6s ease;
+    background: linear-gradient(170deg, rgba(255,255,255,.045), rgba(255,255,255,.01));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .floor-scene.settle .floor-tile.is-blank,
+  .floor-scene.done .floor-tile.is-blank { background: transparent; box-shadow: none; }
+  .floor-scene.settle .floor-tile.is-event,
+  .floor-scene.done .floor-tile.is-event {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tile) 70%, transparent),
+                0 0 14px color-mix(in srgb, var(--tile) 34%, transparent);
+    background: linear-gradient(170deg, color-mix(in srgb, var(--tile) 20%, transparent), rgba(255,255,255,.02));
+  }
+  .floor-scene.settle .floor-num,
+  .floor-scene.done .floor-num { color: rgba(255,255,255,.45); }
+  .floor-label {
+    position: relative; z-index: 1; margin-top: 6px;
+    font-size: 11px; letter-spacing: .16em; color: rgba(255,255,255,.4);
+  }
+  .floor-scene.settle .floor-label, .floor-scene.done .floor-label { color: #6EE7B7; }
+  .floor-dots::after {
+    content: '...'; animation: floorDots 1.4s steps(4, end) infinite; margin-left: 2px;
+  }
+  @keyframes floorDots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floor-scene .floor-tile { animation: none !important; }
+    .floor-dots::after { animation: none; content: '...'; }
+    .floor-scene { transition: none; }
+  }
+}
+
 /* ── Welcome / first-run intro scene ─────────────────────────── */
 @layer components {
   .wel-scene {
@@ -197,30 +280,30 @@
   }
   .wel-floor {
     position: absolute; left: -25%; right: -25%; bottom: -2px; height: 32%; z-index: 0; pointer-events: none;
-    background-image: linear-gradient(rgba(76,201,240,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(76,201,240,.3) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(139,92,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,255,.3) 1px, transparent 1px);
     background-size: 30px 30px; transform: perspective(240px) rotateX(74deg); transform-origin: bottom center;
     -webkit-mask-image: linear-gradient(to top, #000 5%, transparent 82%);
     mask-image: linear-gradient(to top, #000 5%, transparent 82%);
   }
   .wel-spot {
     position: absolute; top: -8%; left: -8%; width: 90vw; height: 104vh; z-index: 1; opacity: 0; pointer-events: none;
-    background: radial-gradient(120% 120% at 0% 0%, rgba(130,224,255,.5), rgba(76,201,240,.16) 38%, transparent 66%);
+    background: radial-gradient(120% 120% at 0% 0%, rgba(170,140,255,.5), rgba(139,92,255,.16) 38%, transparent 66%);
     clip-path: polygon(0% 0%, 66% 18%, 46% 60%, 0% 26%); filter: blur(10px); transition: opacity 1s;
   }
   .wel-flare {
     position: absolute; top: -50px; left: -50px; width: 170px; height: 170px; z-index: 2; opacity: 0; border-radius: 50%;
-    background: radial-gradient(circle, rgba(210,244,255,.95), rgba(76,201,240,.5) 38%, transparent 70%); filter: blur(3px); transition: opacity 1s;
+    background: radial-gradient(circle, rgba(225,210,255,.95), rgba(139,92,255,.5) 38%, transparent 70%); filter: blur(3px); transition: opacity 1s;
   }
   .wel-scene.on .wel-spot, .wel-scene.on .wel-flare { opacity: 1; }
   .wel-col { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; }
   .wel-mascot {
-    width: 300px; max-width: 62vw; margin-bottom: -26px; filter: drop-shadow(0 0 22px rgba(120,210,255,.25));
+    width: 300px; max-width: 62vw; margin-bottom: -26px; filter: drop-shadow(0 0 22px rgba(150,120,255,.25));
     transform: translateY(130vh); transition: transform 1.3s cubic-bezier(.18,.9,.3,1);
   }
   .wel-scene.on .wel-mascot { transform: translateY(0); }
   .wel-logo { font-size: 60px; opacity: 0; transition: opacity .8s .3s; }
   .wel-scene.on .wel-logo { opacity: 1; }
-  .wel-tagline { margin-top: 12px; font-size: 12px; letter-spacing: .2em; color: #4cc9f0; opacity: 0; transition: opacity .8s 1.4s; }
+  .wel-tagline { margin-top: 12px; font-size: 12px; letter-spacing: .2em; color: #a78bfa; opacity: 0; transition: opacity .8s 1.4s; }
   .wel-scene.on .wel-tagline { opacity: 1; }
   .wel-cta {
     position: absolute; bottom: 12%; left: 50%; z-index: 4; opacity: 0;

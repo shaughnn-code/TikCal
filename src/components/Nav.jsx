@@ -12,7 +12,7 @@ export const Nav = () => {
       {({ isActive }) => (
         <span
           className={`flex items-center gap-1.5 font-mono text-[12px] tracking-wide uppercase transition-colors ${
-            isActive ? 'text-ice' : 'text-slate-500 hover:text-white'
+            isActive ? 'text-violet' : 'text-slate-500 hover:text-white'
           }`}
         >
           {isActive && <span className="w-1.5 h-1.5 rounded-full bg-mint shadow-[0_0_8px_#6EE7B7]" />}
@@ -37,7 +37,7 @@ export const Nav = () => {
           {link('/overlap', 'intersect', 'Sync')}
           <NavLink to="/profile">
             {({ isActive }) => (
-              <span className={`flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-wide transition-colors ${isActive ? 'text-ice' : 'text-slate-500 hover:text-white'}`}>
+              <span className={`flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-wide transition-colors ${isActive ? 'text-violet' : 'text-slate-500 hover:text-white'}`}>
                 {profile?.totem ? <Totem icon={profile.totem} size={16} /> : <Icon name="user" size={14} />}
                 <span className="hidden sm:inline">You</span>
               </span>

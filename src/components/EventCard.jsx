@@ -32,14 +32,20 @@ export const EventCard = ({ event, ownerLabel }) => {
   return (
     <button
       onClick={() => navigate(`/events/${event.id}`)}
-      className={`hud relative w-full text-left rounded border p-3.5 transition-all ${
-        isPast ? 'border-white/[0.06] opacity-50' : 'border-ice/20 hover:border-ice/40 bg-white/[0.02]'
+      className={`group relative w-full text-left rounded-2xl border p-3.5 pl-4 overflow-hidden backdrop-blur-sm transition-all duration-200 ${
+        isPast
+          ? 'border-white/[0.06] bg-panel/40 opacity-50'
+          : 'border-white/[0.07] bg-panel/70 hover:border-white/15 hover:-translate-y-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_30px_-16px_rgba(0,0,0,0.8)]'
       }`}
-      style={{ '--hud-color': isPast ? '#334155' : s.color }}
     >
+      {/* colored spine — carries the event's crew/artist hue (data) */}
+      <span
+        className="absolute inset-y-0 left-0 w-[3px] rounded-full"
+        style={{ backgroundColor: isPast ? '#334155' : s.color, boxShadow: isPast ? 'none' : `0 0 10px ${s.color}66` }}
+      />
       <div className="flex items-center gap-3.5">
         <span
-          className="w-11 h-11 rounded flex items-center justify-center font-mono text-[13px] font-bold shrink-0 border"
+          className="w-11 h-11 rounded-xl flex items-center justify-center font-mono text-[13px] font-bold shrink-0 border"
           style={{ color: s.color, backgroundColor: s.bg, borderColor: s.color + '66' }}
         >
           {getInitials(event.artist)}
@@ -71,7 +77,7 @@ export const EventCard = ({ event, ownerLabel }) => {
             {ownerLabel && (
               <>
                 <span className="text-slate-700">·</span>
-                <span className="text-ice/80 normal-case flex items-center gap-0.5">
+                <span className="text-violet/80 normal-case flex items-center gap-0.5">
                   <Icon name="users-three" size={12} /> {ownerLabel}
                 </span>
               </>

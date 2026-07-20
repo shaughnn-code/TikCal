@@ -42,11 +42,11 @@ export default function Login() {
           </Btn>
         </form>
         <p className="text-center text-slate-600 text-sm mt-4">
-          <Link to="/forgot" className="text-ice hover:underline">Forgot password?</Link>
+          <Link to="/forgot" className="text-violet hover:underline">Forgot password?</Link>
         </p>
         <p className="text-center text-slate-600 text-sm mt-2">
           No account?{' '}
-          <Link to="/signup" className="text-ice hover:underline">
+          <Link to="/signup" className="text-violet hover:underline">
             Create one
           </Link>
         </p>

@@ -16,8 +16,8 @@ export default function YearView({ year, today, eventsByDate, onPickMonth }) {
             key={name}
             onClick={() => onPickMonth(m)}
             className="group text-left rounded-[14px] border border-line bg-panel px-4 pt-3.5 pb-4
-                       transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan
-                       hover:shadow-[0_10px_26px_-12px_#2FE6E6]"
+                       transition-all duration-200 hover:-translate-y-0.5 hover:border-violet
+                       hover:shadow-[0_10px_26px_-12px_#8b5cff]"
           >
             <div className="font-heading font-extrabold text-[14px] text-[#eef6f7] mb-2">{name}</div>
             <MicroGrid year={year} month={m} today={today} eventsByDate={eventsByDate} />
@@ -40,10 +40,10 @@ function MicroGrid({ year, month, today, eventsByDate }) {
           <span
             key={i}
             className={`text-[8px] leading-[13px] text-center rounded-[3px] tabular-nums ${
-              isToday ? 'bg-cyan text-[#04191b] font-bold' : 'text-faint'
+              isToday ? 'bg-violet text-[#04191b] font-bold' : 'text-faint'
             }`}
             // An event is a cyan underline: legible at 8px where a dot would vanish.
-            style={has && !isToday ? { boxShadow: 'inset 0 -2px 0 #2FE6E6' } : undefined}
+            style={has && !isToday ? { boxShadow: 'inset 0 -2px 0 #8b5cff' } : undefined}
           >
             {c.date.getDate()}
           </span>

@@ -43,7 +43,7 @@ export default function Overlap() {
       <Wrap>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <div className="font-mono text-[11px] text-ice uppercase tracking-[0.16em]">{FEATURE_NAME}</div>
+            <div className="font-mono text-[11px] text-violet uppercase tracking-[0.16em]">{FEATURE_NAME}</div>
             <h1 className="font-heading font-bold text-2xl text-[#e8f4f8]">Find a night together</h1>
           </div>
           <Btn variant="mint" onClick={() => setModal(true)}>
@@ -55,7 +55,7 @@ export default function Overlap() {
 
         {!active.length && !expired.length && (
           <HudBox className="p-8 text-center">
-            <Icon name="intersect" size={28} className="text-ice/60 mx-auto mb-3" />
+            <Icon name="intersect" size={28} className="text-violet/60 mx-auto mb-3" />
             <div className="font-display font-bold text-[#e8f4f8]">No overlaps yet</div>
             <div className="font-mono text-[11px] text-slate-500 mt-1 mb-4">
               Pool free time with up to 3 friends and find the night everyone can make.
@@ -72,8 +72,8 @@ export default function Overlap() {
               <button
                 key={s.id}
                 onClick={() => navigate(`/overlap/${s.id}`)}
-                className="hud w-full text-left rounded border border-ice/20 hover:border-ice/40 bg-white/[0.02] p-4 transition-all"
-                style={{ '--hud-color': '#4cc9f0' }}
+                className="hud w-full text-left rounded border border-violet/20 hover:border-violet/40 bg-white/[0.02] p-4 transition-all"
+                style={{ '--hud-color': '#8b5cff' }}
               >
                 <div className="font-display font-bold text-base text-[#e8f4f8]">{s.name}</div>
                 <div className="font-mono text-[11px] text-slate-500 uppercase mt-1 flex items-center gap-2">

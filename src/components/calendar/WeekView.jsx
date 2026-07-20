@@ -35,7 +35,7 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, onPick
               key={d.dateStr}
               onDoubleClick={onZoomOut}
               className={`text-center border-b border-l border-line bg-panel px-1.5 py-3 cursor-pointer
-                text-[11px] font-bold tracking-[0.08em] ${sameDay(d.date, today) ? 'text-cyan' : 'text-muted'}`}
+                text-[11px] font-bold tracking-[0.08em] ${sameDay(d.date, today) ? 'text-violet' : 'text-muted'}`}
             >
               {DOW[d.date.getDay()]} {d.date.getDate()}
             </div>
@@ -103,13 +103,18 @@ function Chip({ ev, onPick, tba }) {
     <button
       onClick={(e) => { e.stopPropagation(); onPick?.(ev) }}
       onDoubleClick={(e) => e.stopPropagation()}
-      className="w-full text-left rounded-lg px-[9px] py-[7px] transition-all hover:brightness-110 hover:-translate-y-px"
-      style={{ backgroundColor: s.color, boxShadow: `0 4px 18px -8px ${s.color}` }}
+      className="relative w-full text-left rounded-lg pl-2.5 pr-2 py-[7px] overflow-hidden border border-white/10 bg-panel transition-all hover:border-white/20 hover:-translate-y-px"
     >
-      <div className="text-[11.5px] font-bold text-[#04191b] truncate leading-tight">{ev.title}</div>
+      {/* faint hue wash + colored spine carry the event's crew/artist color (data) */}
+      <span className="absolute inset-0 pointer-events-none" style={{ backgroundColor: s.bg }} />
+      <span
+        className="absolute inset-y-0 left-0 w-[3px]"
+        style={{ backgroundColor: s.color, boxShadow: `0 0 8px ${s.color}66` }}
+      />
+      <div className="relative text-[11.5px] font-bold text-white truncate leading-tight">{ev.title}</div>
       {/* "TBA" not "time TBA": the column is narrow enough that the longer
           string truncates away exactly the word that carries the meaning. */}
-      <div className="text-[10.5px] text-[#04191b]/75 truncate leading-tight">
+      <div className="relative text-[10.5px] text-slate-400 truncate leading-tight">
         {[tba ? 'TBA' : ev.start_time, ev.venue].filter(Boolean).join(' · ')}
       </div>
     </button>

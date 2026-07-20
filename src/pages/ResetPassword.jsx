@@ -40,7 +40,7 @@ export default function ResetPassword() {
         {!user ? (
           <div className="text-center">
             <p className="text-slate-400 text-sm mb-4">This reset link is invalid or has expired.</p>
-            <Link to="/forgot" className="text-ice hover:underline text-sm">Request a new one →</Link>
+            <Link to="/forgot" className="text-violet hover:underline text-sm">Request a new one →</Link>
           </div>
         ) : done ? (
           <p className="text-mint text-sm text-center py-4">✓ Password updated — signing you in…</p>

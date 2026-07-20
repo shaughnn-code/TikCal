@@ -19,6 +19,7 @@ import Profile from './pages/Profile.jsx'
 import Friends from './pages/Friends.jsx'
 import Overlap from './pages/Overlap.jsx'
 import OverlapSession from './pages/OverlapSession.jsx'
+import DanceFloorLoader from './components/DanceFloorLoader.jsx'
 
 // Guards the onboarding / profile-edit route: needs auth, renders full-screen
 // (no Nav). Doubles as the editor once setup is complete.
@@ -27,6 +28,16 @@ const SetupGate = () => {
   if (loading || (user && profile === null)) return <Spinner />
   if (!user) return <Navigate to="/login" replace />
   return <Setup />
+}
+
+// Home: returning/logged-in users start in the app, not on the marketing page.
+// Signed-in → calendar (or setup if onboarding isn't finished); everyone else
+// sees the Landing page.
+const HomeGate = () => {
+  const { user, profile, loading } = useAuth()
+  if (loading || (user && profile === null)) return <Spinner />
+  if (user) return <Navigate to={profile?.setup_complete ? '/calendar' : '/setup'} replace />
+  return <Landing />
 }
 
 // First-run intro: needs auth + completed setup, plays once until seen.
@@ -43,7 +54,8 @@ export default function App() {
   return (
     <Routes>
       {/* Public */}
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<HomeGate />} />
+      <Route path="/floor-preview" element={<DanceFloorLoader discoMs={99000} label="Cueing the floor" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot" element={<ForgotPassword />} />

@@ -7,6 +7,11 @@ import { Icon } from '../components/icons.jsx'
 import { EventCard } from '../components/EventCard.jsx'
 import CalendarZoom from '../components/calendar/CalendarZoom.jsx'
 import SiteFooter from '../components/SiteFooter.jsx'
+import DanceFloorLoader from '../components/DanceFloorLoader.jsx'
+
+// Play the dance-floor intro once per session — on the first calendar load
+// (log-in / refresh) — but not on every tab switch back to /calendar.
+let introPlayed = false
 
 export default function Dashboard() {
   const { user, profile } = useAuth()
@@ -16,6 +21,7 @@ export default function Dashboard() {
   const [err, setErr] = useState('')
   const [selDate, setSelDate] = useState(null)
   const [tab, setTab] = useState('calendar')
+  const [introDone, setIntroDone] = useState(introPlayed)
 
   useEffect(() => {
     let active = true
@@ -48,6 +54,9 @@ export default function Dashboard() {
     }, {}),
   )
 
+  if (!introDone) {
+    return <DanceFloorLoader onDone={() => { introPlayed = true; setIntroDone(true) }} />
+  }
   if (loading) return <Spinner />
 
   const Empty = () => (
@@ -65,12 +74,12 @@ export default function Dashboard() {
           <div>
             <Kicker className="mb-1">// SESSION ACTIVE</Kicker>
             <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8]">
-              <span className="text-ice">{'{'}</span>
+              <span className="text-violet">{'{'}</span>
               {profile?.name ? `${profile.name.split(' ')[0]}'s` : 'My'}
-              <span className="text-ice">{'}'}</span> Calendar
+              <span className="text-violet">{'}'}</span> Calendar
             </h1>
           </div>
-          <Btn variant="mint" onClick={() => navigate('/calendar/add')}>
+          <Btn variant="aurora" onClick={() => navigate('/calendar/add')}>
             <Icon name="plus-bold" size={14} /> Add Show
           </Btn>
         </div>
@@ -89,7 +98,7 @@ export default function Dashboard() {
                 {String(s.n).padStart(2, '0')}
               </div>
               <div className="font-mono text-[9px] text-slate-500 uppercase mt-1 flex items-center justify-center gap-1">
-                <Icon name={s.i} size={10} className={s.tone === 'mint' ? 'text-mint' : 'text-ice'} /> {s.l}
+                <Icon name={s.i} size={10} className={s.tone === 'mint' ? 'text-mint' : 'text-violet'} /> {s.l}
               </div>
             </HudBox>
           ))}
@@ -118,7 +127,7 @@ export default function Dashboard() {
               key={t}
               onClick={() => setTab(t)}
               className={`px-4 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
-                tab === t ? 'bg-white/10 text-ice' : 'text-slate-600 hover:text-slate-300'
+                tab === t ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
               }`}
             >
               {t}
@@ -153,7 +162,7 @@ export default function Dashboard() {
             {/* Next-up hero */}
             {next && (
               <HudBox hero className="p-4 mb-6 cursor-pointer" onClick={() => navigate(`/events/${next.id}`)}>
-                <div className="font-mono text-[9px] tracking-[0.12em] text-ice">
+                <div className="font-mono text-[9px] tracking-[0.12em] text-violet">
                   ▸ NEXT UP {nextCountdown === 0 ? '· TONIGHT' : `· T-${nextCountdown}D`}
                 </div>
                 <div className="font-display font-bold text-xl text-[#e8f4f8] mt-1.5">{next.title}</div>

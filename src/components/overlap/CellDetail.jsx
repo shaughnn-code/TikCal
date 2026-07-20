@@ -79,7 +79,7 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
           </div>
         )}
         {e.source === 'saved' && e.savedBy?.length > 0 && (
-          <div className="font-mono text-[9px] text-ice uppercase tracking-wide mb-0.5 flex items-center gap-1 truncate">
+          <div className="font-mono text-[9px] text-violet uppercase tracking-wide mb-0.5 flex items-center gap-1 truncate">
             <Icon name="bookmark-simple" size={10} className="shrink-0" />
             Saved by {e.savedBy.join(', ')}
           </div>
@@ -103,7 +103,7 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
             href={e.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-[9px] text-slate-500 hover:text-ice text-center underline"
+            className="font-mono text-[9px] text-slate-500 hover:text-violet text-center underline"
           >
             Tickets
           </a>
@@ -168,7 +168,7 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
         {showRecs && (
           <div className="mt-4 pt-4 border-t border-white/10">
             <div className="font-mono text-[10px] text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
-              <Icon name="sparkle" size={12} className="text-ice" />
+              <Icon name="sparkle" size={12} className="text-violet" />
               Event picks for this window
             </div>
 
@@ -192,7 +192,7 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
                 <RecSection
                   icon="bookmark-simple"
                   label="Your crew saved"
-                  tint="text-ice"
+                  tint="text-violet"
                   items={recs.saved}
                   empty="No one in this overlap has saved a show for this night."
                 />

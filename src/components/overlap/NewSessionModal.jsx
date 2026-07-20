@@ -17,7 +17,7 @@ const Pill = ({ active, onClick, children, title }) => (
     title={title}
     className={`min-w-[44px] h-11 px-3 rounded font-mono text-xs font-bold uppercase tracking-wide border transition-all ${
       active
-        ? 'border-ice bg-ice/15 text-ice shadow-[0_0_10px_rgba(76,201,240,0.25)]'
+        ? 'border-violet bg-violet/15 text-violet shadow-[0_0_10px_rgba(76,201,240,0.25)]'
         : 'border-white/10 text-slate-500 hover:border-white/25 hover:text-white'
     }`}
   >

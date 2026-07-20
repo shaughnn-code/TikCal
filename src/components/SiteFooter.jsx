@@ -1,11 +1,44 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 
+// Each link carries its destination. `to` = in-app route (React Router);
+// `href` = external/placeholder ('#' until final targets are set). Product
+// points at real pages today; the rest are stubs to finalize with copy.
 const COLUMNS = [
-  { label: 'Product', links: ['Calendar', 'Discover', 'Plan', 'Overlap'] },
-  { label: 'Company', links: ['About', 'Contact'] },
-  { label: 'Resources', links: ['Help', 'Privacy', 'Terms'] },
-  { label: 'Social', links: ['Instagram', 'X', 'TikTok'] },
+  {
+    label: 'Product',
+    links: [
+      { label: 'Calendar', to: '/calendar' },
+      { label: 'Discover', to: '/discover' },
+      { label: 'Plan', to: '/plan' },
+      { label: 'Overlap', to: '/overlap' },
+    ],
+  },
+  {
+    label: 'Company',
+    links: [
+      { label: 'About', href: '#' },
+      { label: 'Contact', href: '#' },
+    ],
+  },
+  {
+    label: 'Resources',
+    links: [
+      { label: 'Help', href: '#' },
+      { label: 'Privacy', href: '#' },
+      { label: 'Terms', href: '#' },
+    ],
+  },
+  {
+    label: 'Social',
+    links: [
+      { label: 'Instagram', href: '#' },
+      { label: 'TikTok', href: '#' },
+    ],
+  },
 ]
+
+const linkCls = 'text-[13px] text-muted hover:text-[#eef6f7] transition-colors'
 
 // Columns fade/blur/rise in the first time they scroll into view, staggered.
 // Fires once, then unobserves.
@@ -41,7 +74,7 @@ export default function SiteFooter() {
   return (
     <footer ref={ref} className="relative mt-16 border-t border-line pt-10 pb-12">
       <div className="absolute -top-px left-1/2 -translate-x-1/2 w-[200px] h-px
-                      bg-gradient-to-r from-transparent via-cyan to-transparent" />
+                      bg-gradient-to-r from-transparent via-violet to-transparent" />
 
       <div className="grid gap-[26px] grid-cols-2 md:grid-cols-3 lg:grid-cols-[1.3fr_1fr_1fr_1fr_1fr]">
         <div style={reveal(0)}>
@@ -57,10 +90,12 @@ export default function SiteFooter() {
             <div className="text-[10.5px] uppercase tracking-[0.16em] text-faint mb-3">{col.label}</div>
             <ul className="space-y-2">
               {col.links.map((l) => (
-                <li key={l}>
-                  <span className="text-[13px] text-muted hover:text-[#eef6f7] transition-colors cursor-pointer">
-                    {l}
-                  </span>
+                <li key={l.label}>
+                  {l.to ? (
+                    <Link to={l.to} className={linkCls}>{l.label}</Link>
+                  ) : (
+                    <a href={l.href} className={linkCls}>{l.label}</a>
+                  )}
                 </li>
               ))}
             </ul>

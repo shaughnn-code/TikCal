@@ -122,7 +122,7 @@ export default function EventDetail() {
       <GridBg lite />
       <Wrap>
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate(-1)} className="text-slate-500 hover:text-ice transition-colors">
+          <button onClick={() => navigate(-1)} className="text-slate-500 hover:text-violet transition-colors">
             <Icon name="arrow-left" size={20} />
           </button>
           <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8] truncate">{event.title}</h1>
@@ -131,7 +131,7 @@ export default function EventDetail() {
         {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
 
         {event.flyer_url ? (
-          <img src={event.flyer_url} alt={event.title} className="w-full max-h-80 object-cover rounded border border-ice/20 mb-6" />
+          <img src={event.flyer_url} alt={event.title} className="w-full max-h-80 object-cover rounded border border-violet/20 mb-6" />
         ) : null}
 
         <Kicker className="mb-3">▸ {cd}</Kicker>
@@ -235,7 +235,7 @@ export default function EventDetail() {
           </div>
           <p className="font-mono text-[10px] text-slate-600 mt-2">
             Want every show to sync automatically? Subscribe your whole TikCal feed from{' '}
-            <button onClick={() => navigate('/profile')} className="text-ice underline">
+            <button onClick={() => navigate('/profile')} className="text-violet underline">
               your profile
             </button>
             .

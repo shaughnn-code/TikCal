@@ -14,7 +14,7 @@ export default function CalRail({ view, focus, onView, onStep, onToday }) {
             key={v}
             onClick={() => onView(v)}
             className={`flex-1 rounded-lg px-3.5 py-[11px] text-[13px] font-bold tracking-[0.04em] uppercase transition-colors
-              ${view === v ? 'bg-panel-2 text-cyan shadow-[0_0_0_1px_#232b33]' : 'text-muted hover:text-[#eef6f7]'}`}
+              ${view === v ? 'bg-panel-2 text-violet shadow-[0_0_0_1px_#232b33]' : 'text-muted hover:text-[#eef6f7]'}`}
           >
             {v}
           </button>
@@ -31,8 +31,8 @@ export default function CalRail({ view, focus, onView, onStep, onToday }) {
 
       <button
         onClick={onToday}
-        className="shrink-0 rounded-lg px-3 py-[9px] text-[14px] font-bold text-cyan bg-cyan/[0.12] border border-cyan/40
-                   hover:bg-cyan/20 transition-colors whitespace-nowrap"
+        className="shrink-0 rounded-lg px-3 py-[9px] text-[14px] font-bold text-violet bg-violet/[0.12] border border-violet/40
+                   hover:bg-violet/20 transition-colors whitespace-nowrap"
       >
         Today
       </button>
@@ -56,7 +56,7 @@ const RailBtn = ({ children, onClick, label }) => (
     onClick={onClick}
     aria-label={label}
     className="w-7 h-7 shrink-0 rounded-lg border border-line text-muted leading-none
-               hover:text-cyan hover:border-cyan transition-colors"
+               hover:text-violet hover:border-violet transition-colors"
   >
     {children}
   </button>

@@ -16,14 +16,20 @@ export const GridBg = ({ lite = false, glow = true }) => (
   </div>
 )
 
-// HUD box with corner brackets. tone sets bracket color; hero adds emphasis.
-export const HudBox = ({ children, className = '', tone = 'ice', hero = false, ...rest }) => {
-  const hudColor = tone === 'mint' ? '#6EE7B7' : '#4cc9f0'
+// Soft elevated panel — the Aurora system's surface. Dark, rounded, hairline
+// border with a faint violet edge-light up top. `hero` lifts it with an aurora
+// wash; `brackets` opts back into the legacy HUD corner marks (violet now).
+export const HudBox = ({ children, className = '', tone = 'violet', hero = false, brackets = false, ...rest }) => {
+  const hudColor = tone === 'mint' ? '#6EE7B7' : tone === 'ice' ? '#4cc9f0' : '#8b5cff'
   const base = hero
-    ? 'border-ice/40 bg-ice/[0.06] shadow-[inset_0_0_26px_rgba(76,201,240,0.07)]'
-    : 'border-ice/25 bg-white/[0.025]'
+    ? 'border-violet/30 bg-violet/[0.07] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_16px_40px_-12px_rgba(139,92,255,0.35)]'
+    : 'border-white/[0.07] bg-panel/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_30px_-16px_rgba(0,0,0,0.8)]'
   return (
-    <div className={`hud relative rounded ${base} ${className}`} style={{ '--hud-color': hudColor }} {...rest}>
+    <div
+      className={`${brackets ? 'hud' : ''} relative rounded-2xl border backdrop-blur-sm ${base} ${className}`}
+      style={{ '--hud-color': hudColor }}
+      {...rest}
+    >
       {children}
     </div>
   )
@@ -37,7 +43,7 @@ export const SecLabel = ({ children, className = '', ...rest }) => (
 )
 
 export const Kicker = ({ children, className = '' }) => (
-  <div className={`font-mono text-[11px] tracking-[0.16em] text-ice ${className}`}>{children}</div>
+  <div className={`font-mono text-[11px] tracking-[0.16em] text-violet ${className}`}>{children}</div>
 )
 
 export const Inp = ({ label, type = 'text', value, onChange, placeholder, required, cls = '' }) => (
@@ -49,7 +55,7 @@ export const Inp = ({ label, type = 'text', value, onChange, placeholder, requir
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       required={required}
-      className="w-full bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] placeholder-slate-600 text-sm focus:outline-none focus:border-ice/60 transition-colors"
+      className="w-full bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] placeholder-slate-600 text-sm focus:outline-none focus:border-violet/60 transition-colors"
     />
   </div>
 )
@@ -62,7 +68,7 @@ export const Txta = ({ label, value, onChange, placeholder, rows = 3 }) => (
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="w-full bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] placeholder-slate-600 text-sm focus:outline-none focus:border-ice/60 transition-colors resize-none"
+      className="w-full bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] placeholder-slate-600 text-sm focus:outline-none focus:border-violet/60 transition-colors resize-none"
     />
   </div>
 )
@@ -73,7 +79,7 @@ export const Sel = ({ label, value, onChange, options }) => (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-[#0d141b] border border-white/10 rounded px-3 py-3 text-sm focus:outline-none focus:border-ice/60 transition-colors appearance-none"
+      className="w-full bg-[#0d141b] border border-white/10 rounded px-3 py-3 text-sm focus:outline-none focus:border-violet/60 transition-colors appearance-none"
       style={{ color: value ? '#e8f4f8' : '#475569' }}
     >
       <option value="">Select…</option>
@@ -88,8 +94,10 @@ export const Sel = ({ label, value, onChange, options }) => (
 
 export const Btn = ({ children, onClick, type = 'button', variant = 'mint', disabled, cls = '' }) => {
   const styles = {
+    aurora:
+      'text-white bg-gradient-to-r from-aurora to-violet shadow-[0_8px_24px_-8px_rgba(192,75,255,0.6)] hover:brightness-110',
     mint: 'bg-mint hover:brightness-110 text-[#04221a]',
-    ice: 'bg-ice hover:brightness-110 text-[#042029]',
+    ice: 'bg-violet hover:brightness-110 text-white',
     ghost: 'border border-white/10 hover:border-white/25 text-slate-300 hover:text-white',
     danger: 'border border-red-500/25 hover:border-red-400/40 text-red-400 hover:text-red-300',
   }
@@ -115,6 +123,6 @@ export const Wrap = ({ children, cls = '', wide = false }) => (
 
 export const Spinner = () => (
   <div className="flex items-center justify-center min-h-screen">
-    <div className="font-mono text-ice/40 text-sm tracking-[0.3em]">···</div>
+    <div className="font-mono text-violet/40 text-sm tracking-[0.3em]">···</div>
   </div>
 )

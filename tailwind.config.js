@@ -4,23 +4,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#0a0e12',
-        ink2: '#040608',
+        // Near-black aurora base (softened off pure #000 so the light-leak reads).
+        ink: '#0b0b11',
+        ink2: '#060609',
         ice: '#4cc9f0',
         mint: '#6EE7B7',
-        accent: '#4cc9f0',
+        accent: '#a06bff',
         orange: '#ff6b2b',
 
-        // Calendar-zoom design handoff. `cyan` is the single chrome accent;
-        // event chips keep their crew/artist hue via getEventAccent, and
-        // Overlap keeps orange=free / mint=shared. Color stays information.
+        // Aurora signature — the one brand hue, a magenta→violet→iris light-leak.
+        // Used only where TikCal speaks in its own voice (wordmark, hero, primary
+        // CTA, current-time marker). Data hues below stay meaningful because the
+        // chrome doesn't fight them.
+        aurora: '#c04bff',   // magenta core
+        violet: '#8b5cff',   // mid
+        iris: '#5b6bff',      // blue tail
+
+        // `cyan` is the cool chrome accent; event chips keep their crew/artist hue
+        // via getEventAccent, and Overlap keeps orange=free / mint=shared. Color
+        // stays information.
         cyan: '#2FE6E6',
         'cyan-dim': '#1a8f8f',
-        panel: '#11161b',
-        'panel-2': '#161d24',
-        line: '#232b33',
-        muted: '#8fa3ab',
-        faint: '#5a6b73',
+        panel: '#15151c',
+        'panel-2': '#1c1c25',
+        line: '#28282f',
+        muted: '#8f8fa3',
+        faint: '#5a5a6b',
       },
       keyframes: {
         // Zoom transition: the outgoing view scales up and fades while the

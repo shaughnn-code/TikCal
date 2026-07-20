@@ -200,7 +200,7 @@ export default function OverlapSession() {
 
       <Wrap>
         <div className="mb-5">
-          <div className="font-mono text-[11px] text-ice uppercase tracking-[0.16em]">{FEATURE_NAME}</div>
+          <div className="font-mono text-[11px] text-violet uppercase tracking-[0.16em]">{FEATURE_NAME}</div>
           <h1 className="font-heading font-bold text-2xl text-[#e8f4f8]">{session.name}</h1>
           <div className="flex items-center gap-2 mt-2">
             {participants.map((p) => (
@@ -226,7 +226,7 @@ export default function OverlapSession() {
               key={v.key}
               onClick={() => setView(v.key)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded font-mono text-[11px] uppercase tracking-wide transition-all ${
-                view === v.key ? 'bg-ice/15 text-ice' : 'text-slate-500 hover:text-white'
+                view === v.key ? 'bg-violet/15 text-violet' : 'text-slate-500 hover:text-white'
               }`}
             >
               <Icon name={v.icon} size={13} />

@@ -110,7 +110,7 @@ export default function Profile() {
             <h2 className="font-display font-extrabold text-lg uppercase text-[#e8f4f8] truncate">{profile?.name}</h2>
             <div className="font-mono text-[10px] text-slate-500 flex items-center gap-1.5 mt-1">
               {profile?.favorite_venue && (
-                <><Icon name="map-pin" size={11} className="text-ice" /> {profile.favorite_venue}</>
+                <><Icon name="map-pin" size={11} className="text-violet" /> {profile.favorite_venue}</>
               )}
               {totem && <span className="text-slate-700">· {totem.name}</span>}
             </div>
@@ -169,7 +169,7 @@ export default function Profile() {
         {/* Subscribe feed → Apple / Google / Outlook */}
         <HudBox className="p-4 mb-3">
           <SecLabel className="mb-2 flex items-center gap-1.5">
-            <Icon name="calendar-check" size={11} className="text-ice" /> Sync to your calendar
+            <Icon name="calendar-check" size={11} className="text-violet" /> Sync to your calendar
           </SecLabel>
           <p className="text-slate-400 text-xs mb-3 leading-relaxed">
             Subscribe once and every TikCal show — yours and your crew’s — auto-syncs into Apple, Google, or Outlook.
@@ -202,7 +202,7 @@ export default function Profile() {
                   href={`https://calendar.google.com/calendar/u/0/r/settings/addbyurl?cid=${encodeURIComponent(feedUrls(feedToken).https)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-[10px] text-ice underline"
+                  className="font-mono text-[10px] text-violet underline"
                 >
                   Add to Google →
                 </a>
@@ -219,7 +219,7 @@ export default function Profile() {
         {/* Google Calendar connection (powers real free/busy in Plan) */}
         <HudBox className="p-4 mb-3">
           <SecLabel className="mb-2 flex items-center gap-1.5">
-            <Icon name="google-logo" size={11} className="text-ice" /> Google Calendar
+            <Icon name="google-logo" size={11} className="text-violet" /> Google Calendar
           </SecLabel>
           {profile?.google_calendar_email ? (
             <div className="flex items-center justify-between gap-3">
@@ -231,7 +231,7 @@ export default function Profile() {
           ) : (
             <>
               <p className="text-slate-400 text-xs mb-3 leading-relaxed">
-                Connect your Google Calendar so <button onClick={() => navigate('/plan')} className="text-ice underline">Plan a Night</button> knows
+                Connect your Google Calendar so <button onClick={() => navigate('/plan')} className="text-violet underline">Plan a Night</button> knows
                 when you’re actually free — busy times from your real calendar get factored in.
               </p>
               <Btn variant="ice" onClick={connectGoogle} disabled={connecting}>
@@ -260,7 +260,7 @@ export default function Profile() {
           ) : (
             <>
               <p className="text-slate-400 text-xs mb-3 leading-relaxed">
-                Connect Spotify so <button onClick={() => navigate('/discover')} className="text-ice underline">Discover</button> can
+                Connect Spotify so <button onClick={() => navigate('/discover')} className="text-violet underline">Discover</button> can
                 float shows by the artists you actually listen to.
               </p>
               <Btn variant="mint" onClick={connectSpotify} disabled={connecting}>
