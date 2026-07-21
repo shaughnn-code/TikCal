@@ -20,6 +20,10 @@ import Friends from './pages/Friends.jsx'
 import Overlap from './pages/Overlap.jsx'
 import OverlapSession from './pages/OverlapSession.jsx'
 import DanceFloorLoader from './components/DanceFloorLoader.jsx'
+import About from './pages/About.jsx'
+import Help from './pages/Help.jsx'
+import Privacy from './pages/Privacy.jsx'
+import Terms from './pages/Terms.jsx'
 
 // Guards the onboarding / profile-edit route: needs auth, renders full-screen
 // (no Nav). Doubles as the editor once setup is complete.
@@ -62,6 +66,11 @@ export default function App() {
       <Route path="/reset" element={<ResetPassword />} />
       <Route path="/setup" element={<SetupGate />} />
       <Route path="/welcome" element={<WelcomeGate />} />
+      {/* Static info / legal — public, reachable while logged out. */}
+      <Route path="/about" element={<About />} />
+      <Route path="/help" element={<Help />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
       {/* Shared by link: guests join with a display name, no account. */}
       <Route path="/overlap/:sessionId" element={<OverlapSession />} />
 

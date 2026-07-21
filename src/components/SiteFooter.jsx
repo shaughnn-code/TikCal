@@ -17,16 +17,16 @@ const COLUMNS = [
   {
     label: 'Company',
     links: [
-      { label: 'About', href: '#' },
-      { label: 'Contact', href: '#' },
+      { label: 'About', to: '/about' },
+      { label: 'Contact', href: 'mailto:dev@tikcal.nyc' },
     ],
   },
   {
     label: 'Resources',
     links: [
-      { label: 'Help', href: '#' },
-      { label: 'Privacy', href: '#' },
-      { label: 'Terms', href: '#' },
+      { label: 'Help', to: '/help' },
+      { label: 'Privacy', to: '/privacy' },
+      { label: 'Terms', to: '/terms' },
     ],
   },
   {
