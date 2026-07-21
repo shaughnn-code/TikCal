@@ -23,15 +23,20 @@ React 18 + Vite 5 + Tailwind 3 + Supabase. ESM (`"type": "module"`).
 
 Most routes sit behind auth, so an unauthenticated screenshot of `/overlap` will show the login redirect. Guest-capable routes (`/overlap/:sessionId`) render without a session.
 
-## Design tokens
+## Design tokens ("Aurora")
 
-Defined in `tailwind.config.js` / `src/index.css`:
+Defined in `tailwind.config.js` / `src/index.css`. Rebranded from the old cyan
+"Wide Ice" theme in commit `e4301d5` — near-black base + a magenta/violet aurora
+signature. **Color is information**: the brand hue is violet chrome; data hues
+(crew/RSVP/free) carry meaning and must not be repainted.
 
-- `ink #0a0e12` (bg), `ink2 #040608` (recessed/blocked)
-- `ice #4cc9f0` (primary/cyan), `mint #6EE7B7` (success/shared)
-- `#ff6b2b` orange — reserved as the semantic **free/GO** state in Overlap; the only warm accent in a cool UI.
+- `ink #0b0b11` (bg), `ink2 #060609` (recessed/blocked)
+- **Brand/chrome = violet:** `aurora #c04bff`, `violet #8b5cff`, `iris #5b6bff`. Used for wordmark glow, hero, primary CTA (`Btn variant="aurora"`), nav-active, calendar today-marker/selection, links, focus.
+- **Data hues (preserve — do NOT rebrand):** `mint #6EE7B7` (shared / "I'm in"), `#ff6b2b` orange (semantic **free/GO** state in Overlap only), the 10 crew colors via `getEventAccent`, RSVP amber/coral.
+- `cyan #2FE6E6` / `ice #4cc9f0` are **legacy** — no longer chrome; `ice` survives only as a crew-color option. Don't reintroduce them as UI accents.
+- **Backdrop:** aurora light-leak bloom, not a Tron grid. `GridBg` still renders it via the reused `.grid-glow`/`.grid-floor`/`.grid-horizon` classes (repainted).
+- **Surfaces:** `HudBox` is a soft rounded panel by default (pass `brackets` for the legacy HUD corner marks). Event cards (`EventCard`, WeekView chips) = dark cards with a colored left **spine** carrying the event's hue.
 - Fonts: Barlow 800 italic (logo), Syne (headings), Space Grotesk (body), IBM Plex Mono (labels/data)
-- HUD boxes take a `--hud-color` CSS var. Tron-style `GridBg` backdrop.
 
 See `docs/tikcal-overlap-design.md` for the Overlap feature's cell-state → render contract.
 
