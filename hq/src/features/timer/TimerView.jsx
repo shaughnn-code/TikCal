@@ -6,7 +6,7 @@ import { useHQ, taskFocusSeconds } from '../../store.jsx'
 import { useTimer } from './timerState.jsx'
 import { Icon } from '../../components/icons.jsx'
 import { Chip, Field, STATUS } from '../../components/ui.jsx'
-import { fmtClock, fmtDur, ymd, todayYmd } from '../../lib/dates.js'
+import { fmtClock, fmtDue, fmtDur, ymd, todayYmd } from '../../lib/dates.js'
 
 // ---------------------------------------------------------------------------
 // Dial
@@ -118,7 +118,7 @@ function IdleSetup() {
                 }`}
               />
               <span className="min-w-0 flex-1 truncate">{t.title}</span>
-              {t.due && <Chip>{t.due}</Chip>}
+              {t.due && <Chip>{fmtDue(t.due)}</Chip>}
             </button>
           ))}
           {candidates.length === 0 && (

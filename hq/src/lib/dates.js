@@ -75,6 +75,14 @@ export function fmtClock(ms) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
+// 'YYYY-MM-DD' -> "Jul 22" (adds the year when it differs from the current one)
+export function fmtDue(due, now = new Date()) {
+  const d = parseYmd(due)
+  const opts = { month: 'short', day: 'numeric' }
+  if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric'
+  return d.toLocaleDateString(undefined, opts)
+}
+
 // True if a ymd due date is before today (local).
 export function isOverdue(due, today = todayYmd()) {
   return !!due && due < today

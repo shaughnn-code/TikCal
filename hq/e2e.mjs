@@ -67,12 +67,13 @@ function fail(msg) {
 }
 
 // ---- helpers over the page ----
+// Case-insensitive: CSS text-transform (e.g. .label uppercasing) shows up in innerText.
 async function waitForText(page, text, where = 'body') {
   await page
     .waitForFunction(
-      (t, sel) => document.querySelector(sel)?.innerText.includes(t),
+      (t, sel) => (document.querySelector(sel)?.innerText || '').toLowerCase().includes(t),
       { timeout: 8000 },
-      text,
+      text.toLowerCase(),
       where
     )
     .catch(() => fail(`expected to see "${text}" in ${where}`))
@@ -80,13 +81,16 @@ async function waitForText(page, text, where = 'body') {
 async function clickByText(page, selector, text) {
   const ok = await page.evaluate(
     (sel, t) => {
-      const el = [...document.querySelectorAll(sel)].find((e) => e.innerText.trim().includes(t))
-      if (!el) return false
-      el.click()
+      // Smallest match = most specific; a click on it bubbles to the real handler.
+      const matches = [...document.querySelectorAll(sel)]
+        .filter((e) => (e.innerText || '').toLowerCase().includes(t))
+        .sort((a, b) => a.innerText.length - b.innerText.length)
+      if (!matches.length) return false
+      matches[0].click()
       return true
     },
     selector,
-    text
+    text.toLowerCase()
   )
   if (!ok) fail(`nothing matching <${selector}> with text "${text}" to click`)
 }

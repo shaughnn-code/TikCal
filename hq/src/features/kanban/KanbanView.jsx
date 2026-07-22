@@ -6,7 +6,7 @@ import { useHQ, taskFocusSeconds } from '../../store.jsx'
 import { useTimer } from '../timer/timerState.jsx'
 import { Icon } from '../../components/icons.jsx'
 import { Chip, STATUS } from '../../components/ui.jsx'
-import { fmtDur, isOverdue } from '../../lib/dates.js'
+import { fmtDue, fmtDur, isOverdue } from '../../lib/dates.js'
 
 const COLUMNS = ['todo', 'doing', 'done']
 
@@ -76,7 +76,7 @@ function Card({ task, sessions, onMove, onDelete, onFocus }) {
           {task.due && (
             <Chip color={overdue && !done ? 'bg-red/15 text-red' : 'bg-panel2 text-mut'}>
               <Icon name="calendar" size={11} />
-              {task.due}
+              {fmtDue(task.due)}
             </Chip>
           )}
           {(task.tags || []).map((tag) => (
