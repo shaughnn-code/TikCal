@@ -129,17 +129,26 @@ export function feedUrls(token) {
   return { https, webcal: https.replace(/^https?:/, 'webcal:') }
 }
 
-// Kick off Google Calendar OAuth: returns the consent URL to redirect to.
+// Start an OAuth flow and return the provider's consent URL.
+//
 // The platform rides along so the callback knows whether to finish on the
 // website or bounce back into the app via the tikcal:// deep link.
-export async function startGoogleConnect() {
-  const { data, error } = await supabase.functions.invoke('google-oauth-start', {
-    body: { platform: platform() },
-  })
-  if (error) throw error
+//
+// supabase-js rejects on any non-2xx before the caller can look at the body, so
+// a misconfigured function surfaced as the useless "Edge Function returned a
+// non-2xx status code". These functions put a readable reason in { error } —
+// dig it out so the UI can show what's actually wrong.
+async function startConnect(fn) {
+  const { data, error } = await supabase.functions.invoke(fn, { body: { platform: platform() } })
+  if (error) {
+    const detail = await error.context?.json?.().catch(() => null)
+    throw new Error(detail?.error || error.message)
+  }
   if (data?.error) throw new Error(data.error)
   return data.url
 }
+
+export const startGoogleConnect = () => startConnect('google-oauth-start')
 
 // Read the user's Google busy blocks for a window (empty if not connected).
 export async function getGoogleBusy(timeMin, timeMax) {
@@ -161,14 +170,7 @@ export async function disconnectGoogle(userId) {
 // ─── MUSIC TASTE (Spotify / Apple Music) ────────────────────────────────────
 
 // Kick off Spotify OAuth: returns the authorize URL to redirect to.
-export async function startSpotifyConnect() {
-  const { data, error } = await supabase.functions.invoke('spotify-oauth-start', {
-    body: { platform: platform() },
-  })
-  if (error) throw error
-  if (data?.error) throw new Error(data.error)
-  return data.url
-}
+export const startSpotifyConnect = () => startConnect('spotify-oauth-start')
 
 // Re-pull the user's Spotify artists (refreshes the token server-side).
 export async function syncSpotify() {
