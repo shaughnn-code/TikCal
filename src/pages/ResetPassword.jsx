@@ -33,7 +33,7 @@ export default function ResetPassword() {
       <GridBg lite />
       <div className="relative z-10 w-full max-w-sm">
         <div className="text-center mb-10">
-          <Logo size="md" />
+          <Logo size="md" framed />
         </div>
         <Kicker className="mb-3">// SET NEW PASSWORD</Kicker>
 

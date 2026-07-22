@@ -31,7 +31,7 @@ export default function ForgotPassword() {
       <GridBg lite />
       <div className="relative z-10 w-full max-w-sm">
         <div className="text-center mb-10">
-          <Logo size="md" />
+          <Logo size="md" framed />
           <p className="text-slate-600 text-sm mt-3 font-mono">account recovery</p>
         </div>
         <Kicker className="mb-3">// RECOVER ACCESS</Kicker>
