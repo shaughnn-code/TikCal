@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { supabase } from '../supabaseClient.js'
+import { publicUrl } from './platform.js'
 
 const AuthCtx = createContext(null)
 
@@ -68,15 +69,17 @@ export const AuthProvider = ({ children }) => {
   }
 
   // Send a password-reset email (link lands on /reset to set a new password).
+  // The link is opened from a mail client, so it must point at the website —
+  // publicUrl keeps it off the capacitor:// origin on native builds.
   const resetPassword = (email) =>
     supabase.auth
-      .resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset` })
+      .resetPasswordForEmail(email, { redirectTo: publicUrl('/reset') })
       .then(({ error }) => (error ? { error: error.message } : { ok: true }))
 
   // Passwordless: email a one-time sign-in link (lands signed-in on /calendar).
   const sendMagicLink = (email) =>
     supabase.auth
-      .signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/calendar`, shouldCreateUser: false } })
+      .signInWithOtp({ email, options: { emailRedirectTo: publicUrl('/calendar'), shouldCreateUser: false } })
       .then(({ error }) => (error ? { error: error.message } : { ok: true }))
 
   // Set a new password (used on /reset, where a recovery session is active).

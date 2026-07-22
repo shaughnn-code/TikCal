@@ -20,6 +20,7 @@ import Friends from './pages/Friends.jsx'
 import Overlap from './pages/Overlap.jsx'
 import OverlapSession from './pages/OverlapSession.jsx'
 import DanceFloorLoader from './components/DanceFloorLoader.jsx'
+import DeepLinkHandler from './components/DeepLinkHandler.jsx'
 import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
 import Help from './pages/Help.jsx'
@@ -57,38 +58,41 @@ const WelcomeGate = () => {
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/" element={<HomeGate />} />
-      <Route path="/floor-preview" element={<DanceFloorLoader discoMs={99000} label="Cueing the floor" />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot" element={<ForgotPassword />} />
-      <Route path="/reset" element={<ResetPassword />} />
-      <Route path="/setup" element={<SetupGate />} />
-      <Route path="/welcome" element={<WelcomeGate />} />
-      {/* Static info / legal — public, reachable while logged out. */}
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/help" element={<Help />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/terms" element={<Terms />} />
-      {/* Shared by link: guests join with a display name, no account. */}
-      <Route path="/overlap/:sessionId" element={<OverlapSession />} />
+    <>
+      <DeepLinkHandler />
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<HomeGate />} />
+        <Route path="/floor-preview" element={<DanceFloorLoader discoMs={99000} label="Cueing the floor" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/reset" element={<ResetPassword />} />
+        <Route path="/setup" element={<SetupGate />} />
+        <Route path="/welcome" element={<WelcomeGate />} />
+        {/* Static info / legal — public, reachable while logged out. */}
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        {/* Shared by link: guests join with a display name, no account. */}
+        <Route path="/overlap/:sessionId" element={<OverlapSession />} />
 
-      {/* Protected (shared Nav) */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/calendar" element={<Dashboard />} />
-        <Route path="/plan" element={<Plan />} />
-        <Route path="/discover" element={<Discover />} />
-        <Route path="/calendar/add" element={<AddEvent />} />
-        <Route path="/events/:id" element={<EventDetail />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/friends" element={<Friends />} />
-        <Route path="/overlap" element={<Overlap />} />
-      </Route>
+        {/* Protected (shared Nav) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/calendar" element={<Dashboard />} />
+          <Route path="/plan" element={<Plan />} />
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/calendar/add" element={<AddEvent />} />
+          <Route path="/events/:id" element={<EventDetail />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/friends" element={<Friends />} />
+          <Route path="/overlap" element={<Overlap />} />
+        </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   )
 }

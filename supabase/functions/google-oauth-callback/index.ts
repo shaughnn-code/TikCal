@@ -3,30 +3,58 @@
 // verify state, swap the code for tokens, store them, and bounce back to the app.
 //
 // Secrets:  GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, APP_URL (optional, default tikcal.nyc)
+// Note: APP_SCHEME below mirrors src/lib/platform.js, the iOS Info.plist, and
+// the Android manifest — change it in all four or native deep links break.
 // Deploy:   supabase functions deploy google-oauth-callback --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const APP = () => Deno.env.get('APP_URL') || 'https://tikcal.nyc'
-const back = (status: string) => Response.redirect(`${APP()}/profile?google=${status}`, 302)
+const APP_SCHEME = 'tikcal'
+
+// Where to send the browser when we're done. A native build opened this flow in
+// the system browser, so an https redirect would leave the user on the website
+// with the app still waiting behind it; the custom scheme hands control back
+// instead. `platform` comes off the verified state row, never the query string,
+// so the target is always one of ours.
+const redirectBack = (platform: string, status: string) => {
+  const target =
+    platform === 'ios' || platform === 'android'
+      ? `${APP_SCHEME}://profile?google=${status}`
+      : `${APP()}/profile?google=${status}`
+  return new Response(null, { status: 302, headers: { Location: target } })
+}
 
 Deno.serve(async (req) => {
   const url = new URL(req.url)
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
+
+  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+
+  // Resolve + consume the state (single use) before anything else: it carries
+  // the platform, and without it we can't route even a failure back correctly.
+  let uid = ''
+  let platform = 'web'
+  if (state) {
+    const { data: stateRow } = await admin
+      .from('oauth_states')
+      .select('user_id, platform')
+      .eq('state', state)
+      .maybeSingle()
+    if (stateRow) {
+      uid = stateRow.user_id
+      platform = stateRow.platform || 'web'
+      await admin.from('oauth_states').delete().eq('state', state)
+    }
+  }
+  const back = (status: string) => redirectBack(platform, status)
+
   if (url.searchParams.get('error')) return back('denied')
-  if (!code || !state) return back('error')
+  if (!code || !uid) return back('error')
 
   const clientId = Deno.env.get('GOOGLE_CLIENT_ID')
   const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET')
   if (!clientId || !clientSecret) return back('error')
-
-  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
-
-  // Verify + consume the state (single use).
-  const { data: stateRow } = await admin.from('oauth_states').select('user_id').eq('state', state).maybeSingle()
-  if (!stateRow) return back('error')
-  await admin.from('oauth_states').delete().eq('state', state)
-  const uid = stateRow.user_id
 
   const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-oauth-callback`
 

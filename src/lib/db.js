@@ -1,4 +1,5 @@
 import { supabase } from '../supabaseClient.js'
+import { platform } from './platform.js'
 
 // events.owner_id references auth.users, so PostgREST can't embed profiles
 // directly. We fetch events (RLS scopes them to owner + friends + crews) and
@@ -129,8 +130,12 @@ export function feedUrls(token) {
 }
 
 // Kick off Google Calendar OAuth: returns the consent URL to redirect to.
+// The platform rides along so the callback knows whether to finish on the
+// website or bounce back into the app via the tikcal:// deep link.
 export async function startGoogleConnect() {
-  const { data, error } = await supabase.functions.invoke('google-oauth-start')
+  const { data, error } = await supabase.functions.invoke('google-oauth-start', {
+    body: { platform: platform() },
+  })
   if (error) throw error
   if (data?.error) throw new Error(data.error)
   return data.url
@@ -157,7 +162,9 @@ export async function disconnectGoogle(userId) {
 
 // Kick off Spotify OAuth: returns the authorize URL to redirect to.
 export async function startSpotifyConnect() {
-  const { data, error } = await supabase.functions.invoke('spotify-oauth-start')
+  const { data, error } = await supabase.functions.invoke('spotify-oauth-start', {
+    body: { platform: platform() },
+  })
   if (error) throw error
   if (data?.error) throw new Error(data.error)
   return data.url

@@ -30,10 +30,16 @@ Deno.serve(async (req) => {
   const { data: { user } } = await authed.auth.getUser()
   if (!user) return json({ error: 'Not signed in.' }, 401)
 
+  // Which platform is asking decides where the callback sends the browser at
+  // the end. Only the enum travels — never a return URL, which would make this
+  // an open redirect. Anything unrecognised falls back to the web flow.
+  const body = await req.json().catch(() => ({}))
+  const platform = body?.platform === 'ios' || body?.platform === 'android' ? body.platform : 'web'
+
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
   const { data: st, error } = await admin
     .from('oauth_states')
-    .insert({ user_id: user.id, provider: 'google' })
+    .insert({ user_id: user.id, provider: 'google', platform })
     .select('state')
     .single()
   if (error) return json({ error: 'Could not start the connection.' }, 500)

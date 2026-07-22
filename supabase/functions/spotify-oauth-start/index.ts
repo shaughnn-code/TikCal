@@ -27,10 +27,16 @@ Deno.serve(async (req) => {
   const { data: { user } } = await authed.auth.getUser()
   if (!user) return json({ error: 'Not signed in.' }, 401)
 
+  // See google-oauth-start: the platform decides where the callback returns to,
+  // and only this enum crosses the wire (a client-supplied URL would be an open
+  // redirect).
+  const body = await req.json().catch(() => ({}))
+  const platform = body?.platform === 'ios' || body?.platform === 'android' ? body.platform : 'web'
+
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
   const { data: st, error } = await admin
     .from('oauth_states')
-    .insert({ user_id: user.id, provider: 'spotify' })
+    .insert({ user_id: user.id, provider: 'spotify', platform })
     .select('state')
     .single()
   if (error) return json({ error: 'Could not start the connection.' }, 500)

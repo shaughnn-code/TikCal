@@ -7,8 +7,19 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const APP = () => Deno.env.get('APP_URL') || 'https://tikcal.nyc'
-const back = (s: string) => Response.redirect(`${APP()}/discover?spotify=${s}`, 302)
+const APP_SCHEME = 'tikcal'
 const norm = (s: string) => s.trim().toLowerCase()
+
+// See google-oauth-callback: native builds must be returned to via the custom
+// scheme, and the platform comes off the verified state row so the redirect
+// target can never be chosen by the caller.
+const redirectBack = (platform: string, status: string) => {
+  const target =
+    platform === 'ios' || platform === 'android'
+      ? `${APP_SCHEME}://discover?spotify=${status}`
+      : `${APP()}/discover?spotify=${status}`
+  return new Response(null, { status: 302, headers: { Location: target } })
+}
 
 // Pull top + followed artists and (re)write them for this user.
 // deno-lint-ignore no-explicit-any
@@ -46,18 +57,32 @@ Deno.serve(async (req) => {
   const url = new URL(req.url)
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
+
+  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+
+  // Consume the state first — it carries the platform we have to return to.
+  let uid = ''
+  let platform = 'web'
+  if (state) {
+    const { data: stateRow } = await admin
+      .from('oauth_states')
+      .select('user_id, platform')
+      .eq('state', state)
+      .maybeSingle()
+    if (stateRow) {
+      uid = stateRow.user_id
+      platform = stateRow.platform || 'web'
+      await admin.from('oauth_states').delete().eq('state', state)
+    }
+  }
+  const back = (s: string) => redirectBack(platform, s)
+
   if (url.searchParams.get('error')) return back('denied')
-  if (!code || !state) return back('error')
+  if (!code || !uid) return back('error')
 
   const clientId = Deno.env.get('SPOTIFY_CLIENT_ID')
   const clientSecret = Deno.env.get('SPOTIFY_CLIENT_SECRET')
   if (!clientId || !clientSecret) return back('error')
-
-  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
-  const { data: stateRow } = await admin.from('oauth_states').select('user_id').eq('state', state).maybeSingle()
-  if (!stateRow) return back('error')
-  await admin.from('oauth_states').delete().eq('state', state)
-  const uid = stateRow.user_id
 
   // Exchange code for tokens (Basic auth = client_id:client_secret).
   let tok: { access_token?: string; refresh_token?: string; expires_in?: number }
