@@ -15,6 +15,7 @@ import EventDetail from './pages/EventDetail.jsx'
 import AddEvent from './pages/AddEvent.jsx'
 import Profile from './pages/Profile.jsx'
 import Friends from './pages/Friends.jsx'
+import { UnderConstruction } from './components/UnderConstruction.jsx'
 
 // Guards the onboarding / profile-edit route: needs auth, renders full-screen
 // (no Nav). Doubles as the editor once setup is complete.
@@ -56,7 +57,7 @@ export default function App() {
         <Route path="/friends" element={<Friends />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<UnderConstruction backTo="/" />} />
     </Routes>
   )
 }

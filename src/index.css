@@ -184,6 +184,13 @@
     border-left: none;
     border-top: none;
   }
+
+  /* Gemini-generated disco-ball loop reads pastel/lavender; darken + desaturate
+     so it sits inside the ink-dark HUD box instead of fighting it. */
+  .uc-vid {
+    object-fit: cover;
+    filter: saturate(0.75) brightness(0.8) contrast(1.05);
+  }
 }
 
 /* ── Welcome / first-run intro scene ─────────────────────────── */
