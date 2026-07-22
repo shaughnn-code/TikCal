@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ink font-sans text-fg antialiased;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-line;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-line bg-panel;
+  }
+  .btn {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 text-sm font-medium transition-colors hover:border-mut/50 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-gold {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-gold/60 bg-gold/15 px-3 py-1.5 text-sm font-semibold text-gold transition-colors hover:bg-gold/25 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-mut transition-colors hover:bg-panel2 hover:text-fg disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .input {
+    @apply w-full rounded-lg border border-line bg-ink px-3 py-1.5 text-sm text-fg outline-none placeholder:text-mut/60 focus:border-gold/60;
+  }
+  .label {
+    @apply font-mono text-[11px] uppercase tracking-wider text-mut;
+  }
+}
+
+/* Markdown preview (notes) */
+.md-body {
+  @apply text-sm leading-relaxed text-fg/90;
+}
+.md-body h1 { @apply mb-2 mt-4 text-xl font-bold first:mt-0; }
+.md-body h2 { @apply mb-2 mt-4 text-lg font-semibold first:mt-0; }
+.md-body h3 { @apply mb-1 mt-3 font-semibold first:mt-0; }
+.md-body h4 { @apply mb-1 mt-3 text-sm font-semibold first:mt-0; }
+.md-body p { @apply mb-2; }
+.md-body ul { @apply mb-2 list-disc pl-5; }
+.md-body ol { @apply mb-2 list-decimal pl-5; }
+.md-body li { @apply mb-0.5; }
+.md-body code { @apply rounded bg-panel2 px-1 py-0.5 font-mono text-[12px] text-gold; }
+.md-body pre { @apply mb-2 overflow-x-auto rounded-lg bg-panel2 p-3; }
+.md-body pre code { @apply bg-transparent p-0 text-fg/90; }
+.md-body blockquote { @apply mb-2 border-l-2 border-gold/50 pl-3 text-mut; }
+.md-body a { @apply text-blue underline underline-offset-2; }
+.md-body hr { @apply my-3 border-line; }

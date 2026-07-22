@@ -14,3 +14,6 @@ skills-lock.json
 .claude/skills/
 
 supabase/.temp/
+
+# HQ personal data — stays on your machine
+hq/data/
