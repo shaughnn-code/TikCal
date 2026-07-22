@@ -44,33 +44,53 @@
 
 @layer components {
   /* ── 3D extruded wordmark ─────────────────────────────────── */
+  /* Silver liquid-chrome (per Matsero "Chrome Text Effect"): a mirror gradient
+     — bright specular top, a dark horizon reflection band mid-glyph, a second
+     specular flash below, melting to a light silver ground — with a thin dark
+     rim, a top highlight, depth shadow, cool sheen, and a whisper of brand
+     violet in the outer glow. Same Barlow 800 italic wordmark. */
   .logo-3d {
     font-family: 'Barlow', system-ui, sans-serif;
     font-weight: 800;
     font-style: italic;
     letter-spacing: -0.02em;
-    color: #f7f3ff;
     line-height: 1;
-    text-shadow:
-      1px 1px 0 #4a2a80,
-      2px 2px 0 #3a1f66,
-      3px 3px 0 #2a1550,
-      4px 4px 0 #1c0d3a,
-      5px 6px 13px rgba(0, 0, 0, 0.7),
-      0 0 26px rgba(192, 75, 255, 0.5),
-      0 0 50px rgba(139, 92, 255, 0.2);
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%, #eef2f8 12%, #b9c3d3 30%, #7c8698 43%,
+      #363d4c 49%, #444c5d 51%,
+      #f4f7fb 56%, #c3ccda 70%, #8f9aac 84%, #d6dee9 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    -webkit-text-stroke: 0.8px rgba(35, 42, 58, 0.55);
+    filter:
+      drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35))
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.65))
+      drop-shadow(0 0 14px rgba(198, 208, 232, 0.45))
+      drop-shadow(0 0 34px rgba(139, 92, 255, 0.22));
   }
   .logo-3d-sm {
     font-family: 'Barlow', system-ui, sans-serif;
     font-weight: 800;
     font-style: italic;
     letter-spacing: -0.02em;
-    color: #f7f3ff;
     line-height: 1;
-    text-shadow:
-      1px 1px 0 #3a1f66,
-      2px 2px 0 #1c0d3a,
-      0 0 14px rgba(192, 75, 255, 0.45);
+    background: linear-gradient(
+      180deg,
+      #ffffff 4%, #dfe6f0 32%, #6f7a8e 50%, #eef2f8 56%, #aab6c8 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    -webkit-text-stroke: 0.5px rgba(35, 42, 58, 0.5);
+    filter:
+      drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6))
+      drop-shadow(0 0 8px rgba(198, 208, 232, 0.4))
+      drop-shadow(0 0 16px rgba(139, 92, 255, 0.2));
   }
 
   /* ── Aurora light-leak background ─────────────────────────── */

@@ -42,7 +42,7 @@ export default function Landing() {
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center max-w-3xl mx-auto">
         <div className="text-5xl mb-5">🎫</div>
-        <Logo size="lg" className="mb-5" />
+        <Logo size="lg" framed className="mb-5" />
         <div className="font-mono text-xs text-violet tracking-[0.18em] mb-3">EVERY SOURCE · ONE CALENDAR</div>
         <p className="text-slate-400 text-base max-w-md mb-9 leading-relaxed">
           Track every show, see what your crew is hitting, and never miss a night out.

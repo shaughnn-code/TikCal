@@ -1,8 +1,27 @@
 // Shared design-token primitives for the "Wide Ice" system.
 
-export const Logo = ({ size = 'md', className = '' }) => {
+export const Logo = ({ size = 'md', className = '', framed = false }) => {
   const cls = size === 'lg' ? 'logo-3d text-[56px]' : size === 'sm' ? 'logo-3d-sm text-[20px]' : 'logo-3d-sm text-[30px]'
-  return <span className={`${cls} ${className}`}>TikCal</span>
+  const word = <span className={cls}>TikCal</span>
+  if (!framed) return <span className={className}>{word}</span>
+  // Chrome rounded-rectangle frame: a silver metallic gradient border (bright
+  // highlight → steel → specular → shadow) with a top edge-light and soft
+  // sheen, matching the chrome wordmark. Padding + radius scale with size.
+  const box = size === 'lg' ? 'rounded-2xl px-6 py-3' : 'rounded-xl px-3.5 py-1.5'
+  return (
+    <span
+      className={`inline-flex items-center ${box} ${className}`}
+      style={{
+        border: '1.5px solid transparent',
+        background:
+          'linear-gradient(#0d0d13,#0d0d13) padding-box, linear-gradient(150deg,#ffffff 0%,#d6dde8 16%,#838ea1 44%,#eef2f8 58%,#5c6576 82%,#b7c0cf 100%) border-box',
+        boxShadow:
+          '0 0 20px -8px rgba(200,210,235,0.55), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(0,0,0,0.35)',
+      }}
+    >
+      {word}
+    </span>
+  )
 }
 
 // Atmospheric Tron grid background — fixed, full-viewport, behind everything.

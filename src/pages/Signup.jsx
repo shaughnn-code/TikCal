@@ -35,7 +35,7 @@ export default function Signup() {
       <GridBg lite />
       <div className="relative z-10 w-full max-w-sm">
         <div className="text-center mb-12">
-          <Logo size="md" />
+          <Logo size="md" framed />
           <p className="text-slate-600 text-sm mt-3 font-mono">join your friends' calendar</p>
         </div>
         <Kicker className="mb-3">// NEW ACCOUNT</Kicker>
