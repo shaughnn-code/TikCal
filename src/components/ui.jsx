@@ -7,7 +7,9 @@ export const Logo = ({ size = 'md', className = '', framed = false }) => {
   // Chrome rounded-rectangle frame: a silver metallic gradient border (bright
   // highlight → steel → specular → shadow) with a top edge-light and soft
   // sheen, matching the chrome wordmark. Padding + radius scale with size.
-  const box = size === 'lg' ? 'rounded-2xl px-6 py-3' : 'rounded-xl px-3.5 py-1.5'
+  // Asymmetric horizontal padding (more left) optically centers the italic
+  // wordmark, whose trailing advance otherwise leaves it sitting left-of-center.
+  const box = size === 'lg' ? 'rounded-2xl pl-9 pr-5 py-3' : 'rounded-xl pl-[20px] pr-[11px] py-1.5'
   return (
     <span
       className={`inline-flex items-center ${box} ${className}`}
