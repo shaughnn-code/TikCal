@@ -18,7 +18,7 @@ const COLUMNS = [
     label: 'Company',
     links: [
       { label: 'About', to: '/about' },
-      { label: 'Contact', href: 'mailto:dev@tikcal.nyc' },
+      { label: 'Contact', to: '/contact' },
     ],
   },
   {

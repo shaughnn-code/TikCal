@@ -21,6 +21,7 @@ import Overlap from './pages/Overlap.jsx'
 import OverlapSession from './pages/OverlapSession.jsx'
 import DanceFloorLoader from './components/DanceFloorLoader.jsx'
 import About from './pages/About.jsx'
+import Contact from './pages/Contact.jsx'
 import Help from './pages/Help.jsx'
 import Privacy from './pages/Privacy.jsx'
 import Terms from './pages/Terms.jsx'
@@ -68,6 +69,7 @@ export default function App() {
       <Route path="/welcome" element={<WelcomeGate />} />
       {/* Static info / legal — public, reachable while logged out. */}
       <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
       <Route path="/help" element={<Help />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
