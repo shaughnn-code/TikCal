@@ -17,3 +17,5 @@ supabase/.temp/
 
 # HQ personal data — stays on your machine
 hq/data/
+hq/dist-artifact/
+hq/hq-demo.html
