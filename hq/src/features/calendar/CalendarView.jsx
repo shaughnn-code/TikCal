@@ -74,7 +74,7 @@ function MonthCell({ date, monthIndex, store, onOpen }) {
       tabIndex={0}
       onClick={() => onOpen(d)}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen(d)}
-      className={`min-h-[6.5rem] cursor-pointer border border-line p-1.5 transition-colors hover:bg-panel2/40 ${
+      className={`min-h-[4.25rem] cursor-pointer border border-line p-1 transition-colors hover:bg-panel2/40 md:min-h-[6.5rem] md:p-1.5 ${
         outside ? 'bg-ink text-mut/40' : 'bg-panel/30'
       }`}
     >
@@ -124,8 +124,8 @@ function MonthView({ anchor, store, onOpen }) {
 function WeekView({ anchor, store, onOpen }) {
   const days = weekDays(anchor)
   return (
-    <div className="card overflow-hidden">
-      <div className="grid grid-cols-7">
+    <div className="card overflow-x-auto">
+      <div className="grid min-w-[640px] grid-cols-7">
         {days.map((date, i) => {
           const d = ymd(date)
           const isToday = d === todayYmd()

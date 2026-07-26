@@ -25,9 +25,9 @@ function QuickAdd() {
   }
 
   return (
-    <div className="card mb-6 flex items-center gap-2 p-3">
+    <div className="card mb-6 flex flex-wrap items-center gap-2 p-3">
       <input
-        className="input flex-1"
+        className="input w-full md:w-auto md:flex-1"
         placeholder="Add a task…"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -35,13 +35,13 @@ function QuickAdd() {
       />
       <input
         type="date"
-        className="input w-40"
+        className="input flex-1 md:w-40 md:flex-none"
         title="Due date (optional)"
         value={due}
         onChange={(e) => setDue(e.target.value)}
       />
       <input
-        className="input w-40"
+        className="input flex-1 md:w-40 md:flex-none"
         placeholder="tags, comma, sep"
         title="Tags (optional)"
         value={tags}

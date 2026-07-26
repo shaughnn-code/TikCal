@@ -132,6 +132,31 @@ function handle(method, pathname, body) {
   return json({ error: 'unknown endpoint' }, 404)
 }
 
+// --- backup hooks for the Data screen (web/PWA builds) ---
+// One JSON snapshot of everything; keep the file anywhere — a local folder or
+// a cloud-synced one (Drive / iCloud / Dropbox) — and import it to restore.
+window.__HQ_BACKUP__ = {
+  storageKind: storageWorks() ? 'browser storage' : 'memory only (this tab)',
+  counts: () => ({
+    tasks: db.tasks.length,
+    events: db.events.length,
+    sessions: db.sessions.length,
+    notes: db.notes.length,
+  }),
+  snapshot: () => JSON.stringify({ format: 'hq-backup', version: 1, savedAt: new Date().toISOString(), ...db }, null, 2),
+  restore: (text) => {
+    const parsed = JSON.parse(text)
+    for (const key of ['tasks', 'events', 'sessions', 'notes']) {
+      if (!Array.isArray(parsed[key])) throw new Error(`not an HQ backup: missing "${key}"`)
+    }
+    db.tasks = parsed.tasks
+    db.events = parsed.events
+    db.sessions = parsed.sessions
+    db.notes = parsed.notes
+    saveDb()
+  },
+}
+
 const realFetch = window.fetch.bind(window)
 window.fetch = async (input, init = {}) => {
   const url = typeof input === 'string' ? input : input.url

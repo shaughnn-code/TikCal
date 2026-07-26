@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:web": "vite build --config vite.web.config.js",
+    "build:demo": "vite build --config vite.artifact.config.js && node build-demo.mjs",
     "start": "node server.mjs",
     "test": "node --test 'src/**/*.test.js'"
   },

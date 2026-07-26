@@ -40,6 +40,23 @@ leaves your machine.
   backlinks show on both sides.
 - A calendar event can be converted to a task in one click.
 
+## On your phone (installable web app)
+
+The deploy workflow publishes a PWA build of HQ at **https://tikcal.nyc/hq/**
+(from `main`). Open it on your phone and use "Add to Home Screen" — it
+installs like an app, runs full-screen, and works offline.
+
+That build stores data in the browser, with a **Data** tab for maintenance:
+
+- **Export backup** writes everything to one readable `hq-data-….json` file —
+  save it locally or into a synced folder (iCloud, Google Drive, Dropbox) for
+  a cloud copy.
+- **Import backup** restores from that file (also how you move between
+  devices).
+
+Build it locally with `npm run build:web` (output in `dist-web/`); the
+single-file demo is `npm run build:demo` → `hq-demo.html`.
+
 ## Development
 
 ```sh

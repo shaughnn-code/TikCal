@@ -19,3 +19,4 @@ supabase/.temp/
 hq/data/
 hq/dist-artifact/
 hq/hq-demo.html
+hq/dist-web/

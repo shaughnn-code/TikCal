@@ -222,6 +222,15 @@ export default function NotesView() {
     setMode(next)
   }
 
+  // Phone layout shows one pane at a time; "back" returns to the list.
+  const handleBack = async () => {
+    await flushSave()
+    selectedIdRef.current = null
+    setSelectedId(null)
+    setBodyStatus('idle')
+    setHash(null)
+  }
+
   const onDraftChange = (e) => {
     const v = e.target.value
     draftRef.current = v
@@ -278,8 +287,10 @@ export default function NotesView() {
 
   return (
     <div className="flex h-full">
-      {/* ----- left pane: note list ----- */}
-      <div className="flex w-72 shrink-0 flex-col border-r border-line">
+      {/* ----- left pane: note list (on phones: hidden while a note is open) ----- */}
+      <div
+        className={`${selectedId ? 'hidden md:flex' : 'flex'} w-full shrink-0 flex-col border-r border-line md:w-72`}
+      >
         <div className="flex items-center justify-between px-4 pb-2 pt-4">
           <h1 className="text-lg font-semibold">Notes</h1>
           <button className="btn-gold" onClick={handleNew}>
@@ -356,8 +367,8 @@ export default function NotesView() {
         </div>
       </div>
 
-      {/* ----- right pane: open note ----- */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      {/* ----- right pane: open note (on phones: only when one is open) ----- */}
+      <div className={`${selectedId ? 'flex' : 'hidden md:flex'} min-w-0 flex-1 flex-col`}>
         {notes.length === 0 ? (
           <EmptyState
             icon="note"
@@ -372,6 +383,9 @@ export default function NotesView() {
           <>
             {/* toolbar */}
             <div className="flex items-center gap-3 border-b border-line px-4 py-2.5">
+              <button className="btn-ghost -ml-2 p-1 md:hidden" onClick={handleBack} aria-label="Back to notes">
+                <Icon name="chevL" size={18} />
+              </button>
               <div className="flex overflow-hidden rounded-lg border border-line">
                 {['edit', 'preview'].map((m) => (
                   <button

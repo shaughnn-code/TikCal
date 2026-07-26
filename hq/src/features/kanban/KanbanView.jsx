@@ -185,7 +185,7 @@ function Column({ status, tasks, sessions, over, setOver, actions }) {
         <span className="ml-auto font-mono text-[11px] text-mut">{tasks.length}</span>
       </div>
 
-      <div className="flex max-h-[calc(100vh-14rem)] flex-col gap-2 overflow-y-auto p-2">
+      <div className="flex max-h-72 flex-col gap-2 overflow-y-auto p-2 md:max-h-[calc(100vh-14rem)]">
         {tasks.length === 0 ? (
           <div className="label py-6 text-center opacity-60">no cards</div>
         ) : (
@@ -236,7 +236,7 @@ export default function KanbanView() {
         <div className="label mt-1">drag cards between columns</div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid gap-4 md:grid-cols-3">
         {COLUMNS.map((status) => (
           <Column
             key={status}

@@ -8,6 +8,7 @@ import KanbanView from './features/kanban/KanbanView.jsx'
 import CalendarView from './features/calendar/CalendarView.jsx'
 import TimerView from './features/timer/TimerView.jsx'
 import NotesView from './features/notes/NotesView.jsx'
+import DataView from './features/data/DataView.jsx'
 
 const NAV = [
   { hash: '#/tasks', label: 'Tasks', icon: 'list', View: TasksView },
@@ -15,6 +16,11 @@ const NAV = [
   { hash: '#/calendar', label: 'Calendar', icon: 'calendar', View: CalendarView },
   { hash: '#/focus', label: 'Focus', icon: 'timer', View: TimerView },
   { hash: '#/notes', label: 'Notes', icon: 'note', View: NotesView },
+  // Browser-storage builds (PWA/demo) get the backup screen; the local server
+  // build keeps data in plain files instead, so no tab there.
+  ...(typeof window !== 'undefined' && window.__HQ_BACKUP__
+    ? [{ hash: '#/data', label: 'Data', icon: 'db', View: DataView }]
+    : []),
 ]
 
 function useHashRoute() {
@@ -55,7 +61,7 @@ function Shell() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <aside className="flex w-52 shrink-0 flex-col border-r border-line bg-panel/50">
+      <aside className="hidden w-52 shrink-0 flex-col border-r border-line bg-panel/50 md:flex">
         <div className="px-5 pb-4 pt-5">
           <a href="#/tasks" className="text-2xl font-bold tracking-tight">
             HQ<span className="text-gold">.</span>
@@ -83,7 +89,7 @@ function Shell() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 overflow-y-auto">
+      <main className="min-w-0 flex-1 overflow-y-auto pb-20 md:pb-0">
         {error && (
           <div className="m-4 flex items-center justify-between rounded-lg border border-red/50 bg-red/10 px-4 py-2 text-sm text-red">
             <span>{error}</span>
@@ -98,7 +104,46 @@ function Shell() {
           <div className="flex h-full items-center justify-center font-mono text-sm text-mut">loading…</div>
         )}
       </main>
+
+      <MobileNav current={current} />
     </div>
+  )
+}
+
+// Phone layout: bottom tab bar. The Focus tab turns into a live countdown
+// while the timer runs, so the session follows you around the app.
+function MobileNav({ current }) {
+  const timer = useTimer()
+  return (
+    <nav
+      className="fixed inset-x-0 bottom-0 z-40 grid border-t border-line bg-panel/95 backdrop-blur md:hidden"
+      style={{
+        gridTemplateColumns: `repeat(${NAV.length}, 1fr)`,
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
+      {NAV.map((n) => {
+        const active = current.hash === n.hash
+        const isFocusTab = n.hash === '#/focus'
+        const running = isFocusTab && timer.phase !== 'idle'
+        return (
+          <a
+            key={n.hash}
+            href={n.hash}
+            className={`flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium ${
+              active ? 'text-gold' : running ? 'text-gold/80' : 'text-mut'
+            }`}
+          >
+            <Icon name={n.icon} size={20} />
+            {running ? (
+              <span className="font-mono tabular-nums">{fmtClock(timer.remainingMs)}</span>
+            ) : (
+              n.label
+            )}
+          </a>
+        )
+      })}
+    </nav>
   )
 }
 

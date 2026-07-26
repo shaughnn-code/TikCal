@@ -35,6 +35,12 @@ jobs:
         # GitHub Pages has no SPA rewrite; serving the app shell as 404.html
         # lets deep links like /calendar boot React Router instead of 404ing.
         run: cp dist/index.html dist/404.html
+      - name: Build HQ (installable web app at /hq/)
+        run: |
+          npm ci --prefix hq
+          npm run build:web --prefix hq
+          mkdir -p dist/hq
+          cp -r hq/dist-web/. dist/hq/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist

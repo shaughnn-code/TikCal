@@ -19,6 +19,9 @@ const PATHS = {
   chevR: 'M9 6l6 6-6 6',
   tag: 'M4 4h7l9 9-7 7-9-9zM8.5 8.5h.01',
   arrowR: 'M4 12h16M13 5l7 7-7 7',
+  download: 'M12 3v12M7 10l5 5 5-5M4 21h16',
+  upload: 'M12 15V3M7 8l5-5 5 5M4 21h16',
+  db: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
 }
 
 const FILLED = new Set(['play', 'stop'])
