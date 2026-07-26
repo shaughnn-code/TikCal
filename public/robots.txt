@@ -1,0 +1,21 @@
+# tikcal.nyc — allow crawling of public pages.
+User-agent: *
+Allow: /
+
+# Auth, per-user, and session-private routes have no crawlable value.
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot
+Disallow: /reset
+Disallow: /setup
+Disallow: /welcome
+Disallow: /calendar
+Disallow: /plan
+Disallow: /discover
+Disallow: /events/
+Disallow: /profile
+Disallow: /friends
+Disallow: /overlap
+Disallow: /floor-preview
+
+Sitemap: https://tikcal.nyc/sitemap.xml

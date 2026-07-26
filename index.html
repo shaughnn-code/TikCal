@@ -5,7 +5,58 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AB%3C/text%3E%3C/svg%3E" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0a0e12" />
-    <title>TikCal — your crew's concert calendar</title>
+
+    <!-- ── SEO ──────────────────────────────────────────────────────────
+         Static tags serve the homepage (tikcal.nyc/). This is an SPA that
+         serves the same shell for every route, so these describe the site
+         as a whole. Per-route <title>/description/canonical need a runtime
+         head manager (react-helmet-async) — tracked as a follow-up. -->
+    <title>TikCal — NYC Concert Discovery & Group Availability</title>
+    <meta
+      name="description"
+      content="Discover upcoming NYC concerts and see when your crew is actually free. TikCal pairs concert discovery with group availability, RSVPs, and shared calendars for nights out in New York City."
+    />
+    <link rel="canonical" href="https://tikcal.nyc/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TikCal" />
+    <meta property="og:title" content="TikCal — NYC Concert Discovery & Group Availability" />
+    <meta
+      property="og:description"
+      content="Discover upcoming NYC concerts and see when your crew is free. Concert discovery, group availability, RSVPs, and shared calendars for New York City nights out."
+    />
+    <meta property="og:url" content="https://tikcal.nyc/" />
+    <meta property="og:image" content="https://tikcal.nyc/discoball.png" />
+    <meta property="og:image:alt" content="TikCal — a disco ball over an NYC concert calendar" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TikCal — NYC Concert Discovery & Group Availability" />
+    <meta
+      name="twitter:description"
+      content="Discover upcoming NYC concerts and see when your crew is free. Concert discovery, group availability, RSVPs, and shared calendars for NYC nights out."
+    />
+    <meta name="twitter:image" content="https://tikcal.nyc/discoball.png" />
+    <!-- twitter:site / twitter:creator omitted until a real @handle is confirmed. -->
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "TikCal",
+        "url": "https://tikcal.nyc/",
+        "description": "NYC concert discovery app that surfaces upcoming shows and shows when your crew is free — group availability, RSVPs, and shared calendars for nights out in New York City.",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Web, iOS, Android",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+    <!-- NOTE: add "sameAs": [ ...social profile URLs... ] to the block above
+         once the real Instagram/X handles are confirmed. -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
