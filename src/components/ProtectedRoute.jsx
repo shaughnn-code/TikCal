@@ -20,7 +20,11 @@ export const ProtectedRoute = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    // The app shell for every signed-in route. `pb-[var(--sab)]` keeps the last
+    // row of content clear of the iOS home indicator / Android gesture bar.
+    // box-sizing is border-box globally, so the padding sits *inside* the 100vh
+    // of min-h-screen — it adds no phantom scroll. 0px on the web.
+    <div className="min-h-screen pb-[var(--sab)]">
       <Nav />
       <Outlet />
     </div>

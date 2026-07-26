@@ -3,15 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AB%3C/text%3E%3C/svg%3E" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0a0e12" />
+    <!-- viewport-fit=cover is load-bearing on iOS: without it every
+         env(safe-area-inset-*) resolves to 0 and the app renders under the
+         Dynamic Island / home indicator. See :root in src/index.css. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Aurora base (ink). Was #0a0e12, a leftover from the retired Wide Ice theme. -->
+    <meta name="theme-color" content="#0b0b11" />
     <title>TikCal — your crew's concert calendar</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@1,800&family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Fonts are self-hosted (public/fonts, declared in src/fonts.css) so the
+         WebView has them on a cold, offline start — no FOUT, no network hop.
+         Preload only the two faces that paint above the fold: body text and the
+         chrome wordmark. -->
+    <link rel="preload" href="/fonts/space-grotesk-400-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/barlow-800i-latin.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <div id="root"></div>

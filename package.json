@@ -18,6 +18,8 @@
     "@capacitor/browser": "^8.0.4",
     "@capacitor/core": "^8.4.2",
     "@capacitor/ios": "^8.4.2",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@iconify/react": "^5.2.1",
     "@supabase/supabase-js": "^2.45.4",
     "react": "^18.3.1",
@@ -25,6 +27,7 @@
     "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.4.2",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",

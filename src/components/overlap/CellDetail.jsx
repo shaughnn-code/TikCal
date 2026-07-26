@@ -129,9 +129,11 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      {/* Bottom-anchored sheet: its last row would otherwise sit under the home
+          indicator / gesture bar, so the bottom inset adds to its own p-5. */}
       <HudBox
         hero
-        className="w-full sm:max-w-lg max-h-[80vh] overflow-y-auto p-5 rounded-t-2xl"
+        className="w-full sm:max-w-lg max-h-[80vh] overflow-y-auto p-5 pb-[calc(1.25rem+var(--sab))] rounded-t-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">

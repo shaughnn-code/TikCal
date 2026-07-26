@@ -1,8 +1,25 @@
+/* Self-hosted @font-face declarations (generated — see the file header). */
+@import './fonts.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  /* ── Device safe areas ────────────────────────────────────────
+     Single source of truth for the notch / Dynamic Island / home indicator /
+     Android gesture bar insets, so call sites use Tailwind arbitrary values
+     (`pt-[calc(1rem+var(--sat))]`) instead of scattering env() around.
+
+     These need `viewport-fit=cover` on the viewport meta to be non-zero. In a
+     normal desktop browser — and on any device without insets — env() has no
+     value, the 0px fallback applies, and every rule below is a no-op. */
+  :root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+  }
   *,
   *::before,
   *::after {
@@ -206,7 +223,9 @@
   .floor-scene {
     position: fixed; inset: 0; z-index: 60; overflow: hidden;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 14px; padding: 24px; background: #05070b;
+    gap: 14px; background: #05070b;
+    /* fixed + inset:0 ⇒ spans the whole display, insets included. */
+    padding: calc(24px + var(--sat)) calc(24px + var(--sar)) calc(24px + var(--sab)) calc(24px + var(--sal));
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
     transition: opacity .45s ease;
   }
@@ -334,5 +353,7 @@
     font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: .08em;
     background: #6EE7B7; color: #04221a; border: none; border-radius: 6px; padding: 14px 32px; cursor: pointer;
   }
-  .wel-skip { position: absolute; top: 18px; right: 20px; z-index: 5; font-size: 11px; color: #5b6b78; background: none; border: none; cursor: pointer; letter-spacing: .08em; }
+  /* Skip sits in the top-right corner of a fixed, full-bleed scene — clear the
+     status bar / notch and the rounded corner. */
+  .wel-skip { position: absolute; top: calc(18px + var(--sat)); right: calc(20px + var(--sar)); z-index: 5; font-size: 11px; color: #5b6b78; background: none; border: none; cursor: pointer; letter-spacing: .08em; }
 }

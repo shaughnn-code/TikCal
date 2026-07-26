@@ -184,7 +184,8 @@ export default function OverlapSession() {
     <>
       <GridBg lite />
 
-      <header className="relative z-20 border-b border-white/[0.07] px-4 py-4 sticky top-0 bg-ink/80 backdrop-blur">
+      {/* Same sticky-header safe-area treatment as Nav — see Nav.jsx. */}
+      <header className="relative z-20 border-b border-white/[0.07] px-4 py-4 pt-[calc(1rem+var(--sat))] pr-[calc(1rem+var(--sar))] pl-[calc(1rem+var(--sal))] sticky top-0 bg-ink/80 backdrop-blur">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button onClick={() => navigate(user ? '/overlap' : '/')}>
             <Logo size="sm" />

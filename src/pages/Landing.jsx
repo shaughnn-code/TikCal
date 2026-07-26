@@ -15,9 +15,10 @@ export default function Landing() {
   ]
 
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative min-h-screen flex flex-col pb-[var(--sab)]">
       <GridBg />
-      <header className="relative z-10 px-5 py-5 flex items-center justify-between max-w-5xl mx-auto w-full">
+      {/* In-flow header, so it starts at y=0 under the status bar on device. */}
+      <header className="relative z-10 px-5 py-5 pt-[calc(1.25rem+var(--sat))] flex items-center justify-between max-w-5xl mx-auto w-full">
         <Logo size="sm" />
         <div className="flex items-center gap-4 text-sm">
           {loggedIn ? (
@@ -41,7 +42,6 @@ export default function Landing() {
       </header>
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center max-w-3xl mx-auto">
-        <div className="text-5xl mb-5">🎫</div>
         <Logo size="lg" framed className="mb-5" />
         <div className="font-mono text-xs text-violet tracking-[0.18em] mb-3">EVERY SOURCE · ONE CALENDAR</div>
         <p className="text-slate-400 text-base max-w-md mb-9 leading-relaxed">
