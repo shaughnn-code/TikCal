@@ -11,6 +11,5 @@ temporary screenshots/
 .claude/settings.local.json
 .agents/
 skills-lock.json
-.claude/skills/
 
 supabase/.temp/
