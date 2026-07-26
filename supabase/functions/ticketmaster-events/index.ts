@@ -16,6 +16,21 @@ const json = (b: unknown, status = 200) =>
 // New York DMA (covers NYC + the boroughs).
 const NYC_DMA = '345'
 
+// Ticketmaster classification ids. The unfiltered NYC music feed is mostly
+// stadium pop, tribute acts and comedy-adjacent bookings, which buries the
+// club listings this app exists for — so dance/electronic is the default lens
+// and the caller has to opt out of it.
+const GENRES: Record<string, string> = {
+  electronic: 'KnvZfZ7vAvF', // Dance/Electronic
+  rock: 'KnvZfZ7vAeA',
+  pop: 'KnvZfZ7vAev',
+  hiphop: 'KnvZfZ7vAv1',
+  rnb: 'KnvZfZ7vAee',
+  reggae: 'KnvZfZ7vAed',
+  latin: 'KnvZfZ7vAJ6',
+  jazz: 'KnvZfZ7vAvE',
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
@@ -29,18 +44,26 @@ Deno.serve(async (req) => {
   const { data: { user } } = await authed.auth.getUser()
   if (!user) return json({ error: 'Not signed in.' }, 401)
 
-  let body: { keyword?: string; size?: number } = {}
+  let body: { keyword?: string; size?: number; genre?: string } = {}
   try { body = await req.json() } catch { /* defaults */ }
+
+  // 'all' widens to every music genre; anything unrecognised falls back to the
+  // default rather than silently returning an empty feed.
+  const genre = body.genre ?? 'electronic'
+  const classificationId = genre === 'all' ? '' : GENRES[genre] || GENRES.electronic
 
   const startDateTime = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
   const p = new URLSearchParams({
     apikey: key,
     dmaId: NYC_DMA,
-    classificationName: 'music',
     sort: 'date,asc',
     size: String(Math.min(body.size || 100, 199)),
     startDateTime,
   })
+  // classificationId already implies the music segment; sending both narrows
+  // to their intersection and drops events tagged only at genre level.
+  if (classificationId) p.set('classificationId', classificationId)
+  else p.set('classificationName', 'music')
   if (body.keyword) p.set('keyword', body.keyword)
 
   try {

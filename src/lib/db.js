@@ -189,7 +189,7 @@ export async function disconnectSpotify(userId) {
 export async function fetchMyArtists(userId) {
   const { data } = await supabase
     .from('music_artists')
-    .select('provider, artist_name, artist_norm, rank')
+    .select('provider, artist_name, artist_norm, artist_id, rank')
     .eq('user_id', userId)
     .order('rank', { ascending: true })
   return data || []
