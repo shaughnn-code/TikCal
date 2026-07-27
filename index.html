@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="google-site-verification" content="OyRIaQy2F8JBwAYxY0sYj-t11662LDSymvvlNdRiH6U" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AB%3C/text%3E%3C/svg%3E" />
     <!-- viewport-fit=cover is load-bearing on iOS: without it every
          env(safe-area-inset-*) resolves to 0 and the app renders under the
@@ -9,13 +10,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!-- Aurora base (ink). Was #0a0e12, a leftover from the retired Wide Ice theme. -->
     <meta name="theme-color" content="#0b0b11" />
-    <title>TikCal — your crew's concert calendar</title>
+
+    <!-- ── SEO ──────────────────────────────────────────────────────────
+         Static tags serve the homepage (tikcal.nyc/). This is an SPA that
+         serves the same shell for every route, so these describe the site
+         as a whole. Per-route <title>/description/canonical need a runtime
+         head manager (react-helmet-async) — tracked as a follow-up. -->
+    <title>TikCal — NYC Concert Discovery & Group Availability</title>
+    <meta
+      name="description"
+      content="Discover upcoming NYC concerts and see when your crew is actually free. TikCal pairs concert discovery with group availability, RSVPs, and shared calendars for nights out in New York City."
+    />
+    <link rel="canonical" href="https://tikcal.nyc/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TikCal" />
+    <meta property="og:title" content="TikCal — NYC Concert Discovery & Group Availability" />
+    <meta
+      property="og:description"
+      content="Discover upcoming NYC concerts and see when your crew is free. Concert discovery, group availability, RSVPs, and shared calendars for New York City nights out."
+    />
+    <meta property="og:url" content="https://tikcal.nyc/" />
+    <meta property="og:image" content="https://tikcal.nyc/discoball.png" />
+    <meta property="og:image:alt" content="TikCal — a disco ball over an NYC concert calendar" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TikCal — NYC Concert Discovery & Group Availability" />
+    <meta
+      name="twitter:description"
+      content="Discover upcoming NYC concerts and see when your crew is free. Concert discovery, group availability, RSVPs, and shared calendars for NYC nights out."
+    />
+    <meta name="twitter:image" content="https://tikcal.nyc/discoball.png" />
+    <!-- twitter:site / twitter:creator omitted until a real @handle is confirmed. -->
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "TikCal",
+        "url": "https://tikcal.nyc/",
+        "description": "NYC concert discovery app that surfaces upcoming shows and shows when your crew is free — group availability, RSVPs, and shared calendars for nights out in New York City.",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Web, iOS, Android",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+    <!-- NOTE: add "sameAs": [ ...social profile URLs... ] to the block above
+         once the real Instagram/X handles are confirmed. -->
+    <!-- ─────────────────────────────────────────────────────────────── -->
+
     <!-- Fonts are self-hosted (public/fonts, declared in src/fonts.css) so the
          WebView has them on a cold, offline start — no FOUT, no network hop.
-         Preload only the two faces that paint above the fold: body text and the
-         chrome wordmark. -->
+         This replaces the Google Fonts CDN links the web-only SEO branch used —
+         self-hosting works for both web and the native WebView. Preload only the
+         two faces that paint above the fold: body text and the chrome wordmark. -->
     <link rel="preload" href="/fonts/space-grotesk-400-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/barlow-800i-latin.woff2" as="font" type="font/woff2" crossorigin />
+
   </head>
   <body>
     <div id="root"></div>
