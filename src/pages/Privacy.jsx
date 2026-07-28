@@ -1,8 +1,14 @@
 import InfoPage, { H2, Note } from '../components/InfoPage.jsx'
+import Seo from '../components/Seo.jsx'
 
 export default function Privacy() {
   return (
     <InfoPage kicker="PRIVACY" title="Privacy Policy" updated="Draft — full policy coming soon">
+      <Seo
+        title="Privacy Policy"
+        path="/privacy"
+        description="How TikCal handles your data: what we store to run your account, and what we don't do with it."
+      />
       <Note>
         This is a placeholder. Our complete privacy policy is being finalized and will replace this
         page. It isn't a legal agreement yet.

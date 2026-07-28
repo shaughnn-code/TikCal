@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { GridBg, Logo, Btn, HudBox } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
+import Seo from '../components/Seo.jsx'
 
 export default function Landing() {
   const { user, profile } = useAuth()
@@ -16,6 +17,11 @@ export default function Landing() {
 
   return (
     <div className="relative min-h-screen flex flex-col">
+      <Seo
+        home
+        path="/"
+        description="Discover upcoming NYC concerts and see when your crew is actually free. TikCal pairs concert discovery with group availability, RSVPs, and shared calendars for nights out in New York City."
+      />
       <GridBg />
       <header className="relative z-10 px-5 py-5 flex items-center justify-between max-w-5xl mx-auto w-full">
         <Logo size="sm" />
