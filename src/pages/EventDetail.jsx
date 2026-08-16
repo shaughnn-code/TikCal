@@ -140,10 +140,24 @@ export default function EventDetail() {
           {event.artist && <Field label="Artist">{event.artist}</Field>}
           <Field label="Date">{fmt}</Field>
           <Field label="Venue">{event.venue || '—'}</Field>
+          {event.start_time && <Field label="Time">{event.start_time}</Field>}
           <Field label="Added by">
             {event.owner?.totem && <Totem icon={event.owner.totem} size={16} />}
             {isOwner ? 'You' : event.owner?.name || 'A friend'}
           </Field>
+          {event.source_url && (
+            <div className="col-span-2">
+              <SecLabel className="mb-1">Source</SecLabel>
+              <a
+                href={event.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-violet hover:text-iris underline underline-offset-2 truncate block transition-colors"
+              >
+                {event.source_url}
+              </a>
+            </div>
+          )}
           {event.notes && (
             <div className="col-span-2">
               <SecLabel className="mb-1">Notes</SecLabel>

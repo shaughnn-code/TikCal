@@ -25,7 +25,7 @@ signature. **Color is information**: the brand hue is violet chrome; data hues
 - `cyan #2FE6E6` / `ice #4cc9f0` are **legacy** — no longer chrome; `ice` survives only as a crew-color option. Don't reintroduce them as UI accents.
 - **Backdrop:** aurora light-leak bloom, not a Tron grid. `GridBg` still renders it via the reused `.grid-glow`/`.grid-floor`/`.grid-horizon` classes (repainted).
 - **Surfaces:** `HudBox` is a soft rounded panel by default (pass `brackets` for the legacy HUD corner marks). Event cards (`EventCard`, WeekView chips) = dark cards with a colored left **spine** carrying the event's hue.
-- Fonts: Barlow 800 italic (logo), Syne (headings), Space Grotesk (body), IBM Plex Mono (labels/data)
+- Fonts: Barlow 800 italic (logo), Syne (headings), Schibsted Grotesk (body), IBM Plex Mono (labels/data)
 
 See `docs/tikcal-overlap-design.md` for the Overlap feature's cell-state → render contract.
 

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
-import { fetchMyCrews } from '../lib/db.js'
+import { fetchMyCrews, fetchTicketmaster } from '../lib/db.js'
+import { pickTimeSuggestion } from '../lib/calendar/timeSuggest.js'
 import { GridBg, Wrap, Inp, Txta, Btn, SecLabel } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { SmartAdd } from '../components/SmartAdd.jsx'
@@ -16,7 +17,9 @@ export default function AddEvent() {
 
   // The Plan page links here with ?date=YYYY-MM-DD to seed an open night.
   const seedDate = params.get('date') || ''
-  const [form, setForm] = useState({ title: '', artist: '', event_date: seedDate, venue: '', notes: '' })
+  const [form, setForm] = useState({
+    title: '', artist: '', event_date: seedDate, venue: '', notes: '', start_time: '', source_url: '',
+  })
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [shareFriends, setShareFriends] = useState(false)
@@ -24,8 +27,22 @@ export default function AddEvent() {
   const [selCrews, setSelCrews] = useState(new Set())
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
+  const [suggestion, setSuggestion] = useState(null) // { time } | null
+  const [suggesting, setSuggesting] = useState(false)
 
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }))
+
+  // Reverse-search Ticketmaster for a likely start time when the user left
+  // it blank -- never applied automatically, just offered as a chip they
+  // can accept or dismiss.
+  const suggestTime = async () => {
+    setSuggesting(true)
+    setSuggestion(null)
+    const { events } = await fetchTicketmaster({ keyword: form.artist || form.title })
+    const match = pickTimeSuggestion(events, { title: form.title, artist: form.artist, date: form.event_date })
+    setSuggesting(false)
+    setSuggestion(match ? { time: match.time.slice(0, 5) } : { time: null })
+  }
 
   useEffect(() => {
     fetchMyCrews().then(setCrews).catch(() => {})
@@ -47,15 +64,19 @@ export default function AddEvent() {
       return next
     })
 
-  // VenuePicker accepts free-text; keep the extracted venue as-is.
+  // VenuePicker accepts free-text; keep the extracted venue as-is. Merges
+  // onto whatever's already typed rather than replacing wholesale, so a
+  // manually-entered start time or source link survives a Smart Add run --
+  // ingest doesn't extract either of those today.
   const applyFields = (f) =>
-    setForm({
+    setForm((prev) => ({
+      ...prev,
       title: f.title || '',
       artist: f.artist || '',
       event_date: f.event_date || '',
       venue: f.venue || '',
       notes: f.notes || '',
-    })
+    }))
 
   const submit = async (e) => {
     e.preventDefault()
@@ -73,7 +94,14 @@ export default function AddEvent() {
       }
       const { data: event, error: insErr } = await supabase
         .from('events')
-        .insert({ ...form, owner_id: user.id, share_friends: shareFriends, flyer_url })
+        .insert({
+          ...form,
+          start_time: form.start_time || null,
+          source_url: form.source_url || null,
+          owner_id: user.id,
+          share_friends: shareFriends,
+          flyer_url,
+        })
         .select()
         .single()
       if (insErr) throw insErr
@@ -122,6 +150,38 @@ export default function AddEvent() {
           <div className="grid grid-cols-2 gap-4">
             <Inp label="Date" type="date" value={form.event_date} onChange={set('event_date')} required />
             <VenuePicker label="Venue" value={form.venue} onChange={set('venue')} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Inp label="Start Time (optional)" type="time" value={form.start_time} onChange={set('start_time')} />
+              {!form.start_time && form.event_date && (form.artist || form.title) && (
+                <button
+                  type="button"
+                  onClick={suggestTime}
+                  disabled={suggesting}
+                  className="mt-1.5 font-mono text-[10px] text-violet hover:text-iris disabled:opacity-50 transition-colors"
+                >
+                  {suggesting ? 'Searching…' : 'Suggest time from Ticketmaster'}
+                </button>
+              )}
+              {suggestion && (
+                suggestion.time ? (
+                  <div className="mt-1.5 flex items-center gap-2 font-mono text-[10px] text-slate-400">
+                    Suggested <span className="text-[#e8f4f8] font-bold">{suggestion.time}</span>
+                    <button type="button" onClick={() => { set('start_time')(suggestion.time); setSuggestion(null) }} className="text-mint hover:text-mint/80">
+                      Use
+                    </button>
+                    <button type="button" onClick={() => setSuggestion(null)} className="text-slate-500 hover:text-slate-300">
+                      Dismiss
+                    </button>
+                  </div>
+                ) : (
+                  <p className="mt-1.5 font-mono text-[10px] text-slate-600">No match found on Ticketmaster.</p>
+                )
+              )}
+            </div>
+            <Inp label="Source Link (optional)" value={form.source_url} onChange={set('source_url')} placeholder="Ticket page, IG post…" />
           </div>
 
           <Txta label="Notes (optional)" value={form.notes} onChange={set('notes')} placeholder="Doors at 10, tickets at will call…" />

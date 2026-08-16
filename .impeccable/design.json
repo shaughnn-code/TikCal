@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-16T00:00:00.000Z",
+  "title": "Design System: TikCal",
+  "extensions": {
+    "colorMeta": {
+      "aurora": {
+        "role": "primary",
+        "displayName": "Magenta Core",
+        "canonical": "#c04bff",
+        "tonalRamp": ["#2a0d38", "#411457", "#5c1c7a", "#7c299f", "#9c37c2", "#c04bff", "#d685ff", "#eabaff"]
+      },
+      "violet": {
+        "role": "primary",
+        "displayName": "Mid Violet",
+        "canonical": "#8b5cff",
+        "tonalRamp": ["#1c1240", "#2c1c63", "#402a8c", "#553bab", "#6c4bcf", "#8b5cff", "#ab8bff", "#cdb8ff"]
+      },
+      "iris": {
+        "role": "primary",
+        "displayName": "Blue Tail",
+        "canonical": "#5b6bff",
+        "tonalRamp": ["#111340", "#1b1f63", "#282e8c", "#3640ab", "#4552cf", "#5b6bff", "#8b98ff", "#bcc4ff"]
+      },
+      "mint": {
+        "role": "data",
+        "displayName": "Shared Mint",
+        "canonical": "#6EE7B7",
+        "tonalRamp": ["#052e21", "#0a4a37", "#106b4f", "#178f6a", "#2fc48f", "#6EE7B7", "#a4f2d3", "#d4faea"]
+      },
+      "orange": {
+        "role": "data",
+        "displayName": "Free/GO Orange",
+        "canonical": "#ff6b2b",
+        "tonalRamp": ["#3a1200", "#5c1e00", "#832c00", "#ab3c00", "#d4530f", "#ff6b2b", "#ff9a6b", "#ffc7ab"]
+      },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#0b0b11", "tonalRamp": ["#000000", "#050508", "#0b0b11", "#15151c", "#1c1c25", "#28282f", "#4a4a58", "#8f8fa3"] },
+      "panel": { "role": "neutral", "displayName": "Panel", "canonical": "#15151c", "tonalRamp": ["#060609", "#0b0b11", "#15151c", "#1c1c25", "#28282f", "#3a3a46", "#5a5a6b", "#8f8fa3"] },
+      "text-primary": { "role": "neutral", "displayName": "Text Primary", "canonical": "#e8f4f8", "tonalRamp": ["#141516", "#24262a", "#3a3d42", "#565a61", "#7d838c", "#a9b0b8", "#cfd8dd", "#e8f4f8"] },
+      "text-body": { "role": "neutral", "displayName": "Text Body", "canonical": "#ececf4", "tonalRamp": ["#141416", "#242428", "#3a3a42", "#56565f", "#7d7d89", "#a9a9b3", "#cfcfd8", "#ececf4"] },
+      "text-secondary": { "role": "neutral", "displayName": "Text Secondary", "canonical": "#94a3b8", "tonalRamp": ["#12161b", "#1e252d", "#2f3945", "#465464", "#647084", "#94a3b8", "#b8c3d0", "#dbe1e8"] },
+      "ice": { "role": "legacy", "displayName": "Ice (retired chrome)", "canonical": "#4cc9f0", "tonalRamp": ["#032b3a", "#054a61", "#087089", "#0d97b3", "#2bb9d8", "#4cc9f0", "#87ddf7", "#c2eefb"] },
+      "mint-ink": { "role": "paired", "displayName": "Mint Ink", "canonical": "#04221a", "tonalRamp": ["#01100c", "#02170f", "#031e17", "#04221a", "#062f24", "#0a4a37", "#106b4f", "#178f6a"] },
+      "muted-past": { "role": "neutral", "displayName": "Muted Past", "canonical": "#334155", "tonalRamp": ["#0c1017", "#141b26", "#1e2836", "#283749", "#334155", "#4a5b73", "#6b7d96", "#95a4b8"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "TikCal wordmark only — chrome-gradient text-fill, never page content." },
+      "section-headline": { "displayName": "Section Headline", "purpose": "Fixed 26px Syne view-title heading (\"August 2026\", \"Week of Aug 16–22\") — same size in MonthView/WeekView/DayView." },
+      "heading": { "displayName": "Heading", "purpose": "Section and page headings (Syne)." },
+      "body": { "displayName": "Body", "purpose": "Event titles, notes, primary reading content (Schibsted Grotesk)." },
+      "label": { "displayName": "Label / Mono", "purpose": "All metadata: dates, counts, venues, status, button text (IBM Plex Mono, uppercase, tracked). Steps by local density, not component type: 9px (tightest caption) / 10px (most common) / 11px (SecLabel default) / 12.5px (chip/badge) / 13px (largest, near-body weight)." }
+    },
+    "shadows": [
+      { "name": "card-ambient", "value": "inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px -16px rgba(0,0,0,0.8)", "purpose": "Default HudBox elevation — inset highlight + soft ambient dark glow, no directional drop-shadow." },
+      { "name": "card-hero", "value": "inset 0 1px 0 rgba(255,255,255,0.06), 0 16px 40px -12px rgba(139,92,255,0.35)", "purpose": "Elevated/hero HudBox (popovers, featured panels) — violet-tinted ambient wash." },
+      { "name": "button-aurora", "value": "0 8px 24px -8px rgba(192,75,255,0.6)", "purpose": "Primary CTA glow, matches the aurora gradient fill." }
+    ],
+    "motion": [
+      { "name": "zoom-in", "value": "260ms–320ms ease, scale(.92→1) opacity(0→1)", "purpose": "Incoming calendar view on Month/Week/Day zoom transitions." },
+      { "name": "zoom-out", "value": "320ms ease, scale(1→1.08) opacity(1→0)", "purpose": "Outgoing calendar view on zoom transitions." },
+      { "name": "step-enter", "value": "220ms cubic-bezier(0.16,1,0.3,1), translate3d(var(--tx),var(--ty),0)→(0,0,0) opacity(0→1)", "purpose": "Incoming period on swipe/arrow-key step navigation." },
+      { "name": "step-exit", "value": "160ms cubic-bezier(0.16,1,0.3,1), translate3d(0,0,0)→(var(--tx),var(--ty),0) opacity(1→0)", "purpose": "Outgoing period on step navigation — faster than enter so motion reads as settling, not a carousel." },
+      { "name": "interactive-press", "value": "150ms, scale(1→0.9–0.99)", "purpose": "Shared active-state press-down across buttons, chips, cards, rail controls." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button (Aurora)",
+      "kind": "button",
+      "refersTo": "button-aurora",
+      "description": "The one CTA-strength button — gradient chrome fill, reserved for a screen's primary action.",
+      "html": "<button class=\"ds-btn-aurora\">+ Add Show</button>",
+      "css": ".ds-btn-aurora { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: linear-gradient(90deg, #c04bff, #8b5cff); border: none; border-radius: 4px; padding: 12px 20px; transition: filter 0.15s, transform 0.15s; box-shadow: 0 8px 24px -8px rgba(192,75,255,0.6); } .ds-btn-aurora:hover { filter: brightness(1.1); } .ds-btn-aurora:focus-visible { outline: 2px solid #8b5cff; outline-offset: 2px; } .ds-btn-aurora:active { transform: scale(0.96); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Tertiary/cancel action — hairline border, no fill.",
+      "html": "<button class=\"ds-btn-ghost\">Cancel</button>",
+      "css": ".ds-btn-ghost { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #cbd5e1; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 12px 20px; transition: border-color 0.15s, color 0.15s; } .ds-btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: #fff; } .ds-btn-ghost:focus-visible { outline: 2px solid #8b5cff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Event Card",
+      "kind": "card",
+      "refersTo": "card-event",
+      "description": "The primary list row — colored spine carries the event's crew/artist hue, avatar chip shows initials.",
+      "html": "<div class=\"ds-card-event\"><span class=\"ds-card-spine\"></span><span class=\"ds-card-avatar\">FJ</span><div><div class=\"ds-card-title\">Open Air</div><div class=\"ds-card-sub\">AUG 22 · KNOCKDOWN CENTER</div></div></div>",
+      "css": ".ds-card-event { position: relative; display: flex; align-items: center; gap: 14px; background: rgba(21,21,28,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 14px 14px 14px 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px -16px rgba(0,0,0,0.8); transition: border-color 0.2s, transform 0.2s; } .ds-card-event:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); } .ds-card-spine { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 4px; background: #8b5cff; box-shadow: 0 0 10px rgba(139,92,255,0.4); } .ds-card-avatar { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: #8b5cff; background: rgba(139,92,255,0.1); border: 1px solid rgba(139,92,255,0.4); flex-shrink: 0; } .ds-card-title { font-family: Barlow, system-ui, sans-serif; font-weight: 700; font-size: 15px; color: #e8f4f8; } .ds-card-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #94a3b8; margin-top: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": null,
+      "description": "Labeled field — mono uppercase caption above, quiet border-color focus (no ring).",
+      "html": "<div class=\"ds-field\"><span class=\"ds-field-label\">Event Title</span><input class=\"ds-input\" placeholder=\"e.g. Open Air\" /></div>",
+      "css": ".ds-field-label { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; } .ds-input { width: 100%; background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 12px; color: #e8f4f8; font-size: 14px; transition: border-color 0.15s; } .ds-input::placeholder { color: #475569; } .ds-input:focus { outline: none; border-color: rgba(139,92,255,0.6); }"
+    },
+    {
+      "name": "Crew Chip",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "Data-hue badge — never chrome-colored, always the crew's own reserved color.",
+      "html": "<span class=\"ds-chip\"><span class=\"ds-chip-dot\"></span>NIGHT OWLS</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(76,201,240,0.4); color: #4cc9f0; } .ds-chip-dot { width: 6px; height: 6px; border-radius: 50%; background: #4cc9f0; }"
+    },
+    {
+      "name": "HUD Panel",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Signature surface primitive underlying cards, popovers, and forms — inset highlight, glow-not-shadow elevation, optional violet hero wash.",
+      "html": "<div class=\"ds-hudbox\">Panel content</div>",
+      "css": ".ds-hudbox { background: rgba(21,21,28,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px -16px rgba(0,0,0,0.8); padding: 16px; } .ds-hudbox.hero { border-color: rgba(139,92,255,0.3); background: rgba(139,92,255,0.07); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 16px 40px -12px rgba(139,92,255,0.35); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Afterglow",
+    "overview": "TikCal's whole surface is a near-black room lit by one thing: a stage-light bloom bleeding in from the top of the screen. Everything else — panels, text, borders — recedes into the dark and lets that one wash of color read as the room's only real light source. The interface isn't decorated with gradients; it's lit by one. That light is chrome, not paint. Aurora/violet/iris exist to signal \"this is TikCal speaking\" — wordmark, hero, primary CTA, the calendar's today-marker, links, focus rings — and nowhere else. Data carries its own, separate hues (crew colors, mint, RSVP, the one reserved orange), and the chrome deliberately never touches them: the glow illuminates the room, it doesn't relabel what's standing in it. Voice matches the visual: nightlife/rave vernacular (totem names like \"The Press,\" \"Glow Stick\"), never corporate polish.",
+    "keyCharacteristics": [
+      "One chrome light source (magenta→violet→iris), used sparingly, never as a flat fill on large surfaces",
+      "Reserved, separate data hues that the chrome never repaints",
+      "Flat, glow-lit depth — no drop-shadow hierarchy",
+      "Mono labels for anything data/metadata; humanist sans for content"
+    ],
+    "rules": [
+      { "name": "The Chrome-Only Rule", "body": "Aurora/violet/iris are reserved for \"TikCal-is-speaking\" moments (brand, navigation, focus, primary action). They never appear as an event's, crew's, or RSVP's identity color.", "section": "colors" },
+      { "name": "The Reserved-Hue Rule", "body": "Crew colors, mint, RSVP amber/coral, and the reserved orange (Overlap free/GO only) are semantic data, not decoration. A new UI surface reaches for chrome; a new meaning gets its own reserved hue.", "section": "colors" },
+      { "name": "The Retired-Cyan Rule", "body": "Cyan and ice were the old chrome and are fully retired from that role; ice survives only as one selectable crew color.", "section": "colors" },
+      { "name": "The Mono-Speaks-Data Rule", "body": "If a string is a date, count, venue, or status, it's IBM Plex Mono, uppercase, tracked wide. If it's prose a human wrote, it's Schibsted Grotesk.", "section": "typography" },
+      { "name": "The Glow-Not-Shadow Rule", "body": "Elevation reads through an ambient color wash and a hairline top highlight, never a hard offset shadow. A surface that needs to feel raised gets hero (brighter border, violet wash), not a heavier box-shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do treat aurora/violet/iris as a single warm-to-cool sweep (a gradient family), not three interchangeable flat accents.",
+      "Do give every interactive element the same three states: hover (brightness/border), focus-visible (violet ring), active (scale-down).",
+      "Do put dates, counts, venues, and status in IBM Plex Mono, uppercase, tracked wide.",
+      "Do build elevation from an inset highlight + ambient glow, never a hard offset shadow."
+    ],
+    "donts": [
+      "Don't use cyan or ice as a UI accent — that chrome role is retired; ice survives only as a crew-color option.",
+      "Don't use the reserved orange anywhere but Overlap's free/GO state.",
+      "Don't recolor a crew badge, RSVP status, or the mint \"shared\" hue with chrome violet.",
+      "Don't add a literal measured grid/floor line pattern to backgrounds — depth comes from blurred ambient bloom, not graph-paper geometry."
+    ]
+  }
+}

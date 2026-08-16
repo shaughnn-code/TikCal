@@ -1,8 +1,8 @@
-// Pure date math for the Year/Month/Week zoom calendar. No React, no I/O, so
+// Pure date math for the Month/Week/Day zoom calendar. No React, no I/O, so
 // the tricky parts (month matrices, week boundaries, period stepping) are
 // testable under `node --test`.
 
-export const VIEWS = ['year', 'month', 'week']
+export const VIEWS = ['month', 'week', 'day']
 
 export const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -64,21 +64,21 @@ export function weekRangeLabel(focus) {
 }
 
 export function periodLabel(view, focus) {
-  if (view === 'year') return String(focus.getFullYear())
   if (view === 'month') return `${focus.toLocaleDateString('en-US', { month: 'short' })} ${focus.getFullYear()}`
+  if (view === 'day') return focus.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
   return weekRangeLabel(focus)
 }
 
 // Prev/next steps the *current granularity's* period, never the others.
 export function stepFocus(view, focus, dir) {
   const d = new Date(focus)
-  if (view === 'year') d.setFullYear(d.getFullYear() + dir)
-  else if (view === 'month') d.setMonth(d.getMonth() + dir, 1)
-  else d.setDate(d.getDate() + 7 * dir)
+  if (view === 'month') d.setMonth(d.getMonth() + dir, 1)
+  else if (view === 'week') d.setDate(d.getDate() + 7 * dir)
+  else d.setDate(d.getDate() + dir)
   return d
 }
 
-// Zoom one step along year → month → week. Returns the same view at the ends.
+// Zoom one step along month → week → day. Returns the same view at the ends.
 export function zoomView(view, dir) {
   const i = VIEWS.indexOf(view)
   return VIEWS[Math.min(VIEWS.length - 1, Math.max(0, i + dir))]
