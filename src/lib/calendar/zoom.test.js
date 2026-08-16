@@ -71,18 +71,19 @@ test('weekRangeLabel spans a month boundary correctly', () => {
 })
 
 test('periodLabel differs per granularity', () => {
-  const f = D(2026, 6, 9)
-  assert.equal(periodLabel('year', f), '2026')
+  const f = D(2026, 6, 9) // Thu Jul 9 2026
   assert.equal(periodLabel('month', f), 'Jul 2026')
   assert.equal(periodLabel('week', f), 'Jul 5–11')
+  assert.equal(periodLabel('day', f), 'Thu, Jul 9')
 })
 
 test('stepFocus steps only the active granularity', () => {
   const f = D(2026, 6, 9)
-  assert.equal(stepFocus('year', f, 1).getFullYear(), 2027)
   assert.equal(stepFocus('month', f, 1).getMonth(), 7)
   assert.equal(ymd(stepFocus('week', f, 1)), '2026-07-16')
   assert.equal(ymd(stepFocus('week', f, -1)), '2026-07-02')
+  assert.equal(ymd(stepFocus('day', f, 1)), '2026-07-10')
+  assert.equal(ymd(stepFocus('day', f, -1)), '2026-07-08')
 })
 
 test('stepFocus month-stepping does not overflow from a long month', () => {
@@ -91,11 +92,16 @@ test('stepFocus month-stepping does not overflow from a long month', () => {
   assert.equal(stepFocus('month', jan31, 1).getMonth(), 1) // February, not March
 })
 
+test('stepFocus day-stepping crosses a month boundary', () => {
+  const jul31 = D(2026, 6, 31)
+  assert.equal(ymd(stepFocus('day', jul31, 1)), '2026-08-01')
+})
+
 test('zoomView clamps at both ends', () => {
-  assert.equal(zoomView('year', -1), 'year')
-  assert.equal(zoomView('year', 1), 'month')
-  assert.equal(zoomView('week', 1), 'week')
-  assert.equal(zoomView('month', -1), 'year')
+  assert.equal(zoomView('month', -1), 'month')
+  assert.equal(zoomView('month', 1), 'week')
+  assert.equal(zoomView('week', 1), 'day')
+  assert.equal(zoomView('day', 1), 'day')
 })
 
 test('parseTime handles 12h, 24h, and garbage', () => {

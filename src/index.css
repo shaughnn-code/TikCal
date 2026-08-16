@@ -1,3 +1,6 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,14 +15,16 @@
     background-color: #060609;
     /* Global scale-up for readability (lifts all rem-based text + spacing ~13%). */
     font-size: 112.5%;
+    @apply font-sans;
   }
   body {
     margin: 0;
     min-height: 100vh;
     background-color: #0b0b11;
     color: #ececf4;
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'Schibsted Grotesk', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    @apply bg-background text-foreground;
   }
   ::-webkit-scrollbar {
     width: 5px;
@@ -39,6 +44,80 @@
   select option {
     background: #0d141b;
     color: #e8f4f8;
+  }
+  .theme {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+  }
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+  }
+  .dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+  }
+  * {
+    @apply border-border outline-ring;
   }
 }
 
@@ -115,7 +194,12 @@
       radial-gradient(32% 52% at 92% 16%, rgba(97, 120, 255, 0.42), transparent 68%),
       radial-gradient(50% 45% at 22% 6%, rgba(140, 70, 220, 0.3), transparent 74%);
   }
-  /* faint violet floor grid — keeps the "grid/calendar" identity, quietly */
+  /* Warm ground bloom, not a measurement grid — the class name stays
+     (reused across screens) but the paint is pure ambient light, matching
+     the "aurora light-leak, not a Tron grid" brief this section already
+     names above. A literal hairline floor grid reads as generic
+     generated-UI decoration; a nightlife calendar earns its atmosphere
+     from stage-light color, not graph paper. */
   .grid-floor {
     position: absolute;
     left: -25%;
@@ -124,13 +208,8 @@
     height: 40%;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.5;
-    background-image:
-      linear-gradient(rgba(139, 92, 255, 0.14) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(139, 92, 255, 0.14) 1px, transparent 1px);
-    background-size: 46px 46px;
-    transform: perspective(320px) rotateX(76deg);
-    transform-origin: bottom center;
+    opacity: 0.55;
+    background: radial-gradient(60% 100% at 50% 100%, rgba(139, 92, 255, 0.24), transparent 72%);
     -webkit-mask-image: linear-gradient(to top, #000 2%, transparent 70%);
     mask-image: linear-gradient(to top, #000 2%, transparent 70%);
   }
@@ -298,10 +377,11 @@
     display: flex; align-items: center; justify-content: center;
     background: #050608; font-family: 'IBM Plex Mono', ui-monospace, monospace;
   }
+  /* Same call as GridBg's .grid-floor: ambient stage-light glow reads more
+     like an actual dance floor than a measured hairline grid does. */
   .wel-floor {
     position: absolute; left: -25%; right: -25%; bottom: -2px; height: 32%; z-index: 0; pointer-events: none;
-    background-image: linear-gradient(rgba(139,92,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,255,.3) 1px, transparent 1px);
-    background-size: 30px 30px; transform: perspective(240px) rotateX(74deg); transform-origin: bottom center;
+    background: radial-gradient(65% 100% at 50% 100%, rgba(139,92,255,.32), transparent 76%);
     -webkit-mask-image: linear-gradient(to top, #000 5%, transparent 82%);
     mask-image: linear-gradient(to top, #000 5%, transparent 82%);
   }

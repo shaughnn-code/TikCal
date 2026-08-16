@@ -1,0 +1,6 @@
+-- Placeholder for a schema change applied directly to the remote project
+-- (e.g. from another branch/worktree) that has no corresponding local
+-- migration file in this branch's history. Already recorded as applied in
+-- the remote migration history; this file exists only so the CLI can
+-- reconcile local files against remote versions. Intentionally empty --
+-- never re-run.

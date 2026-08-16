@@ -32,10 +32,11 @@ export const EventCard = ({ event, ownerLabel }) => {
   return (
     <button
       onClick={() => navigate(`/events/${event.id}`)}
-      className={`group relative w-full text-left rounded-2xl border p-3.5 pl-4 overflow-hidden backdrop-blur-sm transition-all duration-200 ${
+      className={`group relative w-full text-left rounded-2xl border p-3.5 pl-4 overflow-hidden backdrop-blur-sm transition-all duration-200
+        outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-ink ${
         isPast
           ? 'border-white/[0.06] bg-panel/40 opacity-50'
-          : 'border-white/[0.07] bg-panel/70 hover:border-white/15 hover:-translate-y-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_30px_-16px_rgba(0,0,0,0.8)]'
+          : 'border-white/[0.07] bg-panel/70 hover:border-white/15 hover:-translate-y-0.5 active:scale-[0.99] active:translate-y-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_30px_-16px_rgba(0,0,0,0.8)]'
       }`}
     >
       {/* colored spine — carries the event's crew/artist hue (data) */}

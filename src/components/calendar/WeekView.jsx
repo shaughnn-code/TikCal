@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import {
   DOW, WEEK_ROWS, WEEK_START_HOUR, parseTime, sameDay, slotOffset, weekDays, weekRangeLabel,
 } from '../../lib/calendar/zoom.js'
 import { getEventAccent } from '../../lib/constants.js'
+import EventPopover from './EventPopover.jsx'
 
 const ROW_H = 70
 const COL_H = ROW_H * WEEK_ROWS
@@ -15,8 +17,12 @@ const hourLabel = (i) => {
 // 6PM–1AM gutter + 7 day columns. TikCal events carry no start time today, so
 // an event without one is stacked in a "time TBA" band at the top of its column
 // rather than being given a fabricated position.
-export default function WeekView({ focus, today, eventsByDate, onZoomOut, onPick }) {
+export default function WeekView({ focus, today, eventsByDate, onZoomOut, suppressClickRef }) {
   const days = weekDays(focus)
+  const zoomOut = () => {
+    if (suppressClickRef?.current) return
+    onZoomOut()
+  }
 
   return (
     <div>
@@ -29,19 +35,20 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, onPick
 
       <div className="rounded-[14px] border border-line overflow-hidden">
         <div className="grid" style={{ gridTemplateColumns: `56px repeat(7, minmax(0, 1fr))` }}>
-          <div className="border-b border-line bg-panel" onDoubleClick={onZoomOut} />
+          <div className="border-b border-line bg-panel" onDoubleClick={zoomOut} />
           {days.map((d) => (
             <div
               key={d.dateStr}
-              onDoubleClick={onZoomOut}
+              onDoubleClick={zoomOut}
               className={`text-center border-b border-l border-line bg-panel px-1.5 py-3 cursor-pointer
+                transition-colors duration-150 hover:bg-panel-2
                 text-[11px] font-bold tracking-[0.08em] ${sameDay(d.date, today) ? 'text-violet' : 'text-muted'}`}
             >
               {DOW[d.date.getDay()]} {d.date.getDate()}
             </div>
           ))}
 
-          <div onDoubleClick={onZoomOut}>
+          <div onDoubleClick={zoomOut}>
             {Array.from({ length: WEEK_ROWS }, (_, i) => (
               <div
                 key={i}
@@ -65,7 +72,7 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, onPick
             return (
               <div
                 key={d.dateStr}
-                onDoubleClick={onZoomOut}
+                onDoubleClick={zoomOut}
                 className="relative border-l border-line"
                 style={{ height: COL_H }}
               >
@@ -75,7 +82,7 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, onPick
 
                 <div className="absolute inset-x-1 top-1 flex flex-col gap-1">
                   {untimed.map((ev) => (
-                    <Chip key={ev.id} ev={ev} onPick={onPick} tba />
+                    <Chip key={ev.id} ev={ev} tba />
                   ))}
                 </div>
 
@@ -85,7 +92,7 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, onPick
                     className="absolute inset-x-1"
                     style={{ top: `${off * COL_H + 4}px` }}
                   >
-                    <Chip ev={ev} onPick={onPick} />
+                    <Chip ev={ev} />
                   </div>
                 ))}
               </div>
@@ -97,26 +104,37 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, onPick
   )
 }
 
-function Chip({ ev, onPick, tba }) {
+function Chip({ ev, tba }) {
+  const [hover, setHover] = useState(false)
+  const [open, setOpen] = useState(false)
   const s = getEventAccent(ev)
   return (
-    <button
-      onClick={(e) => { e.stopPropagation(); onPick?.(ev) }}
-      onDoubleClick={(e) => e.stopPropagation()}
-      className="relative w-full text-left rounded-lg pl-2.5 pr-2 py-[7px] overflow-hidden border border-white/10 bg-panel transition-all hover:border-white/20 hover:-translate-y-px"
-    >
-      {/* faint hue wash + colored spine carry the event's crew/artist color (data) */}
-      <span className="absolute inset-0 pointer-events-none" style={{ backgroundColor: s.bg }} />
-      <span
-        className="absolute inset-y-0 left-0 w-[3px]"
-        style={{ backgroundColor: s.color, boxShadow: `0 0 8px ${s.color}66` }}
-      />
-      <div className="relative text-[11.5px] font-bold text-white truncate leading-tight">{ev.title}</div>
-      {/* "TBA" not "time TBA": the column is narrow enough that the longer
-          string truncates away exactly the word that carries the meaning. */}
-      <div className="relative text-[10.5px] text-slate-400 truncate leading-tight">
-        {[tba ? 'TBA' : ev.start_time, ev.venue].filter(Boolean).join(' · ')}
-      </div>
-    </button>
+    <div className="relative" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      <button
+        onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
+        onDoubleClick={(e) => e.stopPropagation()}
+        className="relative w-full text-left rounded-lg pl-2.5 pr-2 py-[7px] overflow-hidden border border-white/10 bg-panel
+                   transition-[border-color,transform] duration-150 hover:border-white/20 hover:-translate-y-px active:scale-[0.98] active:translate-y-0
+                   outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
+      >
+        {/* faint hue wash + colored spine carry the event's crew/artist color (data) */}
+        <span className="absolute inset-0 pointer-events-none" style={{ backgroundColor: s.bg }} />
+        <span
+          className="absolute inset-y-0 left-0 w-[3px]"
+          style={{ backgroundColor: s.color, boxShadow: `0 0 8px ${s.color}66` }}
+        />
+        <div className="relative text-[11.5px] font-bold text-white truncate leading-tight">{ev.title}</div>
+        {/* "TBA" not "time TBA": the column is narrow enough that the longer
+            string truncates away exactly the word that carries the meaning. */}
+        <div className="relative text-[10.5px] text-slate-400 truncate leading-tight">
+          {[tba ? 'TBA' : ev.start_time, ev.venue].filter(Boolean).join(' · ')}
+        </div>
+      </button>
+      {/* Hover previews on desktop; a click pins it open (matches Month's
+          chip and gives touch a way in, since hover never fires there --
+          previously click jumped straight to full detail, which silently
+          dropped the preview on mobile entirely). */}
+      {(hover || open) && <EventPopover event={ev} onClose={open ? () => setOpen(false) : undefined} />}
+    </div>
   )
 }
