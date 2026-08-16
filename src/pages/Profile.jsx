@@ -30,6 +30,13 @@ export default function Profile() {
     getFeedToken(user.id).then(setFeedToken).catch(() => {})
   }, [user.id])
 
+  // React Router doesn't auto-scroll to a #hash on client-side nav (only on
+  // a hard page load), so the stat tiles' deep link from /calendar needs it done by hand.
+  useEffect(() => {
+    if (!events || window.location.hash !== '#stats') return
+    document.getElementById('stats')?.scrollIntoView({ behavior: 'smooth' })
+  }, [events])
+
   // Handle the return from Google OAuth (…/profile?google=connected|denied|error).
   useEffect(() => {
     const g = params.get('google')
@@ -119,7 +126,7 @@ export default function Profile() {
         </HudBox>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 mb-3">
+        <div id="stats" className="grid grid-cols-3 gap-2 mb-3 scroll-mt-24">
           {[
             { n: events.length, l: 'Total', tone: 'ice' },
             { n: upcoming, l: 'Upcoming', tone: 'mint' },

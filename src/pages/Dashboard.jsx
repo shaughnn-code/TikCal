@@ -93,7 +93,12 @@ export default function Dashboard() {
             { n: upcoming.length, l: 'Upcoming', i: 'calendar-dots', tone: 'mint' },
             { n: venues, l: 'Venues', i: 'map-pin', tone: 'ice' },
           ].map((s) => (
-            <HudBox key={s.l} tone={s.tone} className="p-3 text-center">
+            <HudBox
+              key={s.l}
+              tone={s.tone}
+              className="p-3 text-center cursor-pointer transition-transform duration-150 hover:-translate-y-px active:scale-[0.98]"
+              onClick={() => navigate('/profile#stats')}
+            >
               <div className={`font-display font-extrabold text-2xl ${s.tone === 'mint' ? 'text-mint' : 'text-[#e8f4f8]'}`}>
                 {String(s.n).padStart(2, '0')}
               </div>
