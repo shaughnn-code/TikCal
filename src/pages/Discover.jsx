@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { fetchTicketmaster, fetchMyArtists, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
+import { fetchTicketmaster, fetchRA, fetchMyArtists, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 
@@ -20,9 +20,9 @@ export default function Discover() {
   const [err, setErr] = useState('')
 
   const load = useCallback(() => {
-    Promise.all([fetchTicketmaster({}), fetchMyArtists(user.id)])
-      .then(([t, a]) => {
-        setTm(t)
+    Promise.all([fetchTicketmaster({}), fetchRA({}), fetchMyArtists(user.id)])
+      .then(([t, ra, a]) => {
+        setTm({ configured: t.configured || ra.configured, events: [...t.events, ...ra.events] })
         setArtists(a)
       })
       .catch((e) => setErr(e.message))
@@ -158,8 +158,8 @@ export default function Discover() {
         {!tm.configured && (
           <HudBox className="p-4 mb-6">
             <p className="font-mono text-[11px] text-slate-400">
-              Live show discovery isn’t switched on yet. Add a Ticketmaster API key to the{' '}
-              <span className="text-violet">ticketmaster-events</span> function to light this up.
+              Live show discovery isn’t switched on yet. Add a Ticketmaster or RA API key to the{' '}
+              <span className="text-violet">ticketmaster-events</span> / <span className="text-violet">ra-events</span> functions to light this up.
             </p>
           </HudBox>
         )}

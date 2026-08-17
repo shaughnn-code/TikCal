@@ -186,12 +186,25 @@ export async function fetchMyArtists(userId) {
   return data || []
 }
 
-// ─── DISCOVERY (Ticketmaster) ────────────────────────────────────────────────
+// ─── DISCOVERY (Ticketmaster, RA) ─────────────────────────────────────────────
 
 // Search upcoming NYC music events. Returns { configured, events }.
 export async function fetchTicketmaster(params = {}) {
   try {
     const { data, error } = await supabase.functions.invoke('ticketmaster-events', { body: params })
+    if (error || !data) return { configured: false, events: [] }
+    return data
+  } catch {
+    return { configured: false, events: [] }
+  }
+}
+
+// Search upcoming NYC events on Resident Advisor (via the parse.bot RA API
+// wrapper — unofficial, free tier). Same { configured, events } shape as
+// fetchTicketmaster so Discover can merge both sources.
+export async function fetchRA(params = {}) {
+  try {
+    const { data, error } = await supabase.functions.invoke('ra-events', { body: params })
     if (error || !data) return { configured: false, events: [] }
     return data
   } catch {
