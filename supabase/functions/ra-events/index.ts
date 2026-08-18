@@ -4,17 +4,14 @@
 // Mirrors ticketmaster-events' output shape so Discover/Overlap can merge
 // both sources without caring where an event came from.
 //
-// Secret:  RA_API_KEY  (free tier: 200 credits/mo, 5 req/min — from
+// Secret:  RA_API_KEY_TIKCAL  (free tier: 200 credits/mo, 5 req/min — from
 //          https://parse.bot/marketplace/b94a9801-8a5c-490a-9b42-7c41751ebf76/ra-co-api)
 // Deploy:  supabase functions deploy ra-events
 //
-// NOTE: parse.bot's public docs describe list_area_events functionally
-// (sorted by date ascending then popularity, max page_size 50) but don't
-// publish a full example response for it, only for list_clubs. Field
-// mapping below is best-effort from the documented event/venue field names
-// used elsewhere on that page (title, artists, date, venue, flyer_url) —
-// verify against a live response once RA_API_KEY is set, and adjust the
-// `pickEvents`/mapping below if parse.bot's actual shape differs.
+// Response shape (confirmed live, 2026-08-18): { status, data: { total_results,
+// page, page_size, events: [{ id, title, date, start_time, content_url,
+// flyer_url, artists: [{id, name, content_url}], venue: {id, name,
+// content_url}, area, country, pick_blurb }] } }
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const cors = {
@@ -32,7 +29,7 @@ const NYC_AREA_ID = '8'
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
-  const key = Deno.env.get('RA_API_KEY')
+  const key = Deno.env.get('RA_API_KEY_TIKCAL')
   if (!key) return json({ configured: false, events: [] })
 
   // Require a signed-in caller so the key isn't a public proxy.
@@ -58,25 +55,23 @@ Deno.serve(async (req) => {
     if (!res.ok) return json({ configured: true, events: [], error: `ra ${res.status}` })
     const data = await res.json()
     // deno-lint-ignore no-explicit-any
-    const raw: any[] = data?.events || data?.results || (Array.isArray(data) ? data : [])
+    const raw: any[] = data?.data?.events || []
     // deno-lint-ignore no-explicit-any
     const events = raw.map((e: any) => {
-      const venue = e.venue || e.club || {}
-      const artists: string[] = (e.artists || e.lineup || [])
-        // deno-lint-ignore no-explicit-any
-        .map((a: any) => (typeof a === 'string' ? a : a?.name))
-        .filter(Boolean)
+      const venue = e.venue || {}
+      // deno-lint-ignore no-explicit-any
+      const artists: string[] = (e.artists || []).map((a: any) => a?.name).filter(Boolean)
       return {
         id: e.id != null ? String(e.id) : e.content_url || '',
-        title: e.title || e.name || '',
+        title: e.title || '',
         artist: artists.join(', '),
         attractions: artists,
-        date: (e.date || e.start_date || '').slice(0, 10),
-        time: e.start_time || '',
+        date: (e.date || '').slice(0, 10),
+        time: (e.start_time || '').slice(11, 16),
         venue: venue.name || '',
-        city: venue.area?.name || 'New York',
-        url: e.content_url ? `https://ra.co${e.content_url}` : e.url || '',
-        image: e.flyer_url || e.image || '',
+        city: e.area || 'New York',
+        url: e.content_url ? `https://ra.co${e.content_url}` : '',
+        image: e.flyer_url || '',
       }
     }).filter((e: { date: string }) => e.date)
     return json({ configured: true, events })
