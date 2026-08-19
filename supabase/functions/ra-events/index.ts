@@ -13,20 +13,16 @@
 // flyer_url, artists: [{id, name, content_url}], venue: {id, name,
 // content_url}, area, country, pick_blurb }] } }
 import { createClient } from 'npm:@supabase/supabase-js@2'
-
-const cors = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-const json = (b: unknown, status = 200) =>
-  new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
+import { corsHeaders } from '../_shared/cors.ts'
 
 const RA_BASE = 'https://api.parse.bot/scraper/b89b7fc2-7fcb-49f4-8b0d-8ba592c967cc'
 // RA's own area id for New York (per parse.bot's documented examples).
 const NYC_AREA_ID = '8'
 
 Deno.serve(async (req) => {
+  const cors = corsHeaders(req)
+  const json = (b: unknown, status = 200) =>
+    new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
   const key = Deno.env.get('RA_API_KEY_TIKCAL')

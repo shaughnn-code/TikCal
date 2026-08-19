@@ -3,21 +3,9 @@
 //
 // Reads ANTHROPIC_API_KEY from Edge Function secrets.
 import Anthropic from 'npm:@anthropic-ai/sdk@^0.69.0'
+import { corsHeaders } from '../_shared/cors.ts'
 
 const MODEL = 'claude-opus-4-8'
-
-const cors = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...cors, 'Content-Type': 'application/json' },
-  })
 
 // Strip a fetched HTML page down to readable text for the model.
 function htmlToText(html: string): string {
@@ -82,6 +70,12 @@ const OUTPUT_SCHEMA = {
 } as const
 
 Deno.serve(async (req) => {
+  const cors = corsHeaders(req)
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...cors, 'Content-Type': 'application/json' },
+    })
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 

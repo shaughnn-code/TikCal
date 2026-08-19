@@ -1,14 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 
 // The publishable/anon key is safe to expose in client code; RLS enforces access.
-// Values come from .env (VITE_*) with a fallback so the app works out of the box.
-const url =
-  import.meta.env.VITE_SUPABASE_URL || 'https://pirlflebmiylgusmqhhk.supabase.co'
-const anonKey =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  'sb_publishable_1dc1bPeuxhOzWJ9EuPwPCA_o0-KTjmd'
+// Values must come from .env (VITE_*) -- no baked-in fallback, so a missing
+// .env fails loudly instead of silently talking to production.
+export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const supabase = createClient(url, anonKey, {
+if (!supabaseUrl || !anonKey) {
+  throw new Error(
+    'Missing VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY. Copy .env.example to .env and fill in your project values.',
+  )
+}
+
+export const supabase = createClient(supabaseUrl, anonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,

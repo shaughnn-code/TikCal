@@ -15,14 +15,7 @@
 // to bundle ("Could not find npm package 'djwt'").
 import { create, getNumericDate } from 'jsr:@zaubrik/djwt@^3.0.2'
 import { createClient } from 'npm:@supabase/supabase-js@2'
-
-const cors = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-const json = (b: unknown, status = 200) =>
-  new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
+import { corsHeaders } from '../_shared/cors.ts'
 
 function pemToPkcs8(pem: string): Uint8Array {
   const body = pem
@@ -37,6 +30,9 @@ function pemToPkcs8(pem: string): Uint8Array {
 }
 
 Deno.serve(async (req) => {
+  const cors = corsHeaders(req)
+  const json = (b: unknown, status = 200) =>
+    new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
   const teamId = Deno.env.get('APPLE_MUSIC_TEAM_ID')

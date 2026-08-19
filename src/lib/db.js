@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient.js'
+import { supabase, supabaseUrl } from '../supabaseClient.js'
 
 // events.owner_id references auth.users, so PostgREST can't embed profiles
 // directly. We fetch events (RLS scopes them to owner + friends + crews) and
@@ -123,8 +123,7 @@ export async function rotateFeedToken(userId) {
 // Build the subscribe URLs for a feed token. `webcal:` prompts the OS calendar
 // to subscribe; `https:` is the raw feed (and a Google "add by URL" target).
 export function feedUrls(token) {
-  const base = import.meta.env.VITE_SUPABASE_URL || 'https://pirlflebmiylgusmqhhk.supabase.co'
-  const https = `${base}/functions/v1/ics?token=${token}`
+  const https = `${supabaseUrl}/functions/v1/ics?token=${token}`
   return { https, webcal: https.replace(/^https?:/, 'webcal:') }
 }
 

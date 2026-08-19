@@ -4,18 +4,14 @@
 // Secrets:  SPOTIFY_CLIENT_ID
 // Deploy:   supabase functions deploy spotify-oauth-start
 import { createClient } from 'npm:@supabase/supabase-js@2'
-
-const cors = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-const json = (b: unknown, status = 200) =>
-  new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
+import { corsHeaders } from '../_shared/cors.ts'
 
 const SCOPES = 'user-top-read user-follow-read'
 
 Deno.serve(async (req) => {
+  const cors = corsHeaders(req)
+  const json = (b: unknown, status = 200) =>
+    new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
   const clientId = Deno.env.get('SPOTIFY_CLIENT_ID')

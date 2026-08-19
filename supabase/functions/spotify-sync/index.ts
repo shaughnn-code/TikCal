@@ -4,14 +4,7 @@
 // Secrets:  SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
 // Deploy:   supabase functions deploy spotify-sync
 import { createClient } from 'npm:@supabase/supabase-js@2'
-
-const cors = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-const json = (b: unknown, status = 200) =>
-  new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
+import { corsHeaders } from '../_shared/cors.ts'
 const norm = (s: string) => s.trim().toLowerCase()
 
 // deno-lint-ignore no-explicit-any
@@ -43,6 +36,9 @@ async function freshToken(admin: any, conn: any): Promise<string | null> {
 }
 
 Deno.serve(async (req) => {
+  const cors = corsHeaders(req)
+  const json = (b: unknown, status = 200) =>
+    new Response(JSON.stringify(b), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
   const authed = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {

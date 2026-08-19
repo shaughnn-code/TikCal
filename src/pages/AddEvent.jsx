@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
 import { fetchMyCrews, fetchTicketmaster } from '../lib/db.js'
 import { pickTimeSuggestion } from '../lib/calendar/timeSuggest.js'
+import { toSafeUrl } from '../lib/safeUrl.js'
 import { GridBg, Wrap, Inp, Txta, Btn, SecLabel } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { SmartAdd } from '../components/SmartAdd.jsx'
@@ -97,7 +98,7 @@ export default function AddEvent() {
         .insert({
           ...form,
           start_time: form.start_time || null,
-          source_url: form.source_url || null,
+          source_url: toSafeUrl(form.source_url),
           owner_id: user.id,
           share_friends: shareFriends,
           flyer_url,

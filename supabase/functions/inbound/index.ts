@@ -14,6 +14,18 @@ const INBOX_DOMAIN = 'in.tikcal.nyc'
 
 const ok = (msg = 'ok') => new Response(JSON.stringify({ status: msg }), { status: 200, headers: { 'Content-Type': 'application/json' } })
 
+// Constant-time string compare so a mistimed `!==` can't leak how many
+// leading bytes of INBOUND_SECRET a guess got right.
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder()
+  const ab = enc.encode(a)
+  const bb = enc.encode(b)
+  if (ab.length !== bb.length) return false
+  let diff = 0
+  for (let i = 0; i < ab.length; i++) diff |= ab[i] ^ bb[i]
+  return diff === 0
+}
+
 function localpartFor(text: string): string | null {
   if (!text) return null
   const re = new RegExp(`([a-z0-9._+\\-]+)@${INBOX_DOMAIN.replace('.', '\\.')}`, 'i')
@@ -65,8 +77,9 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return ok('ignored')
 
   const url = new URL(req.url)
-  const secret = url.searchParams.get('secret') || req.headers.get('x-inbound-secret')
-  if (!Deno.env.get('INBOUND_SECRET') || secret !== Deno.env.get('INBOUND_SECRET')) {
+  const secret = url.searchParams.get('secret') || req.headers.get('x-inbound-secret') || ''
+  const expected = Deno.env.get('INBOUND_SECRET')
+  if (!expected || !timingSafeEqual(secret, expected)) {
     return new Response('forbidden', { status: 401 })
   }
 

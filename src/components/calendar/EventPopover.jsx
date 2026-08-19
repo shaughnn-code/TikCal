@@ -5,6 +5,7 @@ import { setRsvp, clearRsvp } from '../../lib/db.js'
 import { HudBox, SecLabel } from '../ui.jsx'
 import { Icon, Totem } from '../icons.jsx'
 import { RSVP_OPTIONS, getEventAccent, getInitials, withAlpha } from '../../lib/constants.js'
+import { isSafeUrl } from '../../lib/safeUrl.js'
 
 // Compact detail card for hovering (desktop, Month/Week) or clicking
 // (Month) an event -- crew + "who's in" + an inline RSVP + source link,
@@ -122,7 +123,7 @@ export default function EventPopover({ event, onClose, className = '' }) {
         </div>
       </div>
 
-      {event.source_url && (
+      {isSafeUrl(event.source_url) && (
         <a
           href={event.source_url}
           target="_blank"

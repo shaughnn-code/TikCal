@@ -25,10 +25,15 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Audit dependencies
+        # Non-blocking for now: vite/esbuild and react-router only have major
+        # (breaking) fixes available, tracked separately rather than gating
+        # every deploy. Flip to a hard failure once those are upgraded.
+        run: npm audit --audit-level=high || echo "::warning::npm audit found issues -- see job log"
       - name: Build
         run: npm run build
         env:
-          # Optional: falls back to baked-in publishable values if unset.
+          # Required: the client throws at startup if either is missing.
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       - name: SPA fallback for client-side routing

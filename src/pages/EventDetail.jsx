@@ -5,6 +5,7 @@ import { supabase } from '../supabaseClient.js'
 import { fetchEvent, setRsvp, clearRsvp } from '../lib/db.js'
 import { RSVP_OPTIONS, rsvpByValue, withAlpha } from '../lib/constants.js'
 import { googleCalendarUrl, outlookCalendarUrl, downloadICS } from '../lib/calendar.js'
+import { isSafeUrl } from '../lib/safeUrl.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 
@@ -145,7 +146,7 @@ export default function EventDetail() {
             {event.owner?.totem && <Totem icon={event.owner.totem} size={16} />}
             {isOwner ? 'You' : event.owner?.name || 'A friend'}
           </Field>
-          {event.source_url && (
+          {isSafeUrl(event.source_url) && (
             <div className="col-span-2">
               <SecLabel className="mb-1">Source</SecLabel>
               <a
