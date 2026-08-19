@@ -1,8 +1,14 @@
 import InfoPage, { H2, Note } from '../components/InfoPage.jsx'
+import Seo from '../components/Seo.jsx'
 
 export default function Terms() {
   return (
     <InfoPage kicker="TERMS" title="Terms of Service" updated="Draft — full terms coming soon">
+      <Seo
+        title="Terms of Service"
+        path="/terms"
+        description="The terms for using TikCal to track and share shows with your crew."
+      />
       <Note>
         This is a placeholder. Our complete terms of service are being finalized and will replace
         this page. It isn't a binding agreement yet.

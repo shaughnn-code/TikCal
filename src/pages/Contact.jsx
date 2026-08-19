@@ -1,10 +1,16 @@
 import InfoPage from '../components/InfoPage.jsx'
+import Seo from '../components/Seo.jsx'
 
 const EMAIL = 'dev@tikcal.nyc'
 
 export default function Contact() {
   return (
     <InfoPage kicker="CONTACT" title="Get in touch">
+      <Seo
+        title="Contact"
+        path="/contact"
+        description="Questions, feedback, or a ticket source we should support? Get in touch with the TikCal team."
+      />
       <p>
         Questions, feedback, or a ticket source we should support? We'd love to hear from you.
       </p>

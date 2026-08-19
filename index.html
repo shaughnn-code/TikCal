@@ -8,10 +8,17 @@
     <meta name="theme-color" content="#0a0e12" />
 
     <!-- ── SEO ──────────────────────────────────────────────────────────
-         Static tags serve the homepage (tikcal.nyc/). This is an SPA that
-         serves the same shell for every route, so these describe the site
-         as a whole. Per-route <title>/description/canonical need a runtime
-         head manager (react-helmet-async) — tracked as a follow-up. -->
+         This is an SPA that serves the same index.html shell for every route.
+         Split of responsibility:
+           - The <title>, description, and canonical below are the static
+             HOMEPAGE baseline (and the no-JS fallback for every route). At
+             runtime, <Seo> (src/components/Seo.jsx) MUTATES these exact nodes
+             per route, so there is always exactly one — never a duplicate or
+             conflicting canonical.
+           - The og/twitter/JSON-LD are the static social baseline at homepage
+             values, keeping root (tikcal.nyc/) social unfurls intact without JS.
+             Interior deep-link unfurls show this homepage card until build-time
+             prerendering is added. -->
     <title>TikCal — NYC Concert Discovery & Group Availability</title>
     <meta
       name="description"
@@ -19,7 +26,7 @@
     />
     <link rel="canonical" href="https://tikcal.nyc/" />
 
-    <!-- Open Graph -->
+    <!-- Open Graph (static homepage/social baseline) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TikCal" />
     <meta property="og:title" content="TikCal — NYC Concert Discovery & Group Availability" />

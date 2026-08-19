@@ -1,8 +1,14 @@
 import InfoPage, { H2 } from '../components/InfoPage.jsx'
+import Seo from '../components/Seo.jsx'
 
 export default function About() {
   return (
     <InfoPage kicker="ABOUT" title="One calendar for every night out.">
+      <Seo
+        title="About"
+        path="/about"
+        description="TikCal is an NYC concert discovery app that pulls every show you're tracking into one calendar and shows when your crew is free to go out."
+      />
       <p>
         TikCal pulls every show you're tracking — across every ticket source — into a single
         calendar, then lets you see what your crew is hitting so you never miss a night out.
