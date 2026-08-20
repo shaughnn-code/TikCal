@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { fetchTicketmaster, fetchRA, fetchMyArtists, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
-import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
+import { fetchTicketmaster, fetchRA, fetchDice, fetchMyArtists, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
+import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner, Sel } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 
 const norm = (s) => (s || '').trim().toLowerCase()
+
+const SOURCES = [
+  { value: 'all', label: 'All' },
+  { value: 'ticketmaster', label: 'Ticketmaster' },
+  { value: 'ra', label: 'RA' },
+  { value: 'dice', label: 'DICE' },
+]
 
 export default function Discover() {
   const { user, profile, refreshProfile } = useAuth()
@@ -18,11 +25,27 @@ export default function Discover() {
   const [added, setAdded] = useState(() => new Set())
   const [connecting, setConnecting] = useState(false)
   const [err, setErr] = useState('')
+  const [sourceFilter, setSourceFilter] = useState('all')
+  const [venueFilter, setVenueFilter] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateUntil, setDateUntil] = useState('')
 
   const load = useCallback(() => {
-    Promise.all([fetchTicketmaster({}), fetchRA({}), fetchMyArtists(user.id)])
-      .then(([t, ra, a]) => {
-        setTm({ configured: t.configured || ra.configured, events: [...t.events, ...ra.events] })
+    Promise.all([fetchTicketmaster({}), fetchRA({}), fetchDice({}), fetchMyArtists(user.id)])
+      .then(([t, ra, dice, a]) => {
+        const tag = (src) => (e) => ({ ...e, source: src, key: `${src}-${e.id}` })
+        const merged = [
+          ...t.events.map(tag('ticketmaster')),
+          ...ra.events.map(tag('ra')),
+          ...dice.events.map(tag('dice')),
+        ]
+        // Some sources (RA in particular) repeat the same event across
+        // paginated/overlapping queries — dedupe by source+id so a stray
+        // duplicate can't collide on its React key and leave stale cards
+        // behind when the list re-filters.
+        const seen = new Set()
+        const events = merged.filter((e) => (seen.has(e.key) ? false : (seen.add(e.key), true)))
+        setTm({ configured: t.configured || ra.configured || dice.configured, events })
         setArtists(a)
       })
       .catch((e) => setErr(e.message))
@@ -46,6 +69,21 @@ export default function Discover() {
   const artistSet = useMemo(() => new Set(artists.map((a) => a.artist_norm)), [artists])
   const spotifyOn = !!profile?.spotify_name
 
+  const venueOptions = useMemo(
+    () => [...new Set((tm.events || []).map((e) => e.venue).filter(Boolean))].sort(),
+    [tm.events],
+  )
+
+  const filtered = useMemo(() => {
+    return (tm.events || []).filter((e) => {
+      if (sourceFilter !== 'all' && e.source !== sourceFilter) return false
+      if (venueFilter && e.venue !== venueFilter) return false
+      if (dateFrom && e.date < dateFrom) return false
+      if (dateUntil && e.date > dateUntil) return false
+      return true
+    })
+  }, [tm.events, sourceFilter, venueFilter, dateFrom, dateUntil])
+
   const { forYou, rest } = useMemo(() => {
     const matchOf = (e) => {
       const names = e.attractions?.length ? e.attractions : e.artist ? e.artist.split(',') : []
@@ -53,13 +91,13 @@ export default function Discover() {
     }
     const forYou = []
     const rest = []
-    for (const e of tm.events || []) {
+    for (const e of filtered) {
       const m = matchOf(e)
       if (m) forYou.push({ ...e, matched: m })
       else rest.push(e)
     }
     return { forYou, rest }
-  }, [tm.events, artistSet])
+  }, [filtered, artistSet])
 
   const connectSpotify = async () => {
     setConnecting(true)
@@ -158,18 +196,72 @@ export default function Discover() {
         {!tm.configured && (
           <HudBox className="p-4 mb-6">
             <p className="font-mono text-[11px] text-slate-400">
-              Live show discovery isn’t switched on yet. Add a Ticketmaster or RA API key to the{' '}
-              <span className="text-violet">ticketmaster-events</span> / <span className="text-violet">ra-events</span> functions to light this up.
+              Live show discovery isn’t switched on yet. Add a Ticketmaster, RA, or DICE API key to the{' '}
+              <span className="text-violet">ticketmaster-events</span> / <span className="text-violet">ra-events</span> / <span className="text-violet">dice-events</span> functions to light this up.
             </p>
           </HudBox>
         )}
+
+        {/* Filters */}
+        <HudBox className="p-4 mb-6">
+          <div className="flex flex-wrap gap-4 items-end">
+            <div>
+              <SecLabel className="mb-2">Source</SecLabel>
+              <div className="flex gap-1 bg-white/[0.04] rounded p-1 w-fit">
+                {SOURCES.map((s) => (
+                  <button
+                    key={s.value}
+                    onClick={() => setSourceFilter(s.value)}
+                    className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
+                      sourceFilter === s.value ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="min-w-[160px]">
+              <Sel label="Venue" value={venueFilter} onChange={setVenueFilter} options={venueOptions} />
+            </div>
+
+            <div>
+              <SecLabel className="mb-2">From</SecLabel>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] text-sm focus:outline-none focus:border-violet/60 transition-colors"
+              />
+            </div>
+            <div>
+              <SecLabel className="mb-2">Until</SecLabel>
+              <input
+                type="date"
+                value={dateUntil}
+                onChange={(e) => setDateUntil(e.target.value)}
+                className="bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] text-sm focus:outline-none focus:border-violet/60 transition-colors"
+              />
+            </div>
+
+            {(sourceFilter !== 'all' || venueFilter || dateFrom || dateUntil) && (
+              <button
+                onClick={() => { setSourceFilter('all'); setVenueFilter(''); setDateFrom(''); setDateUntil('') }}
+                className="font-mono text-[10px] text-slate-500 hover:text-white underline"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        </HudBox>
 
         {forYou.length > 0 && (
           <section className="mb-8">
             <SecLabel className="mb-3 text-mint">▸ For you · {forYou.length}</SecLabel>
             <div className="space-y-2">
               {forYou.map((e) => (
-                <Show key={e.id} e={e} highlight />
+                <Show key={e.key} e={e} highlight />
               ))}
             </div>
           </section>
@@ -184,7 +276,7 @@ export default function Discover() {
           ) : (
             <div className="space-y-2">
               {rest.map((e) => (
-                <Show key={e.id} e={e} />
+                <Show key={e.key} e={e} />
               ))}
             </div>
           )}
