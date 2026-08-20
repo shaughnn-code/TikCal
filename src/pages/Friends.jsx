@@ -30,6 +30,20 @@ const ColorPicker = ({ value, onPick }) => (
   </div>
 )
 
+// Satirical corporate title for a crew's show-goer ranking — nightlife
+// vernacular played through an office-parody lens (Chief Rager Officer,
+// Glue Guy, etc). `i` is 0-indexed rank; `n` is crew size.
+const rankTitle = (i, n, showsCount) => {
+  if (showsCount === 0) return 'On The Waitlist'
+  if (i === 0) return 'Chief Rager Officer'
+  if (n === 2) return 'Ride or Die'
+  if (i === n - 1) return 'Unpaid Intern'
+  const mid = Math.floor((n - 1) / 2)
+  if (i === mid) return 'Glue Guy'
+  if (i === 1) return 'VP of Vibes'
+  return 'Middle Management'
+}
+
 const Avatar = ({ profile }) => (
   <div className="w-9 h-9 rounded border border-violet/30 bg-white/5 flex items-center justify-center shrink-0">
     {profile?.totem ? <Totem icon={profile.totem} size={20} /> : <Icon name="user" size={16} className="text-violet" />}
@@ -312,25 +326,33 @@ export default function Friends() {
                                       stat: leaderboard.find((l) => l.user_id === m.user_id) || { shows_count: 0, venues_count: 0 },
                                     }))
                                     .sort((a, b) => b.stat.shows_count - a.stat.shows_count)
-                                    .map(({ m, stat }, i) => (
-                                      <div
-                                        key={m.user_id}
-                                        className={`flex items-center justify-between gap-2 rounded px-2.5 py-1.5 ${
-                                          i === 0 && stat.shows_count > 0 ? 'bg-mint/10 border border-mint/30' : 'bg-white/[0.03]'
-                                        }`}
-                                      >
-                                        <span className="font-mono text-[10px] text-slate-300 flex items-center gap-1.5 min-w-0">
-                                          <span className={`shrink-0 flex items-center ${i === 0 && stat.shows_count > 0 ? 'text-mint' : 'text-slate-600'}`}>
-                                            {i === 0 && stat.shows_count > 0 ? <Icon name="crown-simple" size={12} /> : `#${i + 1}`}
+                                    .map(({ m, stat }, i) => {
+                                      const isChief = i === 0 && stat.shows_count > 0
+                                      return (
+                                        <div
+                                          key={m.user_id}
+                                          className={`flex items-center justify-between gap-2 rounded px-2.5 py-1.5 ${
+                                            isChief ? 'bg-mint/10 border border-mint/30' : 'bg-white/[0.03]'
+                                          }`}
+                                        >
+                                          <span className="flex items-center gap-1.5 min-w-0">
+                                            <span className={`shrink-0 flex items-center ${isChief ? 'text-mint' : 'text-slate-600'}`}>
+                                              {isChief ? <Icon name="crown-simple" size={12} /> : <span className="font-mono text-[10px]">#{i + 1}</span>}
+                                            </span>
+                                            {m.profile?.totem && <Totem icon={m.profile.totem} size={12} className="shrink-0" />}
+                                            <span className="min-w-0">
+                                              <div className="font-mono text-[10px] text-slate-300 truncate">{m.profile?.name || 'Member'}</div>
+                                              <div className={`font-mono text-[9px] italic truncate ${isChief ? 'text-mint/80' : 'text-violet/70'}`}>
+                                                {rankTitle(i, members.length, stat.shows_count)}
+                                              </div>
+                                            </span>
                                           </span>
-                                          {m.profile?.totem && <Totem icon={m.profile.totem} size={12} />}
-                                          <span className="truncate">{m.profile?.name || 'Member'}</span>
-                                        </span>
-                                        <span className="font-mono text-[10px] text-slate-500 shrink-0">
-                                          {stat.shows_count} show{stat.shows_count === 1 ? '' : 's'}
-                                        </span>
-                                      </div>
-                                    ))}
+                                          <span className="font-mono text-[10px] text-slate-500 shrink-0">
+                                            {stat.shows_count} show{stat.shows_count === 1 ? '' : 's'}
+                                          </span>
+                                        </div>
+                                      )
+                                    })}
                                 </div>
                               </div>
                             )}

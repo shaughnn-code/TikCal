@@ -178,19 +178,30 @@ export default function Profile() {
 
           {/* Show stats */}
           <HudBox className="p-4 sm:col-span-3">
-            <SecLabel className="mb-3">// show_stats</SecLabel>
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <div className="font-display font-extrabold text-lg text-[#e8f4f8]">{String(attended).padStart(2, '0')}</div>
-                <div className="font-mono text-[9px] text-slate-500 uppercase mt-0.5">Attended</div>
+            <SecLabel className="mb-4">// show_stats</SecLabel>
+            <div className="grid grid-cols-3 gap-3 items-end">
+              <div className="text-center">
+                <div className="relative inline-flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-aurora/25 blur-xl" aria-hidden />
+                  <Icon name="trophy" size={13} className="absolute -top-1.5 -right-2 text-aurora drop-shadow-[0_0_6px_rgba(192,75,255,0.7)]" />
+                  <div className="relative font-display font-extrabold italic text-4xl sm:text-5xl text-aurora drop-shadow-[0_2px_10px_rgba(192,75,255,0.5)] tabular-nums">
+                    {String(attended).padStart(2, '0')}
+                  </div>
+                </div>
+                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Attended</div>
               </div>
-              <div>
-                <div className="font-display font-extrabold text-lg text-[#e8f4f8]">{String(attendedThisYear).padStart(2, '0')}</div>
-                <div className="font-mono text-[9px] text-slate-500 uppercase mt-0.5">This year</div>
+              <div className="text-center">
+                <div className="relative inline-flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-violet/20 blur-lg" aria-hidden />
+                  <div className="relative font-display font-extrabold italic text-3xl sm:text-4xl text-violet drop-shadow-[0_2px_8px_rgba(139,92,255,0.45)] tabular-nums">
+                    {String(attendedThisYear).padStart(2, '0')}
+                  </div>
+                </div>
+                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">This year</div>
               </div>
-              <div className="min-w-0">
-                <div className="font-display font-extrabold text-lg text-[#e8f4f8] truncate">{topVenue}</div>
-                <div className="font-mono text-[9px] text-slate-500 uppercase mt-0.5">Top venue</div>
+              <div className="text-center min-w-0">
+                <div className="font-display font-bold italic text-base text-[#e8f4f8] truncate px-1">{topVenue}</div>
+                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Top venue</div>
               </div>
             </div>
           </HudBox>
