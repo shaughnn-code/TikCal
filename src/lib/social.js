@@ -97,3 +97,13 @@ export async function loadCrewMembers(crewId) {
   const profs = await profilesByIds((data || []).map((m) => m.user_id))
   return (data || []).map((m) => ({ ...m, profile: profs[m.user_id] || null }))
 }
+
+// Ranks crew members by shows they've shared into this crew that have
+// already happened. Members with zero shows attended aren't returned by the
+// RPC, so the caller should fill those in at rank-last if it wants a
+// complete roster.
+export async function fetchCrewShowStats(crewId) {
+  const { data, error } = await supabase.rpc('crew_show_stats', { p_crew: crewId })
+  if (error) throw error
+  return data || []
+}

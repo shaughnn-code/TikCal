@@ -237,11 +237,15 @@ export async function addDiscoveredEvent(userId, ev) {
   })
 }
 
-// Crews the current user belongs to.
-export async function fetchMyCrews() {
+// Crews the current user belongs to. RLS on crew_members lets a member see
+// every membership row for crews they're in (not just their own), so this
+// must filter to the caller's own rows explicitly — otherwise a crew with N
+// members returns N duplicate rows here.
+export async function fetchMyCrews(userId) {
   const { data, error } = await supabase
     .from('crew_members')
     .select('role, crews(id, name, description, owner_id, color)')
+    .eq('user_id', userId)
     .order('joined_at', { ascending: true })
   if (error) throw error
   return (data || []).map((r) => ({ ...r.crews, role: r.role }))

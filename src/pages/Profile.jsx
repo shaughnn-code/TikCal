@@ -103,6 +103,15 @@ export default function Profile() {
   const today = new Date().toISOString().slice(0, 10)
   const upcoming = events.filter((e) => e.event_date >= today).length
   const venues = new Set(events.map((e) => e.venue).filter(Boolean)).size
+  const past = events.filter((e) => e.event_date < today)
+  const attended = past.length
+  const attendedThisYear = past.filter((e) => e.event_date.slice(0, 4) === today.slice(0, 4)).length
+  const topVenue = Object.entries(
+    past.reduce((acc, e) => {
+      if (e.venue) acc[e.venue] = (acc[e.venue] || 0) + 1
+      return acc
+    }, {}),
+  ).sort((a, b) => b[1] - a[1])[0]?.[0] || '—'
   const shareLink = `${window.location.origin}/signup`
   const copy = () =>
     navigator.clipboard.writeText(shareLink).then(() => {
@@ -166,6 +175,25 @@ export default function Profile() {
               <div className="font-mono text-[9px] text-slate-500 uppercase mt-1">{s.l}</div>
             </HudBox>
           ))}
+
+          {/* Show stats */}
+          <HudBox className="p-4 sm:col-span-3">
+            <SecLabel className="mb-3">// show_stats</SecLabel>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <div className="font-display font-extrabold text-lg text-[#e8f4f8]">{String(attended).padStart(2, '0')}</div>
+                <div className="font-mono text-[9px] text-slate-500 uppercase mt-0.5">Attended</div>
+              </div>
+              <div>
+                <div className="font-display font-extrabold text-lg text-[#e8f4f8]">{String(attendedThisYear).padStart(2, '0')}</div>
+                <div className="font-mono text-[9px] text-slate-500 uppercase mt-0.5">This year</div>
+              </div>
+              <div className="min-w-0">
+                <div className="font-display font-extrabold text-lg text-[#e8f4f8] truncate">{topVenue}</div>
+                <div className="font-mono text-[9px] text-slate-500 uppercase mt-0.5">Top venue</div>
+              </div>
+            </div>
+          </HudBox>
 
           {/* Invite */}
           <HudBox className="p-4 sm:col-span-3">

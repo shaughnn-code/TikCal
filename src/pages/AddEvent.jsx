@@ -46,8 +46,8 @@ export default function AddEvent() {
   }
 
   useEffect(() => {
-    fetchMyCrews().then(setCrews).catch(() => {})
-  }, [])
+    fetchMyCrews(user.id).then(setCrews).catch(() => {})
+  }, [user.id])
 
   const onFile = (e) => {
     const f = e.target.files[0]

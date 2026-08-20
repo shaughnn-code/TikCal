@@ -4,7 +4,7 @@ import { fetchMyCrews } from '../lib/db.js'
 import {
   loadFriends, searchPeople, sendFriendRequest, acceptFriend, removeFriend,
   loadCrewInvites, createCrew, inviteToCrew, acceptCrewInvite, declineCrewInvite, loadCrewMembers,
-  updateCrewColor,
+  updateCrewColor, fetchCrewShowStats,
 } from '../lib/social.js'
 import { CREW_COLORS, DEFAULT_CREW_COLOR } from '../lib/constants.js'
 import { GridBg, Wrap, Inp, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
@@ -73,10 +73,11 @@ export default function Friends() {
   const [newCrewColor, setNewCrewColor] = useState(DEFAULT_CREW_COLOR)
   const [expanded, setExpanded] = useState(null)
   const [members, setMembers] = useState([])
+  const [leaderboard, setLeaderboard] = useState([])
 
   const reload = useCallback(async () => {
     try {
-      const [f, c, ci] = await Promise.all([loadFriends(user.id), fetchMyCrews(), loadCrewInvites(user.id)])
+      const [f, c, ci] = await Promise.all([loadFriends(user.id), fetchMyCrews(user.id), loadCrewInvites(user.id)])
       setFriends(f.friends); setIncoming(f.incoming); setOutgoing(f.outgoing)
       setCrews(c); setCrewInvites(ci)
     } catch (e) { setErr(e.message) } finally { setLoading(false) }
@@ -118,7 +119,9 @@ export default function Friends() {
   }
   const toggleCrew = async (crewId) => {
     if (expanded === crewId) return setExpanded(null)
-    setExpanded(crewId); setMembers(await loadCrewMembers(crewId))
+    setExpanded(crewId)
+    setMembers(await loadCrewMembers(crewId))
+    fetchCrewShowStats(crewId).then(setLeaderboard).catch(() => setLeaderboard([]))
   }
   const doInviteToCrew = async (crewId, inviteeId) => {
     const { error } = await inviteToCrew(crewId, inviteeId, user.id)
@@ -299,6 +302,38 @@ export default function Friends() {
                                 ))}
                               </div>
                             </div>
+                            {members.length > 1 && (
+                              <div>
+                                <SecLabel className="mb-2">▸ Show-goer ranking</SecLabel>
+                                <div className="space-y-1.5">
+                                  {members
+                                    .map((m) => ({
+                                      m,
+                                      stat: leaderboard.find((l) => l.user_id === m.user_id) || { shows_count: 0, venues_count: 0 },
+                                    }))
+                                    .sort((a, b) => b.stat.shows_count - a.stat.shows_count)
+                                    .map(({ m, stat }, i) => (
+                                      <div
+                                        key={m.user_id}
+                                        className={`flex items-center justify-between gap-2 rounded px-2.5 py-1.5 ${
+                                          i === 0 && stat.shows_count > 0 ? 'bg-mint/10 border border-mint/30' : 'bg-white/[0.03]'
+                                        }`}
+                                      >
+                                        <span className="font-mono text-[10px] text-slate-300 flex items-center gap-1.5 min-w-0">
+                                          <span className={`shrink-0 flex items-center ${i === 0 && stat.shows_count > 0 ? 'text-mint' : 'text-slate-600'}`}>
+                                            {i === 0 && stat.shows_count > 0 ? <Icon name="crown-simple" size={12} /> : `#${i + 1}`}
+                                          </span>
+                                          {m.profile?.totem && <Totem icon={m.profile.totem} size={12} />}
+                                          <span className="truncate">{m.profile?.name || 'Member'}</span>
+                                        </span>
+                                        <span className="font-mono text-[10px] text-slate-500 shrink-0">
+                                          {stat.shows_count} show{stat.shows_count === 1 ? '' : 's'}
+                                        </span>
+                                      </div>
+                                    ))}
+                                </div>
+                              </div>
+                            )}
                             <div>
                               <SecLabel className="mb-2">Invite a friend</SecLabel>
                               {friends.length === 0 ? (
