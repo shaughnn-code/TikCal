@@ -26,10 +26,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Audit dependencies
-        # Non-blocking for now: vite/esbuild and react-router only have major
-        # (breaking) fixes available, tracked separately rather than gating
-        # every deploy. Flip to a hard failure once those are upgraded.
-        run: npm audit --audit-level=high || echo "::warning::npm audit found issues -- see job log"
+        run: npm audit --audit-level=high
       - name: Build
         run: npm run build
         env:
