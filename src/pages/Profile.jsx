@@ -107,6 +107,15 @@ export default function Profile() {
   const today = new Date().toISOString().slice(0, 10)
   const upcoming = events.filter((e) => e.event_date >= today).length
   const venues = new Set(events.map((e) => e.venue).filter(Boolean)).size
+  const past = events.filter((e) => e.event_date < today)
+  const attended = past.length
+  const attendedThisYear = past.filter((e) => e.event_date.slice(0, 4) === today.slice(0, 4)).length
+  const topVenue = Object.entries(
+    past.reduce((acc, e) => {
+      if (e.venue) acc[e.venue] = (acc[e.venue] || 0) + 1
+      return acc
+    }, {}),
+  ).sort((a, b) => b[1] - a[1])[0]?.[0] || '—'
   const shareLink = `${window.location.origin}/signup`
   const copy = () =>
     navigator.clipboard.writeText(shareLink).then(() => {
@@ -170,6 +179,36 @@ export default function Profile() {
               <div className="font-mono text-[9px] text-slate-500 uppercase mt-1">{s.l}</div>
             </HudBox>
           ))}
+
+          {/* Show stats */}
+          <HudBox className="p-4 sm:col-span-3">
+            <SecLabel className="mb-4">// show_stats</SecLabel>
+            <div className="grid grid-cols-3 gap-3 items-end">
+              <div className="text-center">
+                <div className="relative inline-flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-aurora/25 blur-xl" aria-hidden />
+                  <Icon name="trophy" size={13} className="absolute -top-1.5 -right-2 text-aurora drop-shadow-[0_0_6px_rgba(192,75,255,0.7)]" />
+                  <div className="relative font-display font-extrabold italic text-4xl sm:text-5xl text-aurora drop-shadow-[0_2px_10px_rgba(192,75,255,0.5)] tabular-nums">
+                    {String(attended).padStart(2, '0')}
+                  </div>
+                </div>
+                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Attended</div>
+              </div>
+              <div className="text-center">
+                <div className="relative inline-flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-violet/20 blur-lg" aria-hidden />
+                  <div className="relative font-display font-extrabold italic text-3xl sm:text-4xl text-violet drop-shadow-[0_2px_8px_rgba(139,92,255,0.45)] tabular-nums">
+                    {String(attendedThisYear).padStart(2, '0')}
+                  </div>
+                </div>
+                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">This year</div>
+              </div>
+              <div className="text-center min-w-0">
+                <div className="font-display font-bold italic text-base text-[#e8f4f8] truncate px-1">{topVenue}</div>
+                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Top venue</div>
+              </div>
+            </div>
+          </HudBox>
 
           {/* Invite */}
           <HudBox className="p-4 sm:col-span-3">
