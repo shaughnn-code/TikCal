@@ -102,6 +102,19 @@ export async function getInboxToken(userId) {
   return data?.token || null
 }
 
+// How many events the auto-import pipeline has landed for this user, and
+// when the most recent one arrived — proof-of-life for the auto_import card.
+export async function getAutoImportStatus(userId) {
+  const { data } = await supabase
+    .from('events')
+    .select('event_date')
+    .eq('owner_id', userId)
+    .ilike('notes', '%(auto-imported from email)%')
+    .order('event_date', { ascending: false })
+  const count = data?.length || 0
+  return { count, lastDate: count ? data[0].event_date : null }
+}
+
 // The current user's .ics feed token (creates one on first read).
 export async function getFeedToken(userId) {
   let { data } = await supabase.from('calendar_feeds').select('token').eq('user_id', userId).maybeSingle()

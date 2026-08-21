@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
-import { getInboxToken, getFeedToken, rotateFeedToken, feedUrls, startGoogleConnect, disconnectGoogle, startSpotifyConnect, disconnectSpotify, syncSpotify } from '../lib/db.js'
+import { getInboxToken, getAutoImportStatus, getFeedToken, rotateFeedToken, feedUrls, startGoogleConnect, disconnectGoogle, startSpotifyConnect, disconnectSpotify, syncSpotify } from '../lib/db.js'
 import { GridBg, Wrap, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 import { totemByIcon } from '../lib/constants.js'
@@ -29,6 +29,9 @@ export default function Profile() {
   const [copied, setCopied] = useState(false)
   const [inboxToken, setInboxToken] = useState(null)
   const [copiedAddr, setCopiedAddr] = useState(false)
+  const [importStatus, setImportStatus] = useState(null)
+  const [mailProvider, setMailProvider] = useState('gmail')
+  const [showHowItWorks, setShowHowItWorks] = useState(false)
   const [feedToken, setFeedToken] = useState(null)
   const [copiedFeed, setCopiedFeed] = useState(false)
   const [connecting, setConnecting] = useState(false)
@@ -41,6 +44,7 @@ export default function Profile() {
       .eq('owner_id', user.id)
       .then(({ data }) => setEvents(data || []))
     getInboxToken(user.id).then(setInboxToken).catch(() => {})
+    getAutoImportStatus(user.id).then(setImportStatus).catch(() => {})
     getFeedToken(user.id).then(setFeedToken).catch(() => {})
   }, [user.id])
 
@@ -182,21 +186,85 @@ export default function Profile() {
 
           {/* Email auto-import */}
           <HudBox tone="mint" className="p-4 sm:col-span-3">
-            <SecLabel className="mb-2 flex items-center gap-1.5">
-              <Icon name="sparkle" size={11} className="text-mint" /> // auto_import
-            </SecLabel>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <SecLabel className="flex items-center gap-1.5">
+                <Icon name="sparkle" size={11} className="text-mint" /> // auto_import
+              </SecLabel>
+              <button
+                onClick={() => setShowHowItWorks(true)}
+                className="font-mono text-[10px] font-bold uppercase tracking-[0.06em] text-mint hover:text-white flex items-center gap-1 shrink-0 underline decoration-mint/40 underline-offset-2 hover:decoration-white/60"
+              >
+                <Icon name="shield-check" size={12} /> How it works &amp; is it safe?
+              </button>
+            </div>
             <p className="text-slate-400 text-xs mb-3 leading-relaxed">
               Forward ticket confirmations (DICE, RA, Ticketmaster, AXS…) here and they’ll land on your calendar automatically.
-              Set a one-time forward rule in Gmail/Outlook and you’re hands-off.
             </p>
-            <div className="flex gap-2">
+
+            {importStatus?.count > 0 && (
+              <div className="mb-3">
+                <StatusPill on label={`${importStatus.count} ticket${importStatus.count === 1 ? '' : 's'} auto-imported · last ${new Date(importStatus.lastDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`} />
+              </div>
+            )}
+
+            <div className="flex gap-2 mb-3">
               <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[10px] text-slate-400 truncate">
                 {importAddr || 'generating…'}
               </div>
-              <Btn variant={copiedAddr ? 'ghost' : 'mint'} onClick={copyAddr} disabled={!importAddr} cls="shrink-0">
+              <Btn variant={copiedAddr ? 'ghost' : 'ghost'} onClick={copyAddr} disabled={!importAddr} cls="shrink-0">
                 {copiedAddr ? '✓ Copied' : 'Copy'}
               </Btn>
             </div>
+
+            <div className="flex items-center gap-1.5 mb-2">
+              {[
+                { id: 'gmail', l: 'Gmail' },
+                { id: 'outlook', l: 'Outlook' },
+                { id: 'icloud', l: 'iCloud' },
+              ].map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setMailProvider(p.id)}
+                  className={`font-mono text-[9px] uppercase tracking-[0.1em] px-2.5 py-1.5 rounded border transition-colors ${
+                    mailProvider === p.id
+                      ? 'text-mint border-mint/40 bg-mint/10'
+                      : 'text-slate-500 border-white/10 hover:border-white/20 hover:text-slate-300'
+                  }`}
+                >
+                  {p.l}
+                </button>
+              ))}
+            </div>
+
+            {mailProvider === 'icloud' ? (
+              <p className="text-slate-500 text-[11px] leading-relaxed">
+                iCloud Mail doesn’t support a direct settings link — copy the address above, then in Mail on iCloud.com go to
+                Settings → Rules → Add a Rule, and forward mail from your ticket vendors to it.
+              </p>
+            ) : (
+              <Btn
+                variant="mint"
+                cls="w-full"
+                disabled={!importAddr}
+                onClick={() => {
+                  copyAddr()
+                  window.open(
+                    mailProvider === 'gmail'
+                      ? 'https://mail.google.com/mail/u/0/#settings/fwdandpop'
+                      : 'https://outlook.live.com/mail/0/options/mail/forwarding',
+                    '_blank',
+                    'noopener',
+                  )
+                }}
+              >
+                <Icon name="arrow-square-out" size={12} /> Set up auto-forward
+              </Btn>
+            )}
+            {mailProvider !== 'icloud' && (
+              <p className="text-slate-500 text-[10px] mt-2 leading-relaxed">
+                Address copied — paste it into the forwarding field that just opened, then save.
+              </p>
+            )}
           </HudBox>
 
           {/* Subscribe feed → Apple / Google / Outlook */}
@@ -329,6 +397,74 @@ export default function Profile() {
           </HudBox>
         </div>
       </Wrap>
+
+      {showHowItWorks && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={() => setShowHowItWorks(false)}
+        >
+          <HudBox
+            hero
+            tone="mint"
+            className="w-full max-w-md p-6 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <h3 className="font-display font-extrabold text-lg text-[#e8f4f8] flex items-center gap-2">
+                <Icon name="shield-check" size={20} className="text-mint" /> How auto-import works
+              </h3>
+              <button
+                onClick={() => setShowHowItWorks(false)}
+                className="text-slate-500 hover:text-white shrink-0 p-1 -m-1"
+                aria-label="Close"
+              >
+                <Icon name="x" size={18} />
+              </button>
+            </div>
+
+            <p className="text-slate-300 text-sm leading-relaxed mb-4">
+              You get a <strong className="text-mint">private address</strong> that only you know. Forward a ticket
+              confirmation to it, and within a minute the show shows up on your calendar — venue, date, and all.
+            </p>
+
+            <SecLabel className="mb-2 text-mint">// the 3 steps</SecLabel>
+            <ol className="space-y-2 mb-4">
+              {[
+                'Pick your email provider above and hit "Set up auto-forward" — your address is copied and your provider\'s forwarding settings open automatically.',
+                'Paste the address into the forwarding field and save (your provider may ask you to confirm once — we\'ll relay that confirmation code straight to your real inbox).',
+                'That\'s it. Every future ticket confirmation from that inbox auto-forwards and lands on your calendar — no more manual entry.',
+              ].map((step, i) => (
+                <li key={i} className="flex gap-3 text-slate-300 text-xs leading-relaxed">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-mint/15 border border-mint/40 text-mint font-mono text-[10px] font-bold flex items-center justify-center">
+                    {i + 1}
+                  </span>
+                  <span className="pt-0.5">{step}</span>
+                </li>
+              ))}
+            </ol>
+
+            <SecLabel className="mb-2 text-mint">// why it's safe</SecLabel>
+            <ul className="space-y-2 mb-1">
+              {[
+                'No password or login is ever shared with TikCal — you never connect your email account, you just forward mail to us, the same as CC-ing a friend.',
+                'We only read what you forward. TikCal never sees the rest of your inbox and can\'t — there\'s no access to it at all.',
+                'Only ticket confirmations turn into events. Ads, on-sale alerts, and anything that isn\'t a real "you\'re going" confirmation get discarded automatically.',
+                'Forward the wrong thing? No harm — anything that doesn\'t look like a real ticket is dropped, not stored.',
+                'Stop anytime by deleting the forwarding rule in your email settings — same place you set it up.',
+              ].map((point, i) => (
+                <li key={i} className="flex gap-2 text-slate-400 text-xs leading-relaxed">
+                  <Icon name="check-circle" size={14} className="text-mint shrink-0 mt-0.5" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+
+            <Btn variant="mint" cls="w-full mt-5" onClick={() => setShowHowItWorks(false)}>
+              Got it
+            </Btn>
+          </HudBox>
+        </div>
+      )}
     </>
   )
 }
