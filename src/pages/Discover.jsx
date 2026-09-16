@@ -156,7 +156,7 @@ export default function Discover() {
     )
 
     const actions = (
-      <div className={tile ? 'flex items-center justify-between gap-2 mt-2' : 'flex flex-col gap-1 shrink-0'}>
+      <div className={tile ? 'flex items-center justify-between gap-2 mt-2' : 'flex items-center gap-3'}>
         {added.has(e.id) ? (
           <span className="font-mono text-[10px] text-mint flex items-center gap-1">
             <Icon name="check-circle" size={12} /> Added
@@ -197,19 +197,23 @@ export default function Discover() {
     }
 
     return (
-      <HudBox tone={highlight ? 'mint' : 'ice'} className="p-3 flex items-center gap-3">
-        {img}
-        <div className="flex-1 min-w-0">
-          {highlight && e.matched && (
-            <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
-              <Icon name="heart" size={10} /> {e.matched}
+      <HudBox tone={highlight ? 'mint' : 'ice'} className="p-3 flex flex-col gap-2.5">
+        <div className="flex items-center gap-3">
+          {img}
+          <div className="flex-1 min-w-0">
+            {highlight && e.matched && (
+              <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
+                <Icon name="heart" size={10} /> {e.matched}
+              </div>
+            )}
+            {/* line-clamp (not truncate) -- a single-line cutoff was chopping
+                real titles mid-word on narrow screens ("Hayley Williams w/ M..."). */}
+            <div className="font-display font-bold text-sm text-[#e8f4f8] line-clamp-2">{e.title}</div>
+            <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
+              {fmtDate(e.date)}
+              {e.venue && <span className="text-slate-700"> · </span>}
+              {e.venue}
             </div>
-          )}
-          <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{e.title}</div>
-          <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
-            {fmtDate(e.date)}
-            {e.venue && <span className="text-slate-700"> · </span>}
-            {e.venue}
           </div>
         </div>
         {actions}

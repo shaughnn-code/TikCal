@@ -11,7 +11,7 @@ const NavItem = ({ to, label, grad, children, dataTour }) => (
   <NavLink to={to} className="shrink-0 outline-none" data-tour={dataTour}>
     {({ isActive }) => (
       <span
-        className={`group relative flex items-center gap-2 rounded-full px-3.5 py-2 font-mono text-[14px] tracking-wide uppercase transition-transform duration-300 ${
+        className={`group relative flex items-center gap-2 rounded-full px-2.5 sm:px-3.5 py-2 font-mono text-[14px] tracking-wide uppercase transition-transform duration-300 ${
           isActive ? 'scale-105' : 'hover:scale-105'
         }`}
       >
@@ -54,11 +54,15 @@ export const Nav = () => {
 
   return (
     <nav className="relative z-20 border-b border-white/[0.07] px-4 py-4 sticky top-0 bg-ink/80 backdrop-blur">
-      <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
+      {/* min-w-0 on both the row and the scroller: flex children default to
+          min-width:auto, which refuses to shrink below content size and was
+          forcing the whole page to overflow horizontally on phones instead of
+          just this row. Now the icon row scrolls internally when it doesn't fit. */}
+      <div className="max-w-4xl mx-auto flex items-center justify-between gap-2 min-w-0">
         <button onClick={() => navigate('/calendar')} className="shrink-0" aria-label="TikCal home">
           <Logo size="md" framed />
         </button>
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 min-w-0 overflow-x-auto no-scrollbar">
           <NavItem to="/calendar" label="Cal" grad="linear-gradient(45deg,#a955ff,#ea51ff)" dataTour="nav-calendar"><Icon name="calendar-dots" size={21} /></NavItem>
           <NavItem to="/discover" label="Find" grad="linear-gradient(45deg,#56ccf2,#2f80ed)" dataTour="nav-discover"><Icon name="compass" size={21} /></NavItem>
           <NavItem to="/plan" label="Plan" grad="linear-gradient(45deg,#ff9966,#ff5e62)"><Icon name="magic-wand" size={21} /></NavItem>
