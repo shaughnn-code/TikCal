@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchTicketmaster, fetchRA, fetchDice, fetchMyArtists, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
-import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner, Sel } from '../components/ui.jsx'
+import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner, SearchSel } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 
 const norm = (s) => (s || '').trim().toLowerCase()
@@ -25,10 +25,12 @@ export default function Discover() {
   const [added, setAdded] = useState(() => new Set())
   const [connecting, setConnecting] = useState(false)
   const [err, setErr] = useState('')
-  const [sourceFilter, setSourceFilter] = useState('all')
-  const [venueFilter, setVenueFilter] = useState('')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateUntil, setDateUntil] = useState('')
+  const emptyFilters = { source: 'all', venue: '', dateFrom: '', dateUntil: '' }
+  // Draft filters track the controls; `applied` only updates when the user
+  // hits Go Disco, so nothing re-filters the list mid-edit.
+  const [draft, setDraft] = useState(emptyFilters)
+  const [applied, setApplied] = useState(emptyFilters)
+  const [view, setView] = useState('list')
 
   const load = useCallback(() => {
     Promise.all([fetchTicketmaster({}), fetchRA({}), fetchDice({}), fetchMyArtists(user.id)])
@@ -76,13 +78,26 @@ export default function Discover() {
 
   const filtered = useMemo(() => {
     return (tm.events || []).filter((e) => {
-      if (sourceFilter !== 'all' && e.source !== sourceFilter) return false
-      if (venueFilter && e.venue !== venueFilter) return false
-      if (dateFrom && e.date < dateFrom) return false
-      if (dateUntil && e.date > dateUntil) return false
+      if (applied.source !== 'all' && e.source !== applied.source) return false
+      if (applied.venue && e.venue !== applied.venue) return false
+      if (applied.dateFrom && e.date < applied.dateFrom) return false
+      if (applied.dateUntil && e.date > applied.dateUntil) return false
       return true
     })
-  }, [tm.events, sourceFilter, venueFilter, dateFrom, dateUntil])
+  }, [tm.events, applied])
+
+  const dirty =
+    draft.source !== applied.source ||
+    draft.venue !== applied.venue ||
+    draft.dateFrom !== applied.dateFrom ||
+    draft.dateUntil !== applied.dateUntil
+  const hasFilters = applied.source !== 'all' || applied.venue || applied.dateFrom || applied.dateUntil
+
+  const applyFilters = () => setApplied(draft)
+  const clearFilters = () => {
+    setDraft(emptyFilters)
+    setApplied(emptyFilters)
+  }
 
   const { forYou, rest } = useMemo(() => {
     const matchOf = (e) => {
@@ -121,29 +136,27 @@ export default function Discover() {
   const fmtDate = (d) =>
     new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 
-  const Show = ({ e, highlight }) => (
-    <HudBox tone={highlight ? 'mint' : 'ice'} className="p-3 flex items-center gap-3">
-      {e.image ? (
-        <img src={e.image} alt="" className="w-14 h-14 rounded object-cover shrink-0 border border-white/10" />
-      ) : (
-        <div className="w-14 h-14 rounded bg-white/5 flex items-center justify-center shrink-0">
-          <Icon name="music-notes" size={20} className="text-slate-600" />
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        {highlight && e.matched && (
-          <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
-            <Icon name="heart" size={10} /> {e.matched}
-          </div>
-        )}
-        <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{e.title}</div>
-        <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
-          {fmtDate(e.date)}
-          {e.venue && <span className="text-slate-700"> · </span>}
-          {e.venue}
-        </div>
+  const Show = ({ e, highlight, tile }) => {
+    const img = e.image ? (
+      <img
+        src={e.image}
+        alt=""
+        className={tile ? 'w-full h-32 rounded object-cover border border-white/10' : 'w-14 h-14 rounded object-cover shrink-0 border border-white/10'}
+      />
+    ) : (
+      <div
+        className={
+          tile
+            ? 'w-full h-32 rounded bg-white/5 flex items-center justify-center'
+            : 'w-14 h-14 rounded bg-white/5 flex items-center justify-center shrink-0'
+        }
+      >
+        <Icon name="music-notes" size={tile ? 28 : 20} className="text-slate-600" />
       </div>
-      <div className="flex flex-col gap-1 shrink-0">
+    )
+
+    const actions = (
+      <div className={tile ? 'flex items-center justify-between gap-2 mt-2' : 'flex flex-col gap-1 shrink-0'}>
         {added.has(e.id) ? (
           <span className="font-mono text-[10px] text-mint flex items-center gap-1">
             <Icon name="check-circle" size={12} /> Added
@@ -159,7 +172,57 @@ export default function Discover() {
           </a>
         )}
       </div>
-    </HudBox>
+    )
+
+    if (tile) {
+      return (
+        <HudBox tone={highlight ? 'mint' : 'ice'} className="p-3 flex flex-col">
+          {img}
+          <div className="min-w-0 mt-2">
+            {highlight && e.matched && (
+              <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
+                <Icon name="heart" size={10} /> {e.matched}
+              </div>
+            )}
+            <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{e.title}</div>
+            <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
+              {fmtDate(e.date)}
+              {e.venue && <span className="text-slate-700"> · </span>}
+              {e.venue}
+            </div>
+          </div>
+          {actions}
+        </HudBox>
+      )
+    }
+
+    return (
+      <HudBox tone={highlight ? 'mint' : 'ice'} className="p-3 flex items-center gap-3">
+        {img}
+        <div className="flex-1 min-w-0">
+          {highlight && e.matched && (
+            <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
+              <Icon name="heart" size={10} /> {e.matched}
+            </div>
+          )}
+          <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{e.title}</div>
+          <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
+            {fmtDate(e.date)}
+            {e.venue && <span className="text-slate-700"> · </span>}
+            {e.venue}
+          </div>
+        </div>
+        {actions}
+      </HudBox>
+    )
+  }
+
+  const ShowList = ({ items }) => (
+    <div className={view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3' : 'space-y-2'}>
+      {items.map((e) => (
+        <Show key={e.key} e={e} highlight={e.matched != null} tile={view === 'grid'} />
+      ))}
+    </div>
   )
 
   return (
@@ -211,9 +274,9 @@ export default function Discover() {
                 {SOURCES.map((s) => (
                   <button
                     key={s.value}
-                    onClick={() => setSourceFilter(s.value)}
+                    onClick={() => setDraft((d) => ({ ...d, source: s.value }))}
                     className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
-                      sourceFilter === s.value ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
+                      draft.source === s.value ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
                     }`}
                   >
                     {s.label}
@@ -222,16 +285,22 @@ export default function Discover() {
               </div>
             </div>
 
-            <div className="min-w-[160px]">
-              <Sel label="Venue" value={venueFilter} onChange={setVenueFilter} options={venueOptions} />
+            <div className="min-w-[200px]">
+              <SearchSel
+                label="Venue"
+                value={draft.venue}
+                onChange={(v) => setDraft((d) => ({ ...d, venue: v }))}
+                options={venueOptions}
+                placeholder="Search venues…"
+              />
             </div>
 
             <div>
               <SecLabel className="mb-2">From</SecLabel>
               <input
                 type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
+                value={draft.dateFrom}
+                onChange={(e) => setDraft((d) => ({ ...d, dateFrom: e.target.value }))}
                 className="bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] text-sm focus:outline-none focus:border-violet/60 transition-colors"
               />
             </div>
@@ -239,31 +308,50 @@ export default function Discover() {
               <SecLabel className="mb-2">Until</SecLabel>
               <input
                 type="date"
-                value={dateUntil}
-                onChange={(e) => setDateUntil(e.target.value)}
+                value={draft.dateUntil}
+                onChange={(e) => setDraft((d) => ({ ...d, dateUntil: e.target.value }))}
                 className="bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] text-sm focus:outline-none focus:border-violet/60 transition-colors"
               />
             </div>
 
-            {(sourceFilter !== 'all' || venueFilter || dateFrom || dateUntil) && (
-              <button
-                onClick={() => { setSourceFilter('all'); setVenueFilter(''); setDateFrom(''); setDateUntil('') }}
-                className="font-mono text-[10px] text-slate-500 hover:text-white underline"
-              >
+            <Btn variant="aurora" onClick={applyFilters} disabled={!dirty} cls="!px-5">
+              <Icon name="disco-ball" size={14} /> Go Disco
+            </Btn>
+
+            {hasFilters && (
+              <button onClick={clearFilters} className="font-mono text-[10px] text-slate-500 hover:text-white underline">
                 Clear filters
               </button>
             )}
           </div>
         </HudBox>
 
+        {/* View toggle */}
+        <div className="flex justify-end mb-4">
+          <div className="flex gap-1 bg-white/[0.04] rounded p-1 w-fit">
+            <button
+              onClick={() => setView('list')}
+              className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
+                view === 'list' ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
+              }`}
+            >
+              <Icon name="list" size={12} /> List
+            </button>
+            <button
+              onClick={() => setView('grid')}
+              className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
+                view === 'grid' ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
+              }`}
+            >
+              <Icon name="squares-four" size={12} /> Grid
+            </button>
+          </div>
+        </div>
+
         {forYou.length > 0 && (
           <section className="mb-8">
             <SecLabel className="mb-3 text-mint">▸ For you · {forYou.length}</SecLabel>
-            <div className="space-y-2">
-              {forYou.map((e) => (
-                <Show key={e.key} e={e} highlight />
-              ))}
-            </div>
+            <ShowList items={forYou} />
           </section>
         )}
 
@@ -274,11 +362,7 @@ export default function Discover() {
               {tm.configured ? 'No shows found right now.' : 'Discovery is not configured yet.'}
             </p>
           ) : (
-            <div className="space-y-2">
-              {rest.map((e) => (
-                <Show key={e.key} e={e} />
-              ))}
-            </div>
+            <ShowList items={rest} />
           )}
         </section>
       </Wrap>

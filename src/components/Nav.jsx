@@ -7,8 +7,8 @@ import { Icon, Totem } from './icons.jsx'
 // route — the pill fills with its own gradient, lifts a blurred glow behind it,
 // and scales up, so the destination you're heading to is unmistakable. Each
 // item carries a distinct hue (`grad`) for at-a-glance identification.
-const NavItem = ({ to, label, grad, children }) => (
-  <NavLink to={to} className="shrink-0 outline-none">
+const NavItem = ({ to, label, grad, children, dataTour }) => (
+  <NavLink to={to} className="shrink-0 outline-none" data-tour={dataTour}>
     {({ isActive }) => (
       <span
         className={`group relative flex items-center gap-2 rounded-full px-3.5 py-2 font-mono text-[14px] tracking-wide uppercase transition-transform duration-300 ${
@@ -59,12 +59,12 @@ export const Nav = () => {
           <Logo size="md" framed />
         </button>
         <div className="flex items-center gap-1 sm:gap-2">
-          <NavItem to="/calendar" label="Cal" grad="linear-gradient(45deg,#a955ff,#ea51ff)"><Icon name="calendar-dots" size={21} /></NavItem>
-          <NavItem to="/discover" label="Find" grad="linear-gradient(45deg,#56ccf2,#2f80ed)"><Icon name="compass" size={21} /></NavItem>
+          <NavItem to="/calendar" label="Cal" grad="linear-gradient(45deg,#a955ff,#ea51ff)" dataTour="nav-calendar"><Icon name="calendar-dots" size={21} /></NavItem>
+          <NavItem to="/discover" label="Find" grad="linear-gradient(45deg,#56ccf2,#2f80ed)" dataTour="nav-discover"><Icon name="compass" size={21} /></NavItem>
           <NavItem to="/plan" label="Plan" grad="linear-gradient(45deg,#ff9966,#ff5e62)"><Icon name="magic-wand" size={21} /></NavItem>
           <NavItem to="/friends" label="Crew" grad="linear-gradient(45deg,#80ff72,#22c55e)"><Icon name="users-three" size={21} /></NavItem>
-          <NavItem to="/overlap" label="Sync" grad="linear-gradient(45deg,#ffd36e,#ff8a3d)"><Icon name="intersect" size={21} /></NavItem>
-          <NavItem to="/profile" label="You" grad="linear-gradient(45deg,#ffa9c6,#f434e2)">
+          <NavItem to="/overlap" label="Sync" grad="linear-gradient(45deg,#ffd36e,#ff8a3d)" dataTour="nav-overlap"><Icon name="intersect" size={21} /></NavItem>
+          <NavItem to="/profile" label="You" grad="linear-gradient(45deg,#ffa9c6,#f434e2)" dataTour="nav-profile">
             {profile?.totem ? <Totem icon={profile.totem} size={24} /> : <Icon name="user" size={21} />}
           </NavItem>
           <button

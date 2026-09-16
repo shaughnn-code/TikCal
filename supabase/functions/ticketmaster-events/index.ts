@@ -58,6 +58,7 @@ Deno.serve(async (req) => {
         city: venue?.city?.name || '',
         url: e.url || '',
         image: (e.images || []).sort((a: { width: number }, b: { width: number }) => b.width - a.width)[0]?.url || '',
+        genre: e.classifications?.[0]?.genre?.name || '',
       }
     }).filter((e: { date: string }) => e.date)
     return json({ configured: true, events })

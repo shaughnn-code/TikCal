@@ -22,12 +22,15 @@ const StatusPill = ({ on, label }) => (
 )
 
 export default function Profile() {
-  const { user, profile, signOut, refreshProfile } = useAuth()
+  const { user, profile, signOut, deleteAccount, refreshProfile, updateProfile } = useAuth()
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const [events, setEvents] = useState(null)
   const [copied, setCopied] = useState(false)
   const [inboxToken, setInboxToken] = useState(null)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteErr, setDeleteErr] = useState('')
   const [copiedAddr, setCopiedAddr] = useState(false)
   const [importStatus, setImportStatus] = useState(null)
   const [mailProvider, setMailProvider] = useState('gmail')
@@ -224,7 +227,7 @@ export default function Profile() {
           </HudBox>
 
           {/* Email auto-import */}
-          <HudBox tone="mint" className="p-4 sm:col-span-3">
+          <HudBox tone="mint" className="p-4 sm:col-span-3" data-tour="forwarding">
             <div className="flex items-center justify-between gap-2 mb-2">
               <SecLabel className="flex items-center gap-1.5">
                 <Icon name="sparkle" size={11} className="text-mint" /> // auto_import
@@ -431,8 +434,42 @@ export default function Profile() {
             <p className="font-mono text-[11px] text-slate-500 mb-3">{user?.email}</p>
             <div className="flex gap-2">
               <Btn variant="ghost" onClick={() => navigate('/setup')}>Edit Profile</Btn>
+              <Btn variant="ghost" onClick={() => { updateProfile({ seen_tour: false }); navigate('/calendar') }}>Replay tour</Btn>
               <Btn variant="danger" onClick={async () => { await signOut(); navigate('/login') }}>Sign out</Btn>
             </div>
+          </HudBox>
+
+          {/* Delete account — two-step confirm, no native browser dialog */}
+          <HudBox className="p-4 sm:col-span-3">
+            <SecLabel className="mb-2">// danger zone</SecLabel>
+            {!confirmingDelete ? (
+              <Btn variant="danger" onClick={() => setConfirmingDelete(true)}>Delete account</Btn>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  This permanently deletes your account and everything tied to it — events, RSVPs, crews you own,
+                  friend connections, calendar/music integrations. This cannot be undone.
+                </p>
+                {deleteErr && <p className="text-red-400 text-xs">{deleteErr}</p>}
+                <div className="flex gap-2">
+                  <Btn
+                    variant="danger"
+                    disabled={deleting}
+                    onClick={async () => {
+                      setDeleting(true)
+                      setDeleteErr('')
+                      const { error } = await deleteAccount()
+                      setDeleting(false)
+                      if (error) return setDeleteErr(error)
+                      navigate('/', { replace: true })
+                    }}
+                  >
+                    {deleting ? 'Deleting…' : 'Yes, permanently delete my account'}
+                  </Btn>
+                  <Btn variant="ghost" onClick={() => setConfirmingDelete(false)} disabled={deleting}>Cancel</Btn>
+                </div>
+              </div>
+            )}
           </HudBox>
         </div>
       </Wrap>

@@ -1,5 +1,7 @@
 // Shared design-token primitives for the "Wide Ice" system.
 
+import { useEffect, useRef, useState } from 'react'
+
 export const Logo = ({ size = 'md', className = '', framed = false }) => {
   const cls = size === 'lg' ? 'logo-3d text-[56px]' : size === 'sm' ? 'logo-3d-sm text-[20px]' : 'logo-3d-sm text-[30px]'
   const word = <span className={cls}>TikCal</span>
@@ -113,7 +115,67 @@ export const Sel = ({ label, value, onChange, options }) => (
   </div>
 )
 
-export const Btn = ({ children, onClick, type = 'button', variant = 'mint', disabled, cls = '' }) => {
+// Searchable single-select combobox — text input filters `options` as-you-type,
+// click or Enter picks. Used where a native <select>'s type-ahead isn't
+// discoverable enough (long option lists like venue names).
+export const SearchSel = ({ label, value, onChange, options, placeholder = 'Search…' }) => {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState(value || '')
+  const wrapRef = useRef(null)
+
+  useEffect(() => setQuery(value || ''), [value])
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
+
+  const filtered = options.filter((o) => o.toLowerCase().includes(query.toLowerCase()))
+
+  const pick = (o) => {
+    onChange(o)
+    setQuery(o)
+    setOpen(false)
+  }
+
+  return (
+    <div ref={wrapRef} className="relative">
+      {label && <SecLabel className="mb-2">{label}</SecLabel>}
+      <input
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value)
+          setOpen(true)
+          if (!e.target.value) onChange('')
+        }}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+        className="w-full bg-[#0d141b] border border-white/10 rounded px-3 py-3 text-sm text-[#e8f4f8] focus:outline-none focus:border-violet/60 transition-colors"
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute z-20 mt-1 w-full max-h-56 overflow-y-auto bg-[#0d141b] border border-white/10 rounded shadow-lg">
+          {filtered.map((o) => (
+            <button
+              key={o}
+              type="button"
+              onClick={() => pick(o)}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-white/10 transition-colors ${
+                o === value ? 'text-violet' : 'text-slate-300'
+              }`}
+            >
+              {o}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export const Btn = ({ children, onClick, type = 'button', variant = 'mint', disabled, cls = '', ...rest }) => {
   const styles = {
     aurora:
       'text-white bg-gradient-to-r from-aurora to-violet shadow-[0_8px_24px_-8px_rgba(192,75,255,0.6)] hover:brightness-110',
@@ -130,6 +192,7 @@ export const Btn = ({ children, onClick, type = 'button', variant = 'mint', disa
       className={`px-5 py-3 rounded font-mono font-bold text-xs tracking-[0.06em] uppercase transition-all inline-flex items-center justify-center gap-1.5 ${styles[variant]} ${
         disabled ? 'opacity-40 cursor-not-allowed' : ''
       } ${cls}`}
+      {...rest}
     >
       {children}
     </button>

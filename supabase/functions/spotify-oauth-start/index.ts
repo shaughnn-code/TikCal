@@ -23,10 +23,19 @@ Deno.serve(async (req) => {
   const { data: { user } } = await authed.auth.getUser()
   if (!user) return json({ error: 'Not signed in.' }, 401)
 
+  // Platform (ios/android/web) so the callback -- which Spotify redirects to
+  // directly, with no JWT or app context -- knows whether to hand control
+  // back via a tikcal:// deep link or a plain https redirect.
+  let platform = 'web'
+  try {
+    const body = await req.json()
+    if (body?.platform === 'ios' || body?.platform === 'android') platform = body.platform
+  } catch { /* no body sent -- default to web */ }
+
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
   const { data: st, error } = await admin
     .from('oauth_states')
-    .insert({ user_id: user.id, provider: 'spotify' })
+    .insert({ user_id: user.id, provider: 'spotify', platform })
     .select('state')
     .single()
   if (error) return json({ error: 'Could not start the connection.' }, 500)

@@ -45,3 +45,13 @@ Linked project: `pirlflebmiylgusmqhhk` (TikCal). Apply migrations with `supabase
 - Pure logic goes in `src/lib/**` and gets a colocated `*.test.js` — no I/O in testable functions.
 - Supabase writes that need validation go through `SECURITY DEFINER` RPCs, not direct table access. RLS is on for every public table.
 - Never put the `service_role` key in client code — only the publishable/anon key.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues in `shaughnn-code/TikCal`, via `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at repo root (not yet created). See `docs/agents/domain.md`.

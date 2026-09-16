@@ -73,6 +73,7 @@ Deno.serve(async (req) => {
       city: 'New York',
       url: e.url || '',
       image: e.image_square || '',
+      genre: (e.tags || [])[0] || '',
     })).filter((e: { date: string }) => e.date)
     return json({ configured: true, events })
   } catch (err) {

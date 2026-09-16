@@ -79,7 +79,7 @@ export default function Dashboard() {
               <span className="text-violet">{'}'}</span> Calendar
             </h1>
           </div>
-          <Btn variant="aurora" onClick={() => navigate('/calendar/add')}>
+          <Btn variant="aurora" onClick={() => navigate('/calendar/add')} data-tour="add-event">
             <Icon name="plus-bold" size={14} /> Add Show
           </Btn>
         </div>

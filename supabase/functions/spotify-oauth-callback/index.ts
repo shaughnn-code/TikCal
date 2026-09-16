@@ -3,11 +3,21 @@
 // everything, and bounce back to the app.
 //
 // Secrets:  SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, APP_URL (optional)
+// Note: APP_SCHEME mirrors google-oauth-callback, src/lib/platform.js, the iOS
+// Info.plist, and the Android manifest -- change it in all if it ever changes.
 // Deploy:   supabase functions deploy spotify-oauth-callback --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const APP = () => Deno.env.get('APP_URL') || 'https://tikcal.nyc'
-const back = (s: string) => Response.redirect(`${APP()}/discover?spotify=${s}`, 302)
+const APP_SCHEME = 'tikcal'
+// A native build opened this flow in the system browser, so an https redirect
+// would leave the user stranded there with the app still waiting behind it;
+// the custom scheme hands control back instead. `platform` comes off the
+// verified state row, never the query string, so the target is always ours.
+const back = (platform: string, s: string) => {
+  const target = platform === 'ios' || platform === 'android' ? `${APP_SCHEME}://discover?spotify=${s}` : `${APP()}/discover?spotify=${s}`
+  return Response.redirect(target, 302)
+}
 const norm = (s: string) => s.trim().toLowerCase()
 
 // Pull top + followed artists and (re)write them for this user.
@@ -46,18 +56,28 @@ Deno.serve(async (req) => {
   const url = new URL(req.url)
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
-  if (url.searchParams.get('error')) return back('denied')
-  if (!code || !state) return back('error')
+
+  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+
+  // Resolve + consume the state (single use) before anything else: it carries
+  // the platform, and without it we can't route even a failure back correctly.
+  let uid = ''
+  let platform = 'web'
+  if (state) {
+    const { data: stateRow } = await admin.from('oauth_states').select('user_id, platform').eq('state', state).maybeSingle()
+    if (stateRow) {
+      uid = stateRow.user_id
+      platform = stateRow.platform || 'web'
+      await admin.from('oauth_states').delete().eq('state', state)
+    }
+  }
+
+  if (url.searchParams.get('error')) return back(platform, 'denied')
+  if (!code || !uid) return back(platform, 'error')
 
   const clientId = Deno.env.get('SPOTIFY_CLIENT_ID')
   const clientSecret = Deno.env.get('SPOTIFY_CLIENT_SECRET')
-  if (!clientId || !clientSecret) return back('error')
-
-  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
-  const { data: stateRow } = await admin.from('oauth_states').select('user_id').eq('state', state).maybeSingle()
-  if (!stateRow) return back('error')
-  await admin.from('oauth_states').delete().eq('state', state)
-  const uid = stateRow.user_id
+  if (!clientId || !clientSecret) return back(platform, 'error')
 
   // Exchange code for tokens (Basic auth = client_id:client_secret).
   let tok: { access_token?: string; refresh_token?: string; expires_in?: number }
@@ -76,9 +96,9 @@ Deno.serve(async (req) => {
     })
     tok = await res.json()
   } catch {
-    return back('error')
+    return back(platform, 'error')
   }
-  if (!tok.access_token) return back('error')
+  if (!tok.access_token) return back(platform, 'error')
 
   // Display name for the "connected as" label.
   let displayName = ''
@@ -101,5 +121,5 @@ Deno.serve(async (req) => {
   await syncArtists(admin, uid, tok.access_token)
   await admin.from('profiles').update({ spotify_name: displayName }).eq('id', uid)
 
-  return back('connected')
+  return back(platform, 'connected')
 })

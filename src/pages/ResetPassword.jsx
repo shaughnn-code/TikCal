@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
+import { validatePassword } from '../lib/validation.js'
 import { GridBg, Logo, Inp, Btn, Kicker, Spinner } from '../components/ui.jsx'
 
 // Landing page for the password-reset email link. Supabase establishes a
@@ -18,7 +19,8 @@ export default function ResetPassword() {
 
   const submit = async (e) => {
     e.preventDefault()
-    if (pw.length < 6) return setErr('Password must be at least 6 characters.')
+    const pwErr = validatePassword(pw)
+    if (pwErr) return setErr(pwErr)
     if (pw !== conf) return setErr('Passwords do not match.')
     setBusy(true); setErr('')
     const r = await updatePassword(pw)
@@ -46,7 +48,7 @@ export default function ResetPassword() {
           <p className="text-mint text-sm text-center py-4">✓ Password updated — signing you in…</p>
         ) : (
           <form onSubmit={submit} className="space-y-4">
-            <Inp label="New password" type="password" value={pw} onChange={setPw} placeholder="Min. 6 characters" required />
+            <Inp label="New password" type="password" value={pw} onChange={setPw} placeholder="Min. 8 characters, 1 letter + 1 number" required />
             <Inp label="Confirm password" type="password" value={conf} onChange={setConf} placeholder="••••••••" required />
             {err && <p className="text-red-400 text-xs text-center py-1">{err}</p>}
             <Btn type="submit" variant="mint" disabled={busy} cls="w-full">

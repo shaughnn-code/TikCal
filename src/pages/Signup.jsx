@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
+import { validatePassword } from '../lib/validation.js'
 import { GridBg, Logo, Inp, Btn, Kicker } from '../components/ui.jsx'
 
 export default function Signup() {
@@ -22,7 +23,8 @@ export default function Signup() {
     setErr('')
     setMsg('')
     if (pw !== conf) return setErr('Passwords do not match.')
-    if (pw.length < 6) return setErr('Password must be at least 6 characters.')
+    const pwErr = validatePassword(pw)
+    if (pwErr) return setErr(pwErr)
     setLoading(true)
     const { error, data } = await signUp(email, pw)
     setLoading(false)
@@ -41,7 +43,7 @@ export default function Signup() {
         <Kicker className="mb-3">// NEW ACCOUNT</Kicker>
         <form onSubmit={submit} className="space-y-4">
           <Inp label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required />
-          <Inp label="Password" type="password" value={pw} onChange={setPw} placeholder="Min. 6 characters" required />
+          <Inp label="Password" type="password" value={pw} onChange={setPw} placeholder="Min. 8 characters, 1 letter + 1 number" required />
           <Inp label="Confirm Password" type="password" value={conf} onChange={setConf} placeholder="••••••••" required />
           {err && <p className="text-red-400 text-xs text-center py-1">{err}</p>}
           {msg && <p className="text-mint text-xs text-center py-1">{msg}</p>}
