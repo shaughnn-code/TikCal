@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { fetchTicketmaster, fetchRA, fetchDice, fetchMyArtists, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner, SearchSel } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
+import { openConnect } from '../lib/oauthFlow.js'
 
 const norm = (s) => (s || '').trim().toLowerCase()
 
@@ -118,7 +119,7 @@ export default function Discover() {
     setConnecting(true)
     setErr('')
     try {
-      window.location.href = await startSpotifyConnect()
+      if (await openConnect(startSpotifyConnect)) setConnecting(false)
     } catch (e) {
       setErr(e.message || 'Could not start the Spotify connection.')
       setConnecting(false)

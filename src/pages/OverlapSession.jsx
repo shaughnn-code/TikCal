@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
+import { publicUrl } from '../lib/platform.js'
 import { GridBg, Wrap, Logo, Btn, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { FEATURE_NAME } from '../lib/overlap/theme.js'
@@ -148,7 +149,7 @@ export default function OverlapSession() {
 
   const share = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href)
+      await navigator.clipboard.writeText(publicUrl(`/overlap/${sessionId}`))
       setCopied(true)
       setTimeout(() => setCopied(false), 1800)
     } catch { /* clipboard blocked */ }

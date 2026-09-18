@@ -6,6 +6,8 @@ import { getInboxToken, getAutoImportStatus, getFeedToken, rotateFeedToken, feed
 import { GridBg, Wrap, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 import { totemByIcon } from '../lib/constants.js'
+import { publicUrl } from '../lib/platform.js'
+import { openConnect } from '../lib/oauthFlow.js'
 
 // Connection-state pill — the mint/muted dot-and-label read used across the
 // bento grid below wherever a card needs a live status at a glance instead
@@ -72,7 +74,7 @@ export default function Profile() {
     setConnecting(true)
     setGErr('')
     try {
-      window.location.href = await startGoogleConnect()
+      if (await openConnect(startGoogleConnect)) setConnecting(false)
     } catch (e) {
       setGErr(e.message || 'Could not start the Google connection.')
       setConnecting(false)
@@ -91,7 +93,7 @@ export default function Profile() {
     setConnecting(true)
     setGErr('')
     try {
-      window.location.href = await startSpotifyConnect()
+      if (await openConnect(startSpotifyConnect)) setConnecting(false)
     } catch (e) {
       setGErr(e.message || 'Could not start the Spotify connection.')
       setConnecting(false)
@@ -119,7 +121,7 @@ export default function Profile() {
       return acc
     }, {}),
   ).sort((a, b) => b[1] - a[1])[0]?.[0] || '—'
-  const shareLink = `${window.location.origin}/signup`
+  const shareLink = publicUrl('/signup')
   const copy = () =>
     navigator.clipboard.writeText(shareLink).then(() => {
       setCopied(true)

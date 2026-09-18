@@ -1,5 +1,5 @@
 import { supabase, supabaseUrl } from '../supabaseClient.js'
-import { getPlatform } from './platform.js'
+import { platform } from './platform.js'
 
 // events.owner_id references auth.users, so PostgREST can't embed profiles
 // directly. We fetch events (RLS scopes them to owner + friends + crews) and
@@ -146,7 +146,9 @@ export function feedUrls(token) {
 // to directly, with no JWT or app context) knows whether to hand control back
 // via a tikcal:// deep link (native) or a plain https redirect (web).
 export async function startGoogleConnect() {
-  const { data, error } = await supabase.functions.invoke('google-oauth-start', { body: { platform: getPlatform() } })
+  const { data, error } = await supabase.functions.invoke('google-oauth-start', {
+    body: { platform: platform() },
+  })
   if (error) throw error
   if (data?.error) throw new Error(data.error)
   return data.url
@@ -174,7 +176,9 @@ export async function disconnectGoogle(userId) {
 // Kick off Spotify OAuth: returns the authorize URL to redirect to. Same
 // platform-in-state-row reasoning as startGoogleConnect above.
 export async function startSpotifyConnect() {
-  const { data, error } = await supabase.functions.invoke('spotify-oauth-start', { body: { platform: getPlatform() } })
+  const { data, error } = await supabase.functions.invoke('spotify-oauth-start', {
+    body: { platform: platform() },
+  })
   if (error) throw error
   if (data?.error) throw new Error(data.error)
   return data.url
