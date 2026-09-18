@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchTicketmaster, fetchRA, fetchDice, fetchMyArtists, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner, SearchSel } from '../components/ui.jsx'
@@ -17,7 +17,7 @@ const SOURCES = [
 
 export default function Discover() {
   const { user, profile, refreshProfile } = useAuth()
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
 
   const [tm, setTm] = useState({ configured: true, events: [] })
