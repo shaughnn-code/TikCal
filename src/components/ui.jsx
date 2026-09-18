@@ -206,7 +206,12 @@ export const Wrap = ({ children, cls = '', wide = false }) => (
 )
 
 export const Spinner = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="font-mono text-violet/40 text-sm tracking-[0.3em]">···</div>
+  <div className="flex items-center justify-center min-h-screen" role="status" aria-live="polite" aria-label="Loading">
+    <div className="aurora-blob-wrap">
+      <div className="aurora-blob" aria-hidden="true">
+        <span className="aurora-blob-spark" />
+      </div>
+      <span className="aurora-blob-label">Loading<span className="floor-dots" /></span>
+    </div>
   </div>
 )

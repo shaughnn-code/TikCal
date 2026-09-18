@@ -382,6 +382,61 @@
   }
 }
 
+/* ── Aurora blob spinner (inline/page loading state) ─────────── */
+@layer components {
+  .aurora-blob-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+  }
+  .aurora-blob {
+    position: relative; width: 84px; height: 84px;
+    /* static fallback shape -- keyframes take over once the animation runs, but
+       reduced-motion strips the animation and needs a real blob left behind. */
+    border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.28), transparent 55%),
+                linear-gradient(150deg, rgba(192,75,255,.85), rgba(91,107,255,.8));
+    animation: blobMorph 4.5s ease-in-out infinite, blobGlow 2.6s ease-in-out infinite;
+  }
+  /* soft halo behind the blob, same morph so it never de-syncs from the shape */
+  .aurora-blob::before {
+    content: ''; position: absolute; inset: -18px; border-radius: inherit;
+    background: inherit; opacity: .35; filter: blur(18px); z-index: -1;
+    animation: inherit;
+  }
+  /* dot-matrix texture on the blob surface, echoing the disco-floor motif */
+  .aurora-blob::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    background-image: radial-gradient(rgba(255,255,255,.5) 1px, transparent 1px);
+    background-size: 4px 4px; mix-blend-mode: overlay; opacity: .5;
+  }
+  .aurora-blob-spark {
+    position: absolute; top: 22%; left: 38%; width: 6px; height: 6px; border-radius: 50%;
+    background: #fff; box-shadow: 0 0 8px 2px rgba(255,255,255,.9);
+    animation: blobSpark 2.6s ease-in-out infinite;
+  }
+  @keyframes blobMorph {
+    0%, 100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; }
+    25%      { border-radius: 58% 42% 39% 61% / 55% 62% 38% 45%; }
+    50%      { border-radius: 50% 50% 33% 67% / 61% 39% 61% 39%; }
+    75%      { border-radius: 33% 67% 58% 42% / 40% 55% 45% 60%; }
+  }
+  @keyframes blobGlow {
+    0%, 100% { box-shadow: 0 0 30px 4px rgba(192,75,255,.45); }
+    50%      { box-shadow: 0 0 46px 10px rgba(91,107,255,.55); }
+  }
+  @keyframes blobSpark {
+    0%, 100% { opacity: .9; transform: scale(1); }
+    50%      { opacity: .25; transform: scale(.6); }
+  }
+  .aurora-blob-label {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px;
+    letter-spacing: .16em; color: rgba(255,255,255,.4); text-transform: uppercase;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .aurora-blob, .aurora-blob::before, .aurora-blob-spark { animation: none; }
+    .aurora-blob { box-shadow: 0 0 30px 4px rgba(192,75,255,.45); }
+  }
+}
+
 /* ── Welcome / first-run intro scene ─────────────────────────── */
 @layer components {
   .wel-scene {
