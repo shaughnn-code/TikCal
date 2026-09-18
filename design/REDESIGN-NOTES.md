@@ -14,13 +14,24 @@ The retro "slatted sun" of a synthwave horizon *is* a stepped pyramid *is* stack
 - The receding grid floor below = the **disco dance-floor / calendar grid**.
 So the icon doesn't collage the concepts — it collapses them into a single mark.
 
-## Palette (from tailwind.config + index.css, extended for the sun)
-- ink `#0a0e12`, ink2 `#040608` (bg)
-- ice/cyan `#4cc9f0`, cyan2 `#2FE6E6` (grid, horizon)
-- mint `#6EE7B7` (top of sun)
-- orange `#ff6b2b` (mid sun — brand's only warm accent)
-- magenta `#ff2e7e` (bottom of sun — synthwave heat; NEW, icon-only)
-- warm yellow `#ffd36e` (sun highlight)
+## Palette
+
+Two separate palettes now — the app chrome and the icon intentionally diverge.
+
+**App chrome — "Aurora"** (shipped in commit `e4301d5`; see CLAUDE.md for the
+authoritative token list). Near-black base + a magenta→violet aurora light-leak.
+Color is information: violet is brand/chrome, every other hue stays reserved for data.
+- ink `#0b0b11` (bg), ink2 `#060609` (recessed/blocked)
+- **brand/chrome = violet:** aurora `#c04bff`, violet `#8b5cff`, iris `#5b6bff` — wordmark glow, hero, primary CTA (`Btn variant="aurora"`), nav-active, calendar today-marker/selection, links, focus.
+- **data hues (do NOT rebrand):** mint `#6EE7B7` (shared / "I'm in"), orange `#ff6b2b` (semantic free/GO in Overlap only), the 10 crew colors via `getEventAccent`, RSVP amber/coral.
+- cyan `#2FE6E6` / ice `#4cc9f0` are **legacy** — no longer chrome; `ice` survives only as a crew-color option. Don't reintroduce them as UI accents.
+- backdrop is the aurora bloom, not a Tron grid: `GridBg` renders it via the reused (repainted) `.grid-glow` / `.grid-floor` / `.grid-horizon` classes.
+
+**App icon — Synth Horizon sun** (icon-only, unchanged by the rebrand). The mark
+keeps its warm synthwave gradient on purpose; it does *not* follow the violet chrome.
+- deep field `#0a0e16` → `#06080e`
+- sun slats top→bottom: mint `#7cf3c4` → yellow `#ffe08a` → orange `#ff9e3d` / `#ff6b2b` → magenta `#ff2e7e` (bottom heat)
+- grid floor / facet lines: cyan `#4cc9f0`
 
 ## Type
 Barlow 800 italic (wordmark), Syne (headings), Space Grotesk (body), IBM Plex Mono (labels/data). Unchanged — already distinctive.
@@ -33,3 +44,4 @@ Barlow 800 italic (wordmark), Syne (headings), Space Grotesk (body), IBM Plex Mo
 
 ## Log
 - (start) Read existing system. Chose the "one form, four readings" concept over collaging.
+- (2026-07-20) Aurora rebrand shipped: app chrome moved from cyan "Wide Ice" to the magenta/violet aurora (`e4301d5`); CLAUDE.md design tokens updated to match (`9183883`). The icon stays warm Synth Horizon — chrome and icon deliberately diverge. Palette section above rewritten to reflect this.

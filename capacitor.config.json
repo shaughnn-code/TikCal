@@ -1,5 +1,24 @@
 {
   "appId": "nyc.tikcal.app",
   "appName": "TikCal",
-  "webDir": "dist"
+  "webDir": "dist",
+  "backgroundColor": "#0b0b11",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 320,
+      "backgroundColor": "#0b0b11",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": false,
+      "androidScaleType": "CENTER_CROP",
+      "androidSplashResourceName": "splash"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0b0b11",
+      "overlaysWebView": false
+    }
+  }
 }

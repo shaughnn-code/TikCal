@@ -53,7 +53,14 @@ export const Nav = () => {
   const navigate = useNavigate()
 
   return (
-    <nav className="relative z-20 border-b border-white/[0.07] px-4 py-4 sticky top-0 bg-ink/80 backdrop-blur">
+    // `sticky top-0` parks the bar at the very top of the viewport, which under
+    // viewport-fit=cover is *behind* the notch / Dynamic Island. The top inset
+    // is added to its padding rather than offsetting it, so the translucent bar
+    // paints under the status bar instead of leaving a hole. Because the nav is
+    // sticky (in flow, not fixed), the taller bar pushes page content down on
+    // its own — nothing else needs to know its height. Side insets keep it clear
+    // of the rounded corners in landscape. All four are 0px on the web.
+    <nav className="relative z-20 border-b border-white/[0.07] px-4 py-4 pt-[calc(1rem+var(--sat))] pr-[calc(1rem+var(--sar))] pl-[calc(1rem+var(--sal))] sticky top-0 bg-ink/80 backdrop-blur">
       {/* min-w-0 on both the row and the scroller: flex children default to
           min-width:auto, which refuses to shrink below content size and was
           forcing the whole page to overflow horizontally on phones instead of

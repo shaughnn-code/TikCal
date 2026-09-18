@@ -4,8 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="google-site-verification" content="OyRIaQy2F8JBwAYxY0sYj-t11662LDSymvvlNdRiH6U" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AB%3C/text%3E%3C/svg%3E" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0a0e12" />
+    <!-- viewport-fit=cover is load-bearing on iOS: without it every
+         env(safe-area-inset-*) resolves to 0 and the app renders under the
+         Dynamic Island / home indicator. See :root in src/index.css. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Aurora base (ink). Was #0a0e12, a leftover from the retired Wide Ice theme. -->
+    <meta name="theme-color" content="#0b0b11" />
 
     <!-- ── SEO ──────────────────────────────────────────────────────────
          This is an SPA that serves the same index.html shell for every route.

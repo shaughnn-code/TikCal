@@ -5,10 +5,11 @@ import { GridBg, Logo } from './ui.jsx'
 // Public + on-brand: aurora backdrop, wordmark home link, narrow prose column.
 export default function InfoPage({ kicker, title, updated, children }) {
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative min-h-screen flex flex-col pb-[var(--sab)]">
       <GridBg lite />
 
-      <header className="relative z-10 w-full max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
+      {/* In-flow header, so it starts at y=0 under the status bar on device. */}
+      <header className="relative z-10 w-full max-w-3xl mx-auto px-6 py-5 pt-[calc(1.25rem+var(--sat))] flex items-center justify-between">
         <Link to="/" aria-label="TikCal home">
           <Logo size="sm" />
         </Link>

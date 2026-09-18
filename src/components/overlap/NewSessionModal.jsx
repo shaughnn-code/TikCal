@@ -67,9 +67,11 @@ export default function NewSessionModal({ creatorName, onClose, onCreated }) {
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4"
       onClick={onClose}
     >
+      {/* Bottom sheet below `sm`, centered dialog above it — so the bottom inset
+          only applies at the small breakpoint (sm:p-6 wins from there up). */}
       <HudBox
         hero
-        className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6 rounded-t-2xl sm:rounded"
+        className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto p-5 pb-[calc(1.25rem+var(--sab))] sm:p-6 rounded-t-2xl sm:rounded"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
