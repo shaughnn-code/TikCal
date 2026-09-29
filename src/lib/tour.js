@@ -2,7 +2,7 @@ export function tourNext(index, steps) {
   return Math.min(index + 1, steps.length - 1)
 }
 
-export function tourBack(index, steps) {
+export function tourBack(index, _steps) {
   return Math.max(index - 1, 0)
 }
 

@@ -25,7 +25,7 @@ export default [
       "react-hooks/exhaustive-deps": "warn",
       "react-refresh/only-export-components": [
         "warn",
-        { allowConstantExport: true },
+        { allowConstantExport: true, allowExportNames: ["buttonVariants", "useAuth"] },
       ],
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
