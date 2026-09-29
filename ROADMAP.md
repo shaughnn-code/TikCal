@@ -102,6 +102,7 @@ Apple Music, Ticketmaster, RA and DICE were code-reviewed clean (all degrade gra
 
 ## Engineering debt
 
+- **Dependabot #33 — `uuid@7.0.3`, moderate, accepted for now.** Missing buffer bounds check in v3/v5/v6 when a `buf` argument is supplied; patched in 11.1.1. Reached only as `@capacitor/cli@8.5.2 → xcode@3.0.1 → uuid@7.0.3`, so it is devDependency-scoped, absent from the shipped bundle, and only runs during `cap sync` / `cap add` with no attacker-controlled `buf`. An `overrides` entry forcing uuid 11 crosses four majors of that package's API and risks breaking `cap sync` — not worth it mid-resubmit. Wait for Capacitor to bump `xcode`, and recheck when the App Store work is done.
 - **Main bundle is 606 kB in a single chunk**, over Vite's 500 kB warning. Fix is route-level `lazy()` code-splitting in `App.jsx` — an afternoon of work, not a quick patch.
 - **Unmerged branches:** `feature/mobile-app-launch` (7 commits ahead) and `feature/spotify-preview` (1 commit ahead). Decide merge or abandon.
 - **Stale remote branches:** `origin/claude/ai-skills-home-lab-w29xtn` (1 unmerged commit), `origin/claude/open-tikal-gcuttr` (2), `origin/claude/personal-dream-app-gfwk8k` (6), `origin/claude/tikcal-nyc-editing-53f30r` (0, fully merged), plus `origin/feature/overlap` and `origin/feature/seo-per-route` whose local counterparts are already deleted. Review the unmerged ones before pruning.
