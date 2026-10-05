@@ -211,11 +211,11 @@ export default function OverlapSession() {
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: p.color, boxShadow: `0 0 6px ${p.color}` }}
                 />
-                <span className="font-mono text-[10px] uppercase text-slate-400">{p.display_name}</span>
+                <span className="font-mono text-[11px] uppercase text-slate-400">{p.display_name}</span>
               </span>
             ))}
             {!full && (
-              <span className="font-mono text-[10px] uppercase text-slate-600">
+              <span className="font-mono text-[11px] uppercase text-slate-600">
                 · {session.max_participants - participants.length} open
               </span>
             )}

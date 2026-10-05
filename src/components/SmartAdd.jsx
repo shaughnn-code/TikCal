@@ -76,7 +76,7 @@ export function SmartAdd({ onResult }) {
       <div className="flex items-center gap-2 mb-3">
         <Icon name="sparkle" size={16} className="text-mint" />
         <h2 className="font-display font-bold text-[#e8f4f8] text-sm">Smart Add</h2>
-        <span className="font-mono text-[10px] text-slate-500">— drop a ticket</span>
+        <span className="font-mono text-[11px] text-slate-500">— drop a ticket</span>
       </div>
 
       <div className="flex gap-1 mb-3 bg-white/[0.04] rounded p-1 w-fit">
@@ -85,7 +85,7 @@ export function SmartAdd({ onResult }) {
             key={t.id}
             type="button"
             onClick={() => { setTab(t.id); setErr('') }}
-            className={`px-3 py-1.5 rounded font-mono text-[10px] tracking-wide transition-all ${
+            className={`px-3 py-1.5 rounded font-mono text-[11px] tracking-wide transition-all ${
               tab === t.id ? 'bg-white/10 text-mint' : 'text-slate-600 hover:text-slate-300'
             }`}
           >

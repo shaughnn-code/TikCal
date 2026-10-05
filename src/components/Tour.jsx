@@ -120,8 +120,8 @@ export const Tour = () => {
       )}
       {!rect && <div className="fixed inset-0 bg-ink2/75" />}
 
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm bg-ink border border-white/10 rounded-xl p-4 shadow-2xl">
-        <p className="font-mono text-[10px] uppercase tracking-wide text-aurora mb-1">
+      <div className="fixed bottom-[calc(6.5rem+var(--sab))] sm:bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm bg-ink border border-white/10 rounded-xl p-4 shadow-2xl">
+        <p className="font-mono text-[11px] uppercase tracking-wide text-aurora mb-1">
           Step {index + 1} of {STEPS.length}
         </p>
         <h3 className="font-display font-bold text-white text-sm mb-1">{step.title}</h3>

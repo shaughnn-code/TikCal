@@ -41,13 +41,13 @@ export default function BestWindows({ session, overlap, participants, onSelect }
             style={{ '--hud-color': meta.color, borderColor: `${meta.color}44`, backgroundColor: `${meta.color}0f` }}
           >
             <div className="text-center shrink-0 w-12">
-              <div className="font-mono text-[9px] text-slate-400 uppercase">
+              <div className="font-mono text-[11px] text-slate-400 uppercase">
                 {dt.toLocaleDateString('en-US', { weekday: 'short' })}
               </div>
               <div className="font-display font-bold text-lg leading-none" style={{ color: meta.color }}>
                 {dt.getDate()}
               </div>
-              <div className="font-mono text-[9px] text-slate-500 uppercase">
+              <div className="font-mono text-[11px] text-slate-500 uppercase">
                 {dt.toLocaleDateString('en-US', { month: 'short' })}
               </div>
             </div>
@@ -55,7 +55,7 @@ export default function BestWindows({ session, overlap, participants, onSelect }
               <div className="font-mono text-xs font-bold uppercase tracking-wide" style={{ color: meta.color }}>
                 {meta.label}
               </div>
-              <div className="font-mono text-[10px] text-slate-500 uppercase mt-0.5">
+              <div className="font-mono text-[11px] text-slate-500 uppercase mt-0.5">
                 {daypartMeta(r.daypart)?.sub || r.daypart} · {tally}
               </div>
             </div>

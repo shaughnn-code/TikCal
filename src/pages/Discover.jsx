@@ -158,7 +158,7 @@ export default function Discover() {
     const actions = (
       <div className={tile ? 'flex items-center justify-between gap-2 mt-2' : 'flex items-center gap-3'}>
         {added.has(e.id) ? (
-          <span className="font-mono text-[10px] text-mint flex items-center gap-1">
+          <span className="font-mono text-[11px] text-mint flex items-center gap-1">
             <Icon name="check-circle" size={12} /> Added
           </span>
         ) : (
@@ -167,7 +167,7 @@ export default function Discover() {
           </Btn>
         )}
         {e.url && (
-          <a href={e.url} target="_blank" rel="noopener noreferrer" className="font-mono text-[9px] text-slate-500 hover:text-violet text-center underline">
+          <a href={e.url} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-slate-500 hover:text-violet text-center underline">
             Tickets
           </a>
         )}
@@ -180,12 +180,12 @@ export default function Discover() {
           {img}
           <div className="min-w-0 mt-2">
             {highlight && e.matched && (
-              <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
+              <div className="font-mono text-[11px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
                 <Icon name="heart" size={10} /> {e.matched}
               </div>
             )}
             <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{e.title}</div>
-            <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
+            <div className="font-mono text-[11px] text-slate-400 truncate mt-0.5">
               {fmtDate(e.date)}
               {e.venue && <span className="text-slate-700"> · </span>}
               {e.venue}
@@ -202,14 +202,14 @@ export default function Discover() {
           {img}
           <div className="flex-1 min-w-0">
             {highlight && e.matched && (
-              <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
+              <div className="font-mono text-[11px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
                 <Icon name="heart" size={10} /> {e.matched}
               </div>
             )}
             {/* line-clamp (not truncate) -- a single-line cutoff was chopping
                 real titles mid-word on narrow screens ("Hayley Williams w/ M..."). */}
             <div className="font-display font-bold text-sm text-[#e8f4f8] line-clamp-2">{e.title}</div>
-            <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
+            <div className="font-mono text-[11px] text-slate-400 truncate mt-0.5">
               {fmtDate(e.date)}
               {e.venue && <span className="text-slate-700"> · </span>}
               {e.venue}
@@ -255,7 +255,7 @@ export default function Discover() {
             </Btn>
           </HudBox>
         ) : (
-          <div className="font-mono text-[10px] text-mint mb-5 flex items-center gap-1.5">
+          <div className="font-mono text-[11px] text-mint mb-5 flex items-center gap-1.5">
             <Icon name="spotify-logo" size={12} /> {profile.spotify_name} · {artists.length} artists tracked
           </div>
         )}
@@ -279,7 +279,7 @@ export default function Discover() {
                   <button
                     key={s.value}
                     onClick={() => setDraft((d) => ({ ...d, source: s.value }))}
-                    className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
+                    className={`px-3 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-all ${
                       draft.source === s.value ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
                     }`}
                   >
@@ -323,7 +323,7 @@ export default function Discover() {
             </Btn>
 
             {hasFilters && (
-              <button onClick={clearFilters} className="font-mono text-[10px] text-slate-500 hover:text-white underline">
+              <button onClick={clearFilters} className="font-mono text-[11px] text-slate-500 hover:text-white underline">
                 Clear filters
               </button>
             )}
@@ -335,7 +335,7 @@ export default function Discover() {
           <div className="flex gap-1 bg-white/[0.04] rounded p-1 w-fit">
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
                 view === 'list' ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
               }`}
             >
@@ -343,7 +343,7 @@ export default function Discover() {
             </button>
             <button
               onClick={() => setView('grid')}
-              className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
                 view === 'grid' ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
               }`}
             >
@@ -362,7 +362,7 @@ export default function Discover() {
         <section>
           <SecLabel className="mb-3">▸ All NYC shows{rest.length ? ` · ${rest.length}` : ''}</SecLabel>
           {rest.length === 0 && forYou.length === 0 ? (
-            <p className="font-mono text-[10px] text-slate-600">
+            <p className="font-mono text-[11px] text-slate-600">
               {tm.configured ? 'No shows found right now.' : 'Discovery is not configured yet.'}
             </p>
           ) : (

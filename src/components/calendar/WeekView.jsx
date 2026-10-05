@@ -52,7 +52,7 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, suppre
             {Array.from({ length: WEEK_ROWS }, (_, i) => (
               <div
                 key={i}
-                className="border-b border-line text-right pr-2 pt-1 text-[10px] text-faint"
+                className="border-b border-line text-right pr-2 pt-1 text-[11px] text-faint"
                 style={{ height: ROW_H }}
               >
                 {hourLabel(i)}
@@ -126,7 +126,7 @@ function Chip({ ev, tba }) {
         <div className="relative text-[11.5px] font-bold text-white truncate leading-tight">{ev.title}</div>
         {/* "TBA" not "time TBA": the column is narrow enough that the longer
             string truncates away exactly the word that carries the meaning. */}
-        <div className="relative text-[10.5px] text-slate-400 truncate leading-tight">
+        <div className="relative text-[11px] text-slate-400 truncate leading-tight">
           {[tba ? 'TBA' : ev.start_time, ev.venue].filter(Boolean).join(' · ')}
         </div>
       </button>

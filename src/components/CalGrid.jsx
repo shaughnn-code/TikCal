@@ -101,7 +101,7 @@ export const CalGrid = ({ events, onDayClick, selectedDate }) => {
       {/* weekday labels */}
       <div className="relative grid grid-cols-7 mb-2">
         {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((d) => (
-          <div key={d} className="text-center font-mono text-[10px] font-medium text-white/30 tracking-widest py-1">
+          <div key={d} className="text-center font-mono text-[11px] font-medium text-white/30 tracking-widest py-1">
             {d}
           </div>
         ))}
@@ -161,7 +161,7 @@ export const CalGrid = ({ events, onDayClick, selectedDate }) => {
                     <div
                       key={ev.id}
                       title={`${ev.artist || ''} — ${ev.title}`}
-                      className="w-full rounded-r-sm px-1.5 py-1 text-[10px] sm:text-[11px] leading-tight"
+                      className="w-full rounded-r-sm px-1.5 py-1 text-[11px] leading-tight"
                       style={{
                         borderLeft: `2px solid ${s.color}`,
                         background: `linear-gradient(90deg, ${s.color}1a, rgba(255,255,255,0.03))`,
@@ -171,13 +171,13 @@ export const CalGrid = ({ events, onDayClick, selectedDate }) => {
                         <>
                           <div className="text-white/85 font-medium">{ev.title}</div>
                           {ev.artist && (
-                            <div className="text-white/40 text-[9px] mt-0.5 truncate">{ev.artist}</div>
+                            <div className="text-white/40 text-[11px] mt-0.5 truncate">{ev.artist}</div>
                           )}
                           {ev.venue && (
-                            <div className="text-white/30 text-[9px] truncate">{ev.venue}</div>
+                            <div className="text-white/30 text-[11px] truncate">{ev.venue}</div>
                           )}
                           {ev.notes && (
-                            <div className="text-white/45 text-[9px] mt-0.5 line-clamp-2">{ev.notes}</div>
+                            <div className="text-white/45 text-[11px] mt-0.5 line-clamp-2">{ev.notes}</div>
                           )}
                         </>
                       ) : (
@@ -187,7 +187,7 @@ export const CalGrid = ({ events, onDayClick, selectedDate }) => {
                   )
                 })}
                 {!isHovered && evs.length > 2 && (
-                  <span className="font-mono text-[9px] sm:text-[10px] text-white/25 pl-1 mt-auto">
+                  <span className="font-mono text-[11px] text-white/25 pl-1 mt-auto">
                     +{evs.length - 2} more
                   </span>
                 )}

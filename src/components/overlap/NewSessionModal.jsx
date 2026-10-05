@@ -104,7 +104,7 @@ export default function NewSessionModal({ creatorName, onClose, onCreated }) {
                   key={label}
                   type="button"
                   onClick={() => setDaysOfWeek(set)}
-                  className={`px-2.5 py-1 rounded font-mono text-[10px] uppercase tracking-wide border transition-colors ${
+                  className={`px-2.5 py-1 rounded font-mono text-[11px] uppercase tracking-wide border transition-colors ${
                     arrEq(daysOfWeek, set)
                       ? 'border-mint/50 text-mint'
                       : 'border-white/10 text-slate-500 hover:text-white'

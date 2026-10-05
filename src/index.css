@@ -67,6 +67,13 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+  /* Mobile bottom tab bar (Nav.jsx): hide it while a field has focus so it
+     never rides up on top of the on-screen keyboard. */
+  @media (max-width: 639px) {
+    body:has(input:focus, textarea:focus, select:focus, [contenteditable]:focus) .tabbar {
+      display: none;
+    }
+  }
   select option {
     background: #0d141b;
     color: #e8f4f8;
@@ -333,7 +340,7 @@
     gap: 6px; width: min(340px, 82vw);
   }
   .floor-weekdays span {
-    text-align: center; font-size: 9px; letter-spacing: .1em; color: rgba(255,255,255,.28);
+    text-align: center; font-size: 11px; letter-spacing: .1em; color: rgba(255,255,255,.28);
   }
   .floor-grid {
     position: relative; z-index: 1; display: grid; grid-template-columns: repeat(7, 1fr);
@@ -346,7 +353,7 @@
     display: flex; align-items: flex-start; justify-content: flex-start;
   }
   .floor-num {
-    font-size: 10px; padding: 4px 0 0 5px; color: rgba(255,255,255,0);
+    font-size: 11px; padding: 4px 0 0 5px; color: rgba(255,255,255,0);
     transition: color .5s ease;
   }
   /* disco: rainbow wave chases diagonally across the floor */

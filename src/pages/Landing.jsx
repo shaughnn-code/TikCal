@@ -79,7 +79,7 @@ export default function Landing() {
         </div>
       </main>
 
-      <footer className="relative z-10 text-center text-slate-600 font-mono text-[10px] py-8">
+      <footer className="relative z-10 text-center text-slate-600 font-mono text-[11px] py-8">
         TIKCAL · MADE FOR NIGHTS OUT IN NYC
       </footer>
     </div>

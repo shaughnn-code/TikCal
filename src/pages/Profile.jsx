@@ -14,7 +14,7 @@ import { openConnect } from '../lib/oauthFlow.js'
 // of a sentence (header chips, card corners).
 const StatusPill = ({ on, label }) => (
   <span
-    className={`font-mono text-[9px] uppercase tracking-[0.1em] px-2 py-1 rounded border shrink-0 ${
+    className={`font-mono text-[11px] uppercase tracking-[0.1em] px-2 py-1 rounded border shrink-0 ${
       on ? 'text-mint border-mint/40 bg-mint/10' : 'text-slate-600 border-white/10 bg-white/[0.02]'
     }`}
   >
@@ -153,7 +153,7 @@ export default function Profile() {
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-display font-extrabold text-lg uppercase text-[#e8f4f8] truncate">{profile?.name}</h2>
-              <div className="font-mono text-[10px] text-slate-500 flex items-center gap-1.5 mt-1">
+              <div className="font-mono text-[11px] text-slate-500 flex items-center gap-1.5 mt-1">
                 {profile?.favorite_venue && (
                   <><Icon name="map-pin" size={11} className="text-violet" /> {profile.favorite_venue}</>
                 )}
@@ -181,7 +181,7 @@ export default function Profile() {
               <div className={`font-display font-extrabold text-2xl ${s.tone === 'mint' ? 'text-mint' : 'text-[#e8f4f8]'}`}>
                 {String(s.n).padStart(2, '0')}
               </div>
-              <div className="font-mono text-[9px] text-slate-500 uppercase mt-1">{s.l}</div>
+              <div className="font-mono text-[11px] text-slate-500 uppercase mt-1">{s.l}</div>
             </HudBox>
           ))}
 
@@ -197,7 +197,7 @@ export default function Profile() {
                     {String(attended).padStart(2, '0')}
                   </div>
                 </div>
-                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Attended</div>
+                <div className="font-mono text-[11px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Attended</div>
               </div>
               <div className="text-center">
                 <div className="relative inline-flex items-center justify-center">
@@ -206,11 +206,11 @@ export default function Profile() {
                     {String(attendedThisYear).padStart(2, '0')}
                   </div>
                 </div>
-                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">This year</div>
+                <div className="font-mono text-[11px] text-slate-500 uppercase mt-2 tracking-[0.14em]">This year</div>
               </div>
               <div className="text-center min-w-0">
                 <div className="font-display font-bold italic text-base text-[#e8f4f8] truncate px-1">{topVenue}</div>
-                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Top venue</div>
+                <div className="font-mono text-[11px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Top venue</div>
               </div>
             </div>
           </HudBox>
@@ -219,7 +219,7 @@ export default function Profile() {
           <HudBox className="p-4 sm:col-span-3">
             <SecLabel className="mb-2">// invite_friends</SecLabel>
             <div className="flex gap-2">
-              <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[10px] text-slate-500 truncate">
+              <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[11px] text-slate-500 truncate">
                 {shareLink}
               </div>
               <Btn variant={copied ? 'ghost' : 'ice'} onClick={copy} cls="shrink-0">
@@ -236,7 +236,7 @@ export default function Profile() {
               </SecLabel>
               <button
                 onClick={() => setShowHowItWorks(true)}
-                className="font-mono text-[10px] font-bold uppercase tracking-[0.06em] text-mint hover:text-white flex items-center gap-1 shrink-0 underline decoration-mint/40 underline-offset-2 hover:decoration-white/60"
+                className="font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-mint hover:text-white flex items-center gap-1 shrink-0 underline decoration-mint/40 underline-offset-2 hover:decoration-white/60"
               >
                 <Icon name="shield-check" size={12} /> How it works &amp; is it safe?
               </button>
@@ -252,7 +252,7 @@ export default function Profile() {
             )}
 
             <div className="flex gap-2 mb-3">
-              <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[10px] text-slate-400 truncate">
+              <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[11px] text-slate-400 truncate">
                 {importAddr || 'generating…'}
               </div>
               <Btn variant={copiedAddr ? 'ghost' : 'ghost'} onClick={copyAddr} disabled={!importAddr} cls="shrink-0">
@@ -269,7 +269,7 @@ export default function Profile() {
                 <button
                   key={p.id}
                   onClick={() => setMailProvider(p.id)}
-                  className={`font-mono text-[9px] uppercase tracking-[0.1em] px-2.5 py-1.5 rounded border transition-colors ${
+                  className={`font-mono text-[11px] uppercase tracking-[0.1em] px-2.5 py-1.5 rounded border transition-colors ${
                     mailProvider === p.id
                       ? 'text-mint border-mint/40 bg-mint/10'
                       : 'text-slate-500 border-white/10 hover:border-white/20 hover:text-slate-300'
@@ -305,7 +305,7 @@ export default function Profile() {
               </Btn>
             )}
             {mailProvider !== 'icloud' && (
-              <p className="text-slate-500 text-[10px] mt-2 leading-relaxed">
+              <p className="text-slate-500 text-[11px] mt-2 leading-relaxed">
                 Address copied — paste it into the forwarding field that just opened, then save.
               </p>
             )}
@@ -323,7 +323,7 @@ export default function Profile() {
             {feedToken ? (
               <>
                 <div className="flex gap-2 mb-2">
-                  <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[10px] text-slate-400 truncate">
+                  <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[11px] text-slate-400 truncate">
                     {feedUrls(feedToken).webcal}
                   </div>
                   <Btn
@@ -340,24 +340,24 @@ export default function Profile() {
                   </Btn>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                  <a href={feedUrls(feedToken).webcal} className="font-mono text-[10px] text-mint underline">
+                  <a href={feedUrls(feedToken).webcal} className="font-mono text-[11px] text-mint underline">
                     Add to Apple Calendar →
                   </a>
                   <a
                     href={`https://calendar.google.com/calendar/u/0/r/settings/addbyurl?cid=${encodeURIComponent(feedUrls(feedToken).https)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-[10px] text-violet underline"
+                    className="font-mono text-[11px] text-violet underline"
                   >
                     Add to Google →
                   </a>
-                  <button onClick={rotateFeed} className="font-mono text-[10px] text-slate-600 hover:text-slate-400 underline">
+                  <button onClick={rotateFeed} className="font-mono text-[11px] text-slate-600 hover:text-slate-400 underline">
                     Reset link
                   </button>
                 </div>
               </>
             ) : (
-              <p className="font-mono text-[10px] text-slate-600">generating…</p>
+              <p className="font-mono text-[11px] text-slate-600">generating…</p>
             )}
           </HudBox>
 
@@ -371,7 +371,7 @@ export default function Profile() {
             </div>
             {googleOn ? (
               <>
-                <p className="font-mono text-[10px] text-slate-400 truncate mb-3">{profile.google_calendar_email}</p>
+                <p className="font-mono text-[11px] text-slate-400 truncate mb-3">{profile.google_calendar_email}</p>
                 <Btn variant="ghost" onClick={unlinkGoogle} cls="!px-3 !py-2">Disconnect</Btn>
               </>
             ) : (
@@ -397,7 +397,7 @@ export default function Profile() {
             </div>
             {spotifyOn ? (
               <>
-                <p className="font-mono text-[10px] text-slate-400 truncate mb-3">{profile.spotify_name}</p>
+                <p className="font-mono text-[11px] text-slate-400 truncate mb-3">{profile.spotify_name}</p>
                 <div className="flex gap-2">
                   <Btn variant="ghost" onClick={resyncSpotify} cls="!px-3 !py-2">Refresh</Btn>
                   <Btn variant="ghost" onClick={unlinkSpotify} cls="!px-3 !py-2">Disconnect</Btn>
@@ -513,7 +513,7 @@ export default function Profile() {
                 'That\'s it. Every future ticket confirmation from that inbox auto-forwards and lands on your calendar — no more manual entry.',
               ].map((step, i) => (
                 <li key={i} className="flex gap-3 text-slate-300 text-xs leading-relaxed">
-                  <span className="shrink-0 w-5 h-5 rounded-full bg-mint/15 border border-mint/40 text-mint font-mono text-[10px] font-bold flex items-center justify-center">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-mint/15 border border-mint/40 text-mint font-mono text-[11px] font-bold flex items-center justify-center">
                     {i + 1}
                   </span>
                   <span className="pt-0.5">{step}</span>

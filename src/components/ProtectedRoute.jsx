@@ -25,7 +25,9 @@ export const ProtectedRoute = () => {
     // row of content clear of the iOS home indicator / Android gesture bar.
     // box-sizing is border-box globally, so the padding sits *inside* the 100vh
     // of min-h-screen — it adds no phantom scroll. 0px on the web.
-    <div className="min-h-screen pb-[var(--sab)]">
+    // On phones the fixed bottom tab bar (~5rem) also needs clearing; from `sm`
+    // up the nav lives in the top bar, so only the inset remains.
+    <div className="min-h-screen pb-[calc(5rem+var(--sab))] sm:pb-[var(--sab)]">
       <Nav />
       <Outlet />
       <Tour />

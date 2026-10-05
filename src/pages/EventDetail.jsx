@@ -3,11 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
 import { fetchEvent, setRsvp, clearRsvp } from '../lib/db.js'
-import { RSVP_OPTIONS, rsvpByValue, withAlpha } from '../lib/constants.js'
+import { RSVP_OPTIONS, rsvpByValue, withAlpha, getEventAccent } from '../lib/constants.js'
 import { googleCalendarUrl, outlookCalendarUrl, downloadICS } from '../lib/calendar.js'
 import { isSafeUrl } from '../lib/safeUrl.js'
-import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
+import { GridBg, Wrap, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
+import { StageHero } from '../components/StageHero.jsx'
 
 export default function EventDetail() {
   const { id } = useParams()
@@ -107,7 +108,7 @@ export default function EventDetail() {
           {people.map((r) => (
             <span
               key={r.user_id}
-              className="font-mono text-[10px] text-slate-200 rounded px-2.5 py-1 flex items-center gap-1.5 border"
+              className="font-mono text-[11px] text-slate-200 rounded px-2.5 py-1 flex items-center gap-1.5 border"
               style={{ borderColor: withAlpha(opt.color, 0.35), backgroundColor: withAlpha(opt.color, 0.08) }}
             >
               {r.profile?.totem && <Totem icon={r.profile.totem} size={14} />}
@@ -122,20 +123,15 @@ export default function EventDetail() {
     <>
       <GridBg lite />
       <Wrap>
-        <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate(-1)} className="text-slate-500 hover:text-violet transition-colors">
-            <Icon name="arrow-left" size={20} />
-          </button>
-          <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8] truncate">{event.title}</h1>
-        </div>
+        <StageHero
+          event={event}
+          accent={getEventAccent(event)}
+          kicker={[cd, event.crews?.[0]?.name].filter(Boolean).join(' · ')}
+          onBack={() => navigate(-1)}
+        />
 
         {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
 
-        {event.flyer_url ? (
-          <img src={event.flyer_url} alt={event.title} className="w-full max-h-80 object-cover rounded border border-violet/20 mb-6" />
-        ) : null}
-
-        <Kicker className="mb-3">▸ {cd}</Kicker>
 
         <HudBox className="p-5 grid grid-cols-2 gap-4">
           {event.artist && <Field label="Artist">{event.artist}</Field>}
@@ -170,12 +166,12 @@ export default function EventDetail() {
               <SecLabel className="mb-2">Shared with</SecLabel>
               <div className="flex flex-wrap gap-2">
                 {event.share_friends && (
-                  <span className="font-mono text-[9px] text-mint border border-mint/40 rounded px-2.5 py-1">FRIENDS</span>
+                  <span className="font-mono text-[11px] text-mint border border-mint/40 rounded px-2.5 py-1">FRIENDS</span>
                 )}
                 {event.crews?.map((c) => (
                   <span
                     key={c.crew_id}
-                    className="font-mono text-[9px] rounded px-2.5 py-1 border flex items-center gap-1.5"
+                    className="font-mono text-[11px] rounded px-2.5 py-1 border flex items-center gap-1.5"
                     style={{ color: c.color || '#4cc9f0', borderColor: withAlpha(c.color || '#4cc9f0', 0.4) }}
                   >
                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color || '#4cc9f0' }} />
@@ -209,7 +205,7 @@ export default function EventDetail() {
                   }
                 >
                   <Icon name={o.icon} size={20} />
-                  <span className="font-mono text-[10px] uppercase tracking-wide">{o.label}</span>
+                  <span className="font-mono text-[11px] uppercase tracking-wide">{o.label}</span>
                 </button>
               )
             })}
@@ -248,7 +244,7 @@ export default function EventDetail() {
               <Icon name="apple-logo" size={15} /> .ics
             </Btn>
           </div>
-          <p className="font-mono text-[10px] text-slate-600 mt-2">
+          <p className="font-mono text-[11px] text-slate-600 mt-2">
             Want every show to sync automatically? Subscribe your whole TikCal feed from{' '}
             <button onClick={() => navigate('/profile')} className="text-violet underline">
               your profile

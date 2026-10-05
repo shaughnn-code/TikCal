@@ -102,7 +102,7 @@ export default function Dashboard() {
               <div className={`font-display font-extrabold text-2xl ${s.tone === 'mint' ? 'text-mint' : 'text-[#e8f4f8]'}`}>
                 {String(s.n).padStart(2, '0')}
               </div>
-              <div className="font-mono text-[9px] text-slate-500 uppercase mt-1 flex items-center justify-center gap-1">
+              <div className="font-mono text-[11px] text-slate-500 uppercase mt-1 flex items-center justify-center gap-1">
                 <Icon name={s.i} size={10} className={s.tone === 'mint' ? 'text-mint' : 'text-violet'} /> {s.l}
               </div>
             </HudBox>
@@ -114,7 +114,7 @@ export default function Dashboard() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-6">
             <SecLabel>Crews</SecLabel>
             {crewLegend.map((c) => (
-              <span key={c.crew_id} className="flex items-center gap-1.5 font-mono text-[10px] text-slate-400">
+              <span key={c.crew_id} className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
                 <span
                   className="w-2.5 h-2.5 rounded-full"
                   style={{ backgroundColor: c.color || '#4cc9f0', boxShadow: `0 0 6px ${c.color || '#4cc9f0'}` }}
@@ -131,7 +131,7 @@ export default function Dashboard() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
+              className={`px-4 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-all ${
                 tab === t ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
               }`}
             >
@@ -167,11 +167,11 @@ export default function Dashboard() {
             {/* Next-up hero */}
             {next && (
               <HudBox hero className="p-4 mb-6 cursor-pointer" onClick={() => navigate(`/events/${next.id}`)}>
-                <div className="font-mono text-[9px] tracking-[0.12em] text-violet">
+                <div className="font-mono text-[11px] tracking-[0.12em] text-violet">
                   ▸ NEXT UP {nextCountdown === 0 ? '· TONIGHT' : `· T-${nextCountdown}D`}
                 </div>
                 <div className="font-display font-bold text-xl text-[#e8f4f8] mt-1.5">{next.title}</div>
-                <div className="font-mono text-[10px] text-slate-500 mt-1 uppercase flex items-center gap-1.5">
+                <div className="font-mono text-[11px] text-slate-500 mt-1 uppercase flex items-center gap-1.5">
                   {next.artist && <span>{next.artist}</span>}
                   {next.venue && <><span className="text-slate-700">·</span><span>{next.venue}</span></>}
                 </div>

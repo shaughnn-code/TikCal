@@ -98,7 +98,7 @@ export default function MonthView({
                         <MonthChip key={ev.id} ev={ev} />
                       ))}
                       {evs.length > 3 && (
-                        <span className="text-[10px] text-faint pl-1">+{evs.length - 3} more</span>
+                        <span className="text-[11px] text-faint pl-1">+{evs.length - 3} more</span>
                       )}
                     </div>
                   </>
@@ -124,7 +124,7 @@ function MonthChip({ ev }) {
         title={`${ev.artist ? ev.artist + ' — ' : ''}${ev.title}`}
         onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
         onDoubleClick={(e) => e.stopPropagation()}
-        className="w-full text-left rounded-[5px] bg-panel-2 px-1.5 py-1 text-[10.5px] text-[#eef6f7] truncate
+        className="w-full text-left rounded-[5px] bg-panel-2 px-1.5 py-1 text-[11px] text-[#eef6f7] truncate
                    transition-transform duration-150 active:scale-[0.97]
                    outline-none focus-visible:ring-2 focus-visible:ring-violet"
         style={{ borderLeft: `2px solid ${s.color}` }}

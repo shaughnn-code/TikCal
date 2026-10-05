@@ -93,7 +93,7 @@ export default function Overlap() {
               {expired.map((s) => (
                 <div key={s.id} className="rounded border border-white/[0.06] p-3">
                   <div className="font-display font-bold text-sm text-slate-400">{s.name}</div>
-                  <div className="font-mono text-[10px] text-slate-600 uppercase">{fmtRange(s)}</div>
+                  <div className="font-mono text-[11px] text-slate-600 uppercase">{fmtRange(s)}</div>
                 </div>
               ))}
             </div>

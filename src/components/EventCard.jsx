@@ -92,12 +92,12 @@ export const EventCard = ({ event, ownerLabel }) => {
             </span>
           )}
           {inCount > 0 && (
-            <span className="font-mono text-[10px] text-mint flex items-center gap-0.5">
+            <span className="font-mono text-[11px] text-mint flex items-center gap-0.5">
               <Icon name="check-circle" size={11} /> {inCount} in
             </span>
           )}
           {mine && (
-            <span className="font-mono text-[9px]" style={{ color: mine.color }}>
+            <span className="font-mono text-[11px]" style={{ color: mine.color }}>
               {mine.short}
             </span>
           )}

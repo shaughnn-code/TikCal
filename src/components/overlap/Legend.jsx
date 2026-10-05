@@ -13,7 +13,7 @@ export default function Legend() {
   return (
     <div className="flex flex-wrap gap-x-3 gap-y-1.5 pt-2">
       {items.map((it) => (
-        <span key={it.label} className="flex items-center gap-1.5 font-mono text-[10px] text-slate-500 uppercase tracking-wide">
+        <span key={it.label} className="flex items-center gap-1.5 font-mono text-[11px] text-slate-500 uppercase tracking-wide">
           <span className="w-3 h-3 rounded" style={it.swatch} />
           {it.label}
         </span>

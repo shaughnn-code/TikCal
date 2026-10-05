@@ -43,7 +43,7 @@ const Cell = ({ cell, participants, onClick }) => {
     return (
       <button
         onClick={onClick}
-        className={`${base} font-mono text-[10px] font-bold`}
+        className={`${base} font-mono text-[11px] font-bold`}
         style={{
           backgroundColor: FREE_COLOR,
           color: '#1a0d00',
@@ -145,7 +145,7 @@ export default function OverlapGrid({ session, overlap, participants, onCellClic
               key={d.dateStr}
               className={`text-center pb-1 ${newWeek ? 'border-l border-white/10 -ml-1 pl-1' : ''}`}
             >
-              <div className="font-mono text-[9px] text-slate-500 uppercase leading-tight">
+              <div className="font-mono text-[11px] text-slate-500 uppercase leading-tight">
                 {dt.toLocaleDateString('en-US', { weekday: 'short' })}
               </div>
               <div className="font-mono text-[12px] text-slate-300 font-bold leading-tight">
@@ -178,7 +178,7 @@ function RowFragment({ dp, dates, overlap, participants, onCellClick }) {
   return (
     <>
       <div className="sticky left-0 z-10 bg-ink/95 flex items-center justify-center">
-        <span className="font-mono text-[10px] font-bold text-slate-400">{meta?.label || dp}</span>
+        <span className="font-mono text-[11px] font-bold text-slate-400">{meta?.label || dp}</span>
       </div>
       {dates.map((d) => {
         const key = `${d.dateStr}:${dp}`

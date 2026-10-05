@@ -127,7 +127,7 @@ export default function AddEvent() {
       }`}
     >
       <span className="text-sm text-[#e8f4f8]">{label}</span>
-      <span className={`font-mono text-[10px] ${active ? 'text-mint' : 'text-slate-600'}`}>{state}</span>
+      <span className={`font-mono text-[11px] ${active ? 'text-mint' : 'text-slate-600'}`}>{state}</span>
     </button>
   )
 
@@ -161,14 +161,14 @@ export default function AddEvent() {
                   type="button"
                   onClick={suggestTime}
                   disabled={suggesting}
-                  className="mt-1.5 font-mono text-[10px] text-violet hover:text-iris disabled:opacity-50 transition-colors"
+                  className="mt-1.5 font-mono text-[11px] text-violet hover:text-iris disabled:opacity-50 transition-colors"
                 >
                   {suggesting ? 'Searching…' : 'Suggest time from Ticketmaster'}
                 </button>
               )}
               {suggestion && (
                 suggestion.time ? (
-                  <div className="mt-1.5 flex items-center gap-2 font-mono text-[10px] text-slate-400">
+                  <div className="mt-1.5 flex items-center gap-2 font-mono text-[11px] text-slate-400">
                     Suggested <span className="text-[#e8f4f8] font-bold">{suggestion.time}</span>
                     <button type="button" onClick={() => { set('start_time')(suggestion.time); setSuggestion(null) }} className="text-mint hover:text-mint/80">
                       Use
@@ -178,7 +178,7 @@ export default function AddEvent() {
                     </button>
                   </div>
                 ) : (
-                  <p className="mt-1.5 font-mono text-[10px] text-slate-600">No match found on Ticketmaster.</p>
+                  <p className="mt-1.5 font-mono text-[11px] text-slate-600">No match found on Ticketmaster.</p>
                 )
               )}
             </div>
@@ -199,12 +199,12 @@ export default function AddEvent() {
               {preview ? (
                 <div>
                   <img src={preview} alt="Preview" className="max-h-28 mx-auto rounded object-cover mb-2" />
-                  <p className="font-mono text-[10px] text-slate-500">Click to change</p>
+                  <p className="font-mono text-[11px] text-slate-500">Click to change</p>
                 </div>
               ) : (
                 <div className="text-slate-600">
                   <Icon name="camera" size={26} className="mx-auto mb-2 opacity-50" />
-                  <p className="font-mono text-[10px]">Upload flyer or screenshot</p>
+                  <p className="font-mono text-[11px]">Upload flyer or screenshot</p>
                 </div>
               )}
             </div>
@@ -231,7 +231,7 @@ export default function AddEvent() {
                 ),
               )}
             </div>
-            <p className="font-mono text-[10px] text-slate-600 mt-2">Leave everything off to keep this show private to you.</p>
+            <p className="font-mono text-[11px] text-slate-600 mt-2">Leave everything off to keep this show private to you.</p>
           </div>
 
           {err && <p className="text-red-400 text-xs">{err}</p>}

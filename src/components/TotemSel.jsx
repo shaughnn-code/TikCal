@@ -19,12 +19,12 @@ export const TotemSel = ({ value, onChange }) => (
           }`}
         >
           {/* vibe tooltip */}
-          <span className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-40 z-30 rounded-md border border-mint bg-[#0c141c] px-2.5 py-2 text-[10px] leading-snug text-[#e8f4f8] opacity-0 shadow-[0_10px_24px_rgba(0,0,0,0.7)] transition-opacity group-hover:opacity-100">
+          <span className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-40 z-30 rounded-md border border-mint bg-[#0c141c] px-2.5 py-2 text-[11px] leading-snug text-[#e8f4f8] opacity-0 shadow-[0_10px_24px_rgba(0,0,0,0.7)] transition-opacity group-hover:opacity-100">
             {t.vibe}
             <span className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-mint" />
           </span>
           <Totem icon={t.icon} size={26} />
-          <span className="font-display font-bold text-[9px] text-center leading-tight text-[#e8f4f8]">
+          <span className="font-display font-bold text-[11px] text-center leading-tight text-[#e8f4f8]">
             {t.name}
           </span>
         </button>
