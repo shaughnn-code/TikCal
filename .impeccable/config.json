@@ -1,0 +1,242 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-09-30T12:07:55.488Z",
+        "reason": "DESIGN.md sanctions logo-3d chrome text and glow-not-shadow elevation; set A reproduces shipped look"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-09-30T12:07:55.500Z",
+        "reason": "DESIGN.md sanctions logo-3d chrome text and glow-not-shadow elevation; set A reproduces shipped look"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.155Z",
+        "reason": "Claude triage: hits are the phone screen, flex-centered inputs and the centered stats strip; no text touches an edge in renders"
+      },
+      {
+        "rule": "all-caps-body",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.173Z",
+        "reason": "Claude triage: uppercase mono metadata lines are DESIGN.md Mono-Speaks-Data rule, each under one line"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.191Z",
+        "reason": "Claude triage: false match; IBM Plex Mono and Schibsted Grotesk are declared in DESIGN.md"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.212Z",
+        "reason": "Claude triage: remaining hits are the iPhone mockup frame (56/68px), not app UI"
+      },
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.229Z",
+        "reason": "Claude triage: hits are RSVP/genre pills and featured-card overlays inside HudBox, not nested cards"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.251Z",
+        "reason": "Claude triage: 3px colored spine is DESIGN.md EventCard signature detail"
+      },
+      {
+        "rule": "gpt-thin-border-wide-shadow",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.270Z",
+        "reason": "Claude triage: hairline + ambient glow is DESIGN.md HudBox elevation spec"
+      },
+      {
+        "rule": "radial-halo",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.288Z",
+        "reason": "Claude triage: radial wash is the Discover card artwork (stage light), not page decoration"
+      },
+      {
+        "rule": "repeating-stripes-gradient",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-a-afterglow.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.312Z",
+        "reason": "Claude triage: stripes are light-beam texture inside featured card artwork"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.341Z",
+        "reason": "Claude triage: marquee strips, phone screen and poster/stub layouts; verified in renders, no flush or unreadable text"
+      },
+      {
+        "rule": "all-caps-body",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.356Z",
+        "reason": "Claude triage: marquee strips, phone screen and poster/stub layouts; verified in renders, no flush or unreadable text"
+      },
+      {
+        "rule": "wide-tracking",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.373Z",
+        "reason": "Claude triage: marquee strips, phone screen and poster/stub layouts; verified in renders, no flush or unreadable text"
+      },
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.392Z",
+        "reason": "Claude triage: marquee strips, phone screen and poster/stub layouts; verified in renders, no flush or unreadable text"
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.411Z",
+        "reason": "Claude triage: marquee strips, phone screen and poster/stub layouts; verified in renders, no flush or unreadable text"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.428Z",
+        "reason": "Claude triage: set B is the user-requested new direction and intentionally departs from DESIGN.md"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.451Z",
+        "reason": "Claude triage: set B is the user-requested new direction and intentionally departs from DESIGN.md"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.472Z",
+        "reason": "Claude triage: set B is the user-requested new direction and intentionally departs from DESIGN.md"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.499Z",
+        "reason": "Claude triage: set B is the user-requested new direction and intentionally departs from DESIGN.md"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.525Z",
+        "reason": "Claude triage: the only hit is the neutral warm phone-mockup drop shadow"
+      },
+      {
+        "rule": "radial-halo",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.545Z",
+        "reason": "Claude triage: red halftone fade is welcome-poster artwork"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-b-wristband.html"
+        ],
+        "createdAt": "2026-10-02T05:19:52.561Z",
+        "reason": "Claude triage: paper #efe9dd on riso blue is 74px display text at ~4.9:1"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-c-timetable.html"
+        ],
+        "createdAt": "2026-10-02T05:58:27.253Z",
+        "reason": "Set C is a deliberate new-direction mockup with its own type system (Archivo + Plex Mono)"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-c-timetable.html"
+        ],
+        "createdAt": "2026-10-02T06:02:21.770Z",
+        "reason": "False positives: fixed-height flex containers (iOS fields, grouped rows, segmented control, phone screen) center text vertically, so zero top/bottom padding is not flush text"
+      },
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          "design/mockups-2026-09-29/set-c-timetable.html"
+        ],
+        "createdAt": "2026-10-02T06:02:22.559Z",
+        "reason": "Only hit is the 40px welcome display headline; 1.02 leading is intentional for display type, body text is 1.35"
+      }
+    ]
+  }
+}

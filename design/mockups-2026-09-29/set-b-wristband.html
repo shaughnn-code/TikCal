@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TikCal — Set B · Wristband</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="icons.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+<script>window.__ICONS__.forEach((c) => IconifyIcon.addCollection(c))</script>
+<link rel="stylesheet" href="frame.css">
+<style>
+:root{
+  --paper:#efe9dd; --paper2:#e6dfd0; --card:#f7f3ea; --ink:#17150f; --ink2:#3b372e; --mute:#6f685a; --rule:#d3cab8;
+  --red:#ff4a1c;            /* the one bold hit: brand + primary action (fills only) */
+  --red-text:#c4300a;       /* red for text/glyphs on paper, 4.5:1+ */
+  --in:#0b7f45;             /* "I'm in" */
+  --maybe:#e0a100;          /* maybe */
+  /* crew hues = riso inks */
+  --riso-blue:#2f5bd3; --riso-pink:#ff4fa3; --riso-teal:#00796b; --riso-yellow:#ffc933;
+}
+.canvas{ background:#d9d1c1; }
+.canvas::after{ content:""; position:absolute; inset:0; opacity:.35; pointer-events:none; mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .27 0 0 0 0 .2 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.phone{ background:linear-gradient(145deg,#2b2925,#0f0e0c 45%,#26241f); box-shadow:0 0 0 1.5px #45413a, 0 40px 70px -30px rgba(40,30,10,.55); }
+.screen{ background:var(--paper); color:var(--ink); font-family:"Inter Tight",system-ui,sans-serif; }
+.paper{ position:absolute; inset:0; pointer-events:none; opacity:.55; mix-blend-mode:multiply; z-index:35;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .28 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.serif{ font-family:"Instrument Serif",serif; font-weight:400; letter-spacing:-.01em; }
+.mono{ font-family:"JetBrains Mono",monospace; font-weight:500; text-transform:uppercase; letter-spacing:.1em; }
+.eyebrow{ font:700 11px/1 "JetBrains Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--mute); }
+.btn{ height:56px; border-radius:28px; display:flex; align-items:center; justify-content:center; gap:10px; font:700 16px/1 "Inter Tight"; }
+.btn.red{ background:var(--red); color:var(--ink); }
+.btn.ink{ background:var(--ink); color:var(--paper); }
+.btn.line{ border:1.5px solid var(--ink); color:var(--ink); }
+.dots{ background-image:radial-gradient(circle, var(--c) 42%, transparent 44%); background-size:7px 7px; }
+.face{ width:28px; height:28px; border-radius:50%; margin-left:-8px; border:2px solid var(--card); display:flex; align-items:center; justify-content:center; font:700 12px/1 "Inter Tight"; color:#fff; }
+.face:first-child{ margin-left:0; }
+.faces{ display:flex; }
+/* tab bar: floating ink pill */
+.tabbar{ position:absolute; left:20px; right:20px; bottom:30px; height:66px; border-radius:33px; background:var(--ink); z-index:30;
+  display:flex; align-items:center; justify-content:space-around; padding:0 8px; box-shadow:0 14px 30px -14px rgba(23,21,15,.6); }
+.tab{ height:50px; padding:0 16px; border-radius:25px; display:flex; align-items:center; gap:8px; color:#a39b8b; font:600 14px/1 "Inter Tight"; }
+.tab iconify-icon{ font-size:24px; }
+.tab.on{ background:var(--paper); color:var(--ink); }
+.stub{ background:var(--card); border-radius:18px; position:relative; }
+.perf{ position:relative; height:0; border-top:2px dashed var(--rule); margin:0 18px; }
+.perf::before,.perf::after{ content:""; position:absolute; top:-12px; width:22px; height:22px; border-radius:50%; background:var(--paper); }
+.perf::before{ left:-30px; } .perf::after{ right:-30px; }
+.chip{ height:38px; padding:0 16px; border-radius:19px; display:inline-flex; align-items:center; gap:6px; font:600 14px/1 "Inter Tight"; border:1.5px solid var(--ink); white-space:nowrap; }
+.chip.on{ background:var(--ink); color:var(--paper); }
+</style>
+</head>
+<body data-fonts='["400 30px \"Instrument Serif\"","italic 400 30px \"Instrument Serif\"","600 16px \"Inter Tight\"","500 12px \"JetBrains Mono\""]'>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <pattern id="ht-red" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2.2" fill="#ff4a1c"/></pattern>
+    <pattern id="ht-blue" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2.2" fill="#2f5bd3"/></pattern>
+    <pattern id="ht-ink" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1.9" fill="#17150f"/></pattern>
+    <symbol id="crowd" viewBox="0 0 400 120"><path d="M0 120V70c10-4 14-22 26-22s14 18 20 20c6-16 14-36 28-36s16 24 20 32c8-8 12-20 24-20 14 0 14 18 20 22 8-26 20-50 34-50s18 28 22 36c6-10 14-20 24-20s14 16 20 22c8-20 16-42 30-42 14 0 18 22 22 32 6-6 14-16 22-16 14 0 16 20 22 24 8-14 16-30 28-30s16 20 20 28c6-4 12-10 20-10v96Z"/><path d="M60 52l-10-42 7-2 11 40z M300 36l8-40 7 2-7 40z M180 30l-3-44h7l3 44z"/></symbol>
+    <symbol id="burst" viewBox="0 0 40 40"><path d="M20 0l3.5 12.5L36 6l-7 11 11 3-11 3 7 11-12.5-6.5L20 40l-3.5-12.5L4 34l7-11L0 20l11-3L4 6l12.5 6.5Z"/></symbol>
+  </defs>
+</svg>
+
+<!-- ============ B1 WELCOME ============ -->
+<section class="canvas" id="b1-welcome"><div class="phone"><div class="screen" data-tone="light">
+  <div class="content" style="padding:66px 20px 0">
+    <!-- poster -->
+    <div style="height:440px;border-radius:26px;background:var(--ink);position:relative;overflow:hidden">
+      <div class="dots" style="--c:#ff4a1c;position:absolute;inset:0;opacity:.95;-webkit-mask-image:radial-gradient(70% 55% at 50% 40%,#000 10%,transparent 75%)"></div>
+      <img src="../discoball.png" style="position:absolute;top:22px;left:50%;transform:translateX(-50%);width:330px;mix-blend-mode:screen;filter:contrast(1.15)">
+      <div style="position:absolute;left:18px;top:18px" class="mono"><span style="color:var(--paper);font-size:12px;letter-spacing:.16em">NYC · VOL. 26</span></div>
+      <svg width="54" height="54" style="position:absolute;right:16px;top:14px;fill:var(--paper)"><use href="#burst"/></svg>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:62px;background:var(--red);display:flex;align-items:center;overflow:hidden">
+        <div class="mono" style="white-space:nowrap;color:var(--ink);font:700 15px/1 'JetBrains Mono';letter-spacing:.18em">ADMIT ONE CREW ✶ TIKCAL ✶ ADMIT ONE CREW ✶ TIKCAL</div>
+      </div>
+    </div>
+    <div style="margin-top:28px;padding:0 6px">
+      <div class="serif" style="font-size:52px;line-height:.98">Know who's<br><i>going.</i></div>
+      <p style="font-size:18px;line-height:1.4;color:var(--ink2);margin-top:14px;max-width:320px">One calendar for every show your crew is going to.</p>
+    </div>
+    <div style="position:absolute;left:20px;right:20px;bottom:50px">
+      <div class="btn red">Get my wristband <iconify-icon icon="ph:arrow-right-bold"></iconify-icon></div>
+      <div style="text-align:center;margin-top:18px;font:600 16px 'Inter Tight'">I already have an account</div>
+    </div>
+  </div>
+  <div class="paper"></div>
+</div></div></section>
+
+<!-- ============ B2 SIGN IN ============ -->
+<section class="canvas" id="b2-signin"><div class="phone"><div class="screen" data-tone="light">
+  <!-- wristband strip -->
+  <div style="position:absolute;left:-40px;right:-40px;top:112px;height:54px;background:var(--red);transform:rotate(-6deg);display:flex;align-items:center;justify-content:center;overflow:hidden">
+    <div style="white-space:nowrap;color:var(--ink);font:700 15px/1 'JetBrains Mono';letter-spacing:.18em">TIKCAL ✶ ALL ACCESS ✶ TIKCAL ✶ ALL ACCESS ✶ TIKCAL</div>
+  </div>
+  <div class="content" style="padding:236px 24px 0">
+    <div class="serif" style="font-size:48px;line-height:1">Back on the<br><i>list.</i></div>
+    <p style="font-size:17px;color:var(--ink2);margin-top:12px">Sign in to see who's going where.</p>
+    <div style="margin-top:28px;background:var(--card);border-radius:20px;overflow:hidden">
+      <div style="padding:14px 18px 14px">
+        <div class="eyebrow">Email</div>
+        <div style="font-size:18px;margin-top:8px;font-weight:500">apple@tikcal.app</div>
+      </div>
+      <div style="height:1px;background:var(--rule);margin:0 18px"></div>
+      <div style="padding:14px 18px;display:flex;align-items:flex-end">
+        <div style="flex:1"><div class="eyebrow">Password</div><div style="font-size:18px;margin-top:8px;letter-spacing:.25em">••••••••••</div></div>
+        <span style="font:600 14px 'Inter Tight';color:var(--mute)">Forgot?</span>
+      </div>
+    </div>
+    <div class="btn ink" style="margin-top:18px">Sign in</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div class="btn line" style="font-size:15px"><iconify-icon icon="ph:apple-logo-fill" style="font-size:20px"></iconify-icon>Apple</div>
+      <div class="btn line" style="font-size:15px"><iconify-icon icon="logos:google-icon" style="font-size:17px"></iconify-icon>Google</div>
+    </div>
+    <p style="position:absolute;left:0;right:0;bottom:42px;text-align:center;font-size:16px;color:var(--ink2)">New here? <b style="color:var(--ink);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--red);text-decoration-thickness:2px">Get a wristband</b></p>
+  </div>
+  <div class="paper"></div>
+</div></div></section>
+
+<!-- ============ B3 SHOWS (HOME) ============ -->
+<section class="canvas" id="b3-calendar"><div class="phone"><div class="screen" data-tone="light">
+  <div class="content" style="padding:62px 20px 0">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font:800 22px/1 'Inter Tight';letter-spacing:-.03em">TikCal<span style="color:var(--red-text)">✶</span></div>
+      <div style="width:44px;height:44px;border-radius:22px;background:var(--red);display:flex;align-items:center;justify-content:center"><iconify-icon icon="ph:plus-bold" style="color:var(--ink);font-size:20px"></iconify-icon></div>
+    </div>
+    <div style="margin-top:20px;display:flex;align-items:baseline;justify-content:space-between">
+      <div class="serif" style="font-size:50px;line-height:1">October</div>
+      <div class="eyebrow">5 shows</div>
+    </div>
+    <!-- week strip -->
+    <div id="bweek" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:16px"></div>
+
+    <div class="eyebrow" style="margin:22px 2px 12px">This weekend</div>
+    <!-- lead ticket -->
+    <div class="stub" style="overflow:hidden">
+      <div style="display:flex;gap:14px;padding:16px">
+        <div style="width:78px;height:92px;border-radius:12px;background:var(--riso-blue);position:relative;overflow:hidden;flex-shrink:0">
+          <svg viewBox="0 0 400 120" style="position:absolute;bottom:0;width:190%;left:-45%;fill:url(#ht-ink)"><use href="#crowd"/></svg>
+          <svg width="22" height="22" style="position:absolute;top:8px;right:8px;fill:var(--paper)"><use href="#burst"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="mono" style="font-size:12px;color:var(--mute)">Sat 03 · 10PM</div>
+          <div class="serif" style="font-size:32px;line-height:1;margin-top:6px">Four Tet</div>
+          <div style="font-size:15px;color:var(--ink2);margin-top:6px">Knockdown Center</div>
+        </div>
+      </div>
+      <div class="perf"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="faces"><div class="face" style="background:var(--riso-teal)">J</div><div class="face" style="background:var(--riso-pink);color:var(--ink)">M</div><div class="face" style="background:var(--riso-blue)">R</div></div>
+          <span style="font:600 14px 'Inter Tight'">3 from Night Shift</span>
+        </div>
+        <span style="height:30px;padding:0 12px;border-radius:15px;background:var(--in);color:#fff;display:flex;align-items:center;gap:5px;font:700 13px 'Inter Tight'"><iconify-icon icon="ph:check-bold"></iconify-icon>In</span>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;background:var(--card);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px">
+      <div style="width:6px;align-self:stretch;border-radius:3px;background:var(--riso-yellow)"></div>
+      <div style="flex:1"><div class="mono" style="font-size:12px;color:var(--mute)">Sat 10 · 9PM</div><div style="font:600 18px 'Inter Tight';margin-top:5px">Peggy Gou</div><div style="font-size:14px;color:var(--ink2);margin-top:3px">Brooklyn Mirage</div></div>
+      <span style="height:30px;padding:0 12px;border-radius:15px;border:1.5px solid var(--maybe);color:#8a6400;display:flex;align-items:center;font:700 13px 'Inter Tight'">Maybe</span>
+    </div>
+    <div style="margin-top:10px;background:var(--card);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:14px">
+      <div style="width:6px;align-self:stretch;border-radius:3px;background:var(--riso-pink)"></div>
+      <div style="flex:1"><div class="mono" style="font-size:12px;color:var(--mute)">Sat 17 · 8PM</div><div style="font:600 18px 'Inter Tight';margin-top:5px">Fred again..</div><div style="font-size:14px;color:var(--ink2);margin-top:3px">Brooklyn Paramount</div></div>
+      <span style="height:30px;padding:0 12px;border-radius:15px;border:1.5px dashed var(--mute);color:var(--ink2);display:flex;align-items:center;font:700 13px 'Inter Tight'">RSVP</span>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab on"><iconify-icon icon="ph:ticket-fill"></iconify-icon>Shows</div>
+    <div class="tab"><iconify-icon icon="ph:compass"></iconify-icon></div>
+    <div class="tab"><iconify-icon icon="ph:users-three"></iconify-icon></div>
+    <div class="tab"><iconify-icon icon="ph:smiley"></iconify-icon></div>
+  </div>
+  <div class="paper"></div>
+</div></div></section>
+
+<!-- ============ B4 EVENT DETAIL ============ -->
+<section class="canvas" id="b4-event"><div class="phone"><div class="screen" data-tone="light">
+  <!-- poster hero -->
+  <div style="position:absolute;top:0;left:0;right:0;height:410px;background:var(--riso-blue);overflow:hidden">
+    <div class="dots" style="--c:#ff4a1c;position:absolute;inset:0;mix-blend-mode:multiply;-webkit-mask-image:radial-gradient(60% 60% at 50% 30%,#000 5%,transparent 70%)"></div>
+    <!-- light beams -->
+    <div style="position:absolute;inset:0;background:conic-gradient(from 180deg at 50% 100%, transparent 145deg, rgba(239,233,221,.5) 152deg, transparent 156deg, transparent 172deg, rgba(239,233,221,.55) 178deg, transparent 182deg, transparent 198deg, rgba(239,233,221,.45) 204deg, transparent 208deg)"></div>
+    <svg viewBox="0 0 400 120" style="position:absolute;bottom:40px;width:100%;fill:url(#ht-ink)"><use href="#crowd"/></svg>
+    <div style="position:absolute;bottom:0;left:0;right:0;height:42px;background-image:radial-gradient(circle,#17150f 42%,transparent 44%);background-size:5px 5px"></div>
+    <div style="position:absolute;top:62px;left:20px;right:20px;display:flex;justify-content:space-between">
+      <div style="width:44px;height:44px;border-radius:22px;background:var(--paper);display:flex;align-items:center;justify-content:center"><iconify-icon icon="ph:arrow-left-bold" style="font-size:20px"></iconify-icon></div>
+      <div style="width:44px;height:44px;border-radius:22px;background:var(--paper);display:flex;align-items:center;justify-content:center"><iconify-icon icon="ph:export-bold" style="font-size:20px"></iconify-icon></div>
+    </div>
+    <div class="serif" style="position:absolute;left:20px;top:128px;color:var(--paper);font-size:74px;line-height:.9"><i>Four</i><br>Tet</div>
+    <svg width="64" height="64" style="position:absolute;right:26px;top:150px;fill:var(--riso-yellow)"><use href="#burst"/></svg>
+    <div style="position:absolute;right:30px;top:172px;width:56px;text-align:center;font:800 11px/1.1 'Inter Tight';color:var(--ink);transform:rotate(12deg)">3 OF<br>YOU</div>
+  </div>
+  <!-- ticket stub -->
+  <div class="content" style="padding:380px 20px 0">
+    <div class="stub" style="box-shadow:0 18px 30px -24px rgba(23,21,15,.5)">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:18px 18px 16px">
+        <div><div class="eyebrow">Date</div><div style="font:700 18px 'Inter Tight';margin-top:8px">Sat 3</div></div>
+        <div><div class="eyebrow">Doors</div><div style="font:700 18px 'Inter Tight';margin-top:8px">10 PM</div></div>
+        <div><div class="eyebrow">From</div><div style="font:700 18px 'Inter Tight';margin-top:8px">$45</div></div>
+      </div>
+      <div style="padding:0 18px 16px;display:flex;align-items:center;gap:8px;font-size:16px;color:var(--ink2)"><iconify-icon icon="ph:map-pin-fill" style="color:var(--red-text);font-size:18px"></iconify-icon>Knockdown Center, Maspeth</div>
+      <div class="perf"></div>
+      <div style="padding:16px 18px 18px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div class="eyebrow">Night Shift crew</div><span style="font:600 14px 'Inter Tight';color:var(--mute)">3 in · 1 maybe</span></div>
+        <div style="display:flex;gap:14px;margin-top:14px">
+          <div style="text-align:center"><div class="face" style="width:46px;height:46px;font-size:17px;background:var(--riso-teal);border:3px solid var(--in)">J</div><div style="font:600 13px 'Inter Tight';margin-top:6px">Jess</div></div>
+          <div style="text-align:center"><div class="face" style="width:46px;height:46px;font-size:17px;margin:0;background:var(--riso-pink);color:var(--ink);border:3px solid var(--in)">M</div><div style="font:600 13px 'Inter Tight';margin-top:6px">Marco</div></div>
+          <div style="text-align:center"><div class="face" style="width:46px;height:46px;font-size:17px;margin:0;background:var(--riso-blue);border:3px solid var(--in)">R</div><div style="font:600 13px 'Inter Tight';margin-top:6px">Rae</div></div>
+          <div style="text-align:center"><div class="face" style="width:46px;height:46px;font-size:17px;margin:0;background:#73664f;border:3px dashed var(--maybe)">K</div><div style="font:600 13px 'Inter Tight';margin-top:6px;color:var(--mute)">Kai</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;left:20px;right:20px;top:644px;display:flex;gap:12px;align-items:flex-start">
+    <div class="face" style="width:34px;height:34px;margin:0;background:var(--riso-teal);border:0;flex-shrink:0">J</div>
+    <div style="background:var(--ink);color:var(--paper);border-radius:4px 18px 18px 18px;padding:12px 14px;font-size:15px;line-height:1.35">Meet at Jefferson L, 11:15. Don't be Lost Keys this time.</div>
+  </div>
+  <!-- RSVP -->
+  <div style="position:absolute;left:20px;right:20px;bottom:40px">
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:8px">
+      <div class="btn" style="background:var(--in);color:#fff"><iconify-icon icon="ph:check-bold" style="font-size:18px"></iconify-icon>I'm in</div>
+      <div class="btn line">Maybe</div>
+      <div class="btn line">Out</div>
+    </div>
+  </div>
+  <div class="paper"></div>
+</div></div></section>
+
+<!-- ============ B5 FIND ============ -->
+<section class="canvas" id="b5-discover"><div class="phone"><div class="screen" data-tone="light">
+  <div class="content" style="padding:62px 20px 0">
+    <div class="eyebrow">Picked for Night Shift</div>
+    <div class="serif" style="font-size:46px;line-height:1;margin-top:10px">Shows you'd<br><i>all</i> like</div>
+    <div style="display:flex;gap:8px;margin-top:18px;margin-right:-20px;overflow:hidden">
+      <span class="chip on">All</span><span class="chip">Techno</span><span class="chip">House</span><span class="chip">Live</span><span class="chip">Disco</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px">
+      <!-- poster 1 -->
+      <div>
+        <div style="height:210px;border-radius:16px;background:var(--red);position:relative;overflow:hidden">
+          <div style="position:absolute;inset:0;background:conic-gradient(from 180deg at 50% 100%, transparent 160deg, rgba(255,230,200,.5) 170deg, transparent 176deg, transparent 186deg, rgba(255,230,200,.45) 192deg, transparent 198deg)"></div>
+          <svg viewBox="0 0 400 120" style="position:absolute;bottom:0;width:230%;left:-60%;fill:url(#ht-ink)"><use href="#crowd"/></svg>
+          <div class="serif" style="position:absolute;left:12px;top:12px;font-size:30px;line-height:.95;color:var(--ink)">Fred<br><i>again..</i></div>
+          <span style="position:absolute;right:10px;top:10px;height:28px;padding:0 10px;border-radius:14px;background:var(--paper);display:flex;align-items:center;gap:4px;font:700 12px 'Inter Tight'"><iconify-icon icon="ph:users-three-fill" style="color:var(--in)"></iconify-icon>2</span>
+        </div>
+        <div class="mono" style="font-size:12px;margin-top:10px;color:var(--mute)">Sat 17 · Paramount</div>
+      </div>
+      <!-- poster 2 -->
+      <div>
+        <div style="height:210px;border-radius:16px;background:var(--riso-yellow);position:relative;overflow:hidden">
+          <div class="dots" style="--c:#2f5bd3;position:absolute;inset:0;-webkit-mask-image:radial-gradient(55% 45% at 60% 55%,#000 20%,transparent 75%)"></div>
+          <div style="position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:92px;height:92px;border-radius:50%;background:var(--ink)"></div>
+          <div style="position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:var(--riso-yellow)"></div>
+          <div class="serif" style="position:absolute;left:12px;top:12px;font-size:30px;line-height:.95;color:var(--ink)">Jamie<br><i>xx</i></div>
+        </div>
+        <div class="mono" style="font-size:12px;margin-top:10px;color:var(--mute)">Sat 24 · Elsewhere</div>
+      </div>
+      <!-- poster 3 -->
+      <div>
+        <div style="height:132px;border-radius:16px;background:var(--riso-pink);position:relative;overflow:hidden">
+          <svg viewBox="0 0 400 120" style="position:absolute;bottom:0;width:200%;left:-40%;fill:url(#ht-blue)"><use href="#crowd"/></svg>
+          <div class="serif" style="position:absolute;left:12px;top:12px;font-size:28px;line-height:.95;color:var(--ink)">Honey<br><i>Dijon</i></div>
+        </div>
+        <div class="mono" style="font-size:12px;margin-top:10px;color:var(--mute)">Sat 31 · Nowadays</div>
+      </div>
+      <div>
+        <div style="height:132px;border-radius:16px;background:var(--ink);position:relative;overflow:hidden">
+          <div class="dots" style="--c:#ff4a1c;position:absolute;inset:0;opacity:.9;-webkit-mask-image:linear-gradient(200deg,#000,transparent 70%)"></div>
+          <div class="serif" style="position:absolute;left:12px;top:12px;font-size:28px;line-height:.95;color:var(--paper)">Floating<br><i>Points</i></div>
+        </div>
+        <div class="mono" style="font-size:12px;margin-top:10px;color:var(--mute)">Nov 7 · Superior</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab"><iconify-icon icon="ph:ticket"></iconify-icon></div>
+    <div class="tab on"><iconify-icon icon="ph:compass-fill"></iconify-icon>Find</div>
+    <div class="tab"><iconify-icon icon="ph:users-three"></iconify-icon></div>
+    <div class="tab"><iconify-icon icon="ph:smiley"></iconify-icon></div>
+  </div>
+  <div class="paper"></div>
+</div></div></section>
+
+<!-- ============ B6 YOU (PASSPORT) ============ -->
+<section class="canvas" id="b6-profile"><div class="phone"><div class="screen" data-tone="light">
+  <div class="content" style="padding:62px 20px 0">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="eyebrow">Your passport</div>
+      <iconify-icon icon="ph:gear-six" style="font-size:24px"></iconify-icon>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:18px">
+      <div style="width:84px;height:84px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;overflow:hidden;border:3px solid var(--ink)">
+        <iconify-icon icon="noto:sparkler" style="font-size:80px;display:block"></iconify-icon>
+      </div>
+      <div>
+        <div class="serif" style="font-size:44px;line-height:1">Apple</div>
+        <div style="font:600 15px 'Inter Tight';color:var(--ink2);margin-top:6px">Glow Stick · Brooklyn</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);margin-top:22px;border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)">
+      <div style="padding:14px 0"><div class="serif" style="font-size:40px;line-height:1">24</div><div class="eyebrow" style="margin-top:6px">Shows</div></div>
+      <div style="padding:14px 0 14px 14px;border-left:1px solid var(--rule)"><div class="serif" style="font-size:40px;line-height:1;color:var(--red-text)">5</div><div class="eyebrow" style="margin-top:6px">Upcoming</div></div>
+      <div style="padding:14px 0 14px 14px;border-left:1px solid var(--rule)"><div class="serif" style="font-size:40px;line-height:1">11</div><div class="eyebrow" style="margin-top:6px">Venues</div></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin:22px 2px 14px"><div class="eyebrow">Venue stamps</div><span style="font:600 14px 'Inter Tight';text-decoration:underline;text-underline-offset:3px">All 11</span></div>
+    <div id="stamps" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px"></div>
+    <div class="eyebrow" style="margin:24px 2px 12px">Your crews</div>
+    <div style="display:flex;gap:8px">
+      <span class="chip" style="border-color:var(--riso-blue)"><span style="width:10px;height:10px;border-radius:5px;background:var(--riso-blue)"></span>Night Shift · 4</span>
+      <span class="chip" style="border-color:var(--riso-pink)"><span style="width:10px;height:10px;border-radius:5px;background:var(--riso-pink)"></span>Sunday Service · 3</span>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab"><iconify-icon icon="ph:ticket"></iconify-icon></div>
+    <div class="tab"><iconify-icon icon="ph:compass"></iconify-icon></div>
+    <div class="tab"><iconify-icon icon="ph:users-three"></iconify-icon></div>
+    <div class="tab on"><iconify-icon icon="ph:smiley-fill"></iconify-icon>You</div>
+  </div>
+  <div class="paper"></div>
+</div></div></section>
+
+<script>
+// week strip: Sep 28 – Oct 4, today Sep 30
+const days=[['M',28],['T',29],['W',30],['T',1],['F',2],['S',3],['S',4]];
+document.getElementById('bweek').innerHTML=days.map(([w,d])=>{
+  const today=d===30, ev=d===3;
+  return `<div style="height:72px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    ${today?'background:var(--ink);color:var(--paper)':'background:var(--card)'}">
+    <span style="font:700 11px 'JetBrains Mono';letter-spacing:.1em;${today?'':'color:var(--mute)'}">${w}</span>
+    <span style="font:700 20px 'Inter Tight'">${d}</span>
+    <span style="width:6px;height:6px;border-radius:3px;background:${ev?'var(--red)':'transparent'}"></span></div>`}).join('');
+// venue stamps
+const st=[['Knockdown','Ctr','#2f5bd3',-8],['Elsewhere','BK','#ff4a1c',6],['Nowadays','QNS','#00897b',-3],['Good','Room','#ff4fa3',9],['Mirage','BK','#17150f',-6],['Public','Records','#e0a100',4]];
+document.getElementById('stamps').innerHTML=st.map(([a,b,c,r])=>`
+  <div style="aspect-ratio:1;border-radius:50%;border:2.5px solid ${c};color:${c};display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(${r}deg);position:relative;opacity:.92">
+    <div style="position:absolute;inset:5px;border-radius:50%;border:1px dashed ${c}"></div>
+    <span style="font:700 10px 'JetBrains Mono';letter-spacing:.14em">✶ NYC ✶</span>
+    <span class="serif" style="font-size:21px;line-height:1;margin-top:4px">${a}</span>
+    <span style="font:700 10px 'JetBrains Mono';letter-spacing:.14em;margin-top:3px">${b.toUpperCase()}</span></div>`).join('');
+</script>
+<script src="chrome.js"></script>
+</body>
+</html>
