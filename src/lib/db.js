@@ -141,6 +141,19 @@ export function feedUrls(token) {
   return { https, webcal: https.replace(/^https?:/, 'webcal:') }
 }
 
+// supabase-js reports any non-2xx as a generic "Edge Function returned a
+// non-2xx status code" and leaves the function's real answer on the response.
+// Our functions reply { error: '…' }, so dig that out for the user.
+async function fnError(error) {
+  try {
+    const body = await error?.context?.json?.()
+    if (body?.error) return new Error(body.error)
+  } catch {
+    /* body wasn't JSON -- fall through to the generic message */
+  }
+  return error
+}
+
 // Kick off Google Calendar OAuth: returns the consent URL to redirect to.
 // Platform travels with the state row so the callback (which Google redirects
 // to directly, with no JWT or app context) knows whether to hand control back
@@ -149,7 +162,7 @@ export async function startGoogleConnect() {
   const { data, error } = await supabase.functions.invoke('google-oauth-start', {
     body: { platform: platform() },
   })
-  if (error) throw error
+  if (error) throw await fnError(error)
   if (data?.error) throw new Error(data.error)
   return data.url
 }
@@ -179,7 +192,7 @@ export async function startSpotifyConnect() {
   const { data, error } = await supabase.functions.invoke('spotify-oauth-start', {
     body: { platform: platform() },
   })
-  if (error) throw error
+  if (error) throw await fnError(error)
   if (data?.error) throw new Error(data.error)
   return data.url
 }

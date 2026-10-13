@@ -32,6 +32,7 @@ export default function Profile() {
   const [inboxToken, setInboxToken] = useState(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [deleteText, setDeleteText] = useState('')
   const [deleteErr, setDeleteErr] = useState('')
   const [copiedAddr, setCopiedAddr] = useState(false)
   const [importStatus, setImportStatus] = useState(null)
@@ -426,7 +427,7 @@ export default function Profile() {
             <p className="text-slate-500 text-xs leading-relaxed">
               {appleOn
                 ? 'Connected — your Apple Music artists feed Discover.'
-                : 'Coming once the Apple Music key is configured.'}
+                : 'Apple Music sync is coming soon.'}
             </p>
           </HudBox>
 
@@ -434,29 +435,49 @@ export default function Profile() {
           <HudBox className="p-4 sm:col-span-3">
             <SecLabel className="mb-2">// account</SecLabel>
             <p className="font-mono text-[11px] text-slate-500 mb-3">{user?.email}</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Btn variant="ghost" onClick={() => navigate('/setup')}>Edit Profile</Btn>
               <Btn variant="ghost" onClick={() => { updateProfile({ seen_tour: false }); navigate('/calendar') }}>Replay tour</Btn>
               <Btn variant="danger" onClick={async () => { await signOut(); navigate('/login') }}>Sign out</Btn>
             </div>
           </HudBox>
 
-          {/* Delete account — two-step confirm, no native browser dialog */}
-          <HudBox className="p-4 sm:col-span-3">
-            <SecLabel className="mb-2">// danger zone</SecLabel>
+          {/* Delete account. Deliberately quiet: a plain text link at the very
+              bottom, then a typed confirmation, so it can't be hit by a stray
+              tap. It stays findable in-app, which the App Store requires. */}
+          <div className="sm:col-span-3 pt-2">
             {!confirmingDelete ? (
-              <Btn variant="danger" onClick={() => setConfirmingDelete(true)}>Delete account</Btn>
+              <button
+                type="button"
+                onClick={() => { setDeleteText(''); setConfirmingDelete(true) }}
+                className="font-mono text-[11px] text-slate-600 hover:text-slate-400 underline underline-offset-2"
+              >
+                Delete account…
+              </button>
             ) : (
-              <div className="space-y-2">
+              <HudBox className="p-4 space-y-3">
+                <SecLabel>// delete account</SecLabel>
                 <p className="text-slate-400 text-xs leading-relaxed">
                   This permanently deletes your account and everything tied to it — events, RSVPs, crews you own,
                   friend connections, calendar/music integrations. This cannot be undone.
                 </p>
+                <label className="block">
+                  <span className="font-mono text-[11px] text-slate-500">Type DELETE to confirm</span>
+                  <input
+                    value={deleteText}
+                    onChange={(e) => setDeleteText(e.target.value)}
+                    autoCapitalize="characters"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className="mt-1.5 w-full bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] text-sm focus:outline-none focus:border-red-400/60 transition-colors"
+                  />
+                </label>
                 {deleteErr && <p className="text-red-400 text-xs">{deleteErr}</p>}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <Btn variant="ghost" onClick={() => setConfirmingDelete(false)} disabled={deleting}>Cancel</Btn>
                   <Btn
                     variant="danger"
-                    disabled={deleting}
+                    disabled={deleting || deleteText.trim().toUpperCase() !== 'DELETE'}
                     onClick={async () => {
                       setDeleting(true)
                       setDeleteErr('')
@@ -466,13 +487,12 @@ export default function Profile() {
                       navigate('/', { replace: true })
                     }}
                   >
-                    {deleting ? 'Deleting…' : 'Yes, permanently delete my account'}
+                    {deleting ? 'Deleting…' : 'Permanently delete'}
                   </Btn>
-                  <Btn variant="ghost" onClick={() => setConfirmingDelete(false)} disabled={deleting}>Cancel</Btn>
                 </div>
-              </div>
+              </HudBox>
             )}
-          </HudBox>
+          </div>
         </div>
       </Wrap>
 

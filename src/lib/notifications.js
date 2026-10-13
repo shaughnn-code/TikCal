@@ -47,6 +47,9 @@ async function loadNudges(myId) {
 }
 
 export async function loadNotifications(myId) {
+  // First run on this device: start the clock now, so a backlog of long-since
+  // accepted friend requests doesn't arrive as a wall of "new".
+  if (!getSeenAt()) markSeenNow()
   const [{ friends, incoming }, invites, nudges] = await Promise.all([
     loadFriends(myId),
     loadCrewInvites(myId).catch(() => []),

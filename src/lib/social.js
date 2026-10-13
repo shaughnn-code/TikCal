@@ -60,7 +60,7 @@ export async function removeFriend(id) {
 export async function loadCrewInvites(myId) {
   const { data, error } = await supabase
     .from('crew_invites')
-    .select('id, crew_id, inviter_id, status, crews(name, description)')
+    .select('id, crew_id, inviter_id, status, created_at, crews(name, description)')
     .eq('invitee_id', myId)
     .eq('status', 'pending')
   if (error) throw error
