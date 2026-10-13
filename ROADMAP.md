@@ -6,7 +6,22 @@ Live tracking is GitHub Issues (`shaughnn-code/TikCal`); this file is a summary.
 
 Status values: `[TODO]`, `[IN_PROGRESS]`, `[BLOCKED: REQUIRES NICHOLAS]`, `[DONE]`, `[REVERTED]`
 
-**Last verified against the working tree: 2026-09-29** (commit `64e3dd4`). Anything below that contradicts the tree is a bug in this file — fix it here rather than working around it.
+**Last verified against the working tree: 2026-09-29** (commit `64e3dd4`); carry-over section added 2026-10-13. Anything below that contradicts the tree is a bug in this file — fix it here rather than working around it.
+
+---
+
+## Carry-over from 2026-10-13 (Afterglow launch session)
+
+Afterglow rebuild is live on tikcal.nyc (`main` at `f9b42e1`) and on the test iPhone (ad-hoc). Open work, in order:
+
+1. `[BLOCKED: REQUIRES NICHOLAS]` **Apply the nudges migration.** `supabase/migrations/20261013180000_event_nudges.sql` is not applied to production. Until it is, "Nudge your people" on a show errors on tap. Paste the file into Supabase Dashboard → SQL Editor → Run.
+2. `[BLOCKED: REQUIRES NICHOLAS]` **Google Calendar connect is unconfigured.** No `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` secrets on the project. Create the OAuth client (see `supabase/functions/README.md`), then `supabase secrets set`.
+3. `[TODO]` **RA and DICE never load on Find.** Both timed out at 12s on device; the client now waits 60s, cause unconfirmed. Need real durations from Dashboard → Edge Functions → `ra-events` / `dice-events` → Invocations. Likely fix: server-side fetch timeout plus a cached results table. parse.bot free tier is 200 credits/month and every Find visit spends them.
+4. `[TODO]` **Apple Music sync is not built.** Only `apple-music-token` exists; no `APPLE_MUSIC_*` secrets; the library sync was never written. Decide whether to build it.
+5. `[TODO]` **Calendar rework for iPhone.** The zoom calendar is not phone-ready. Interim: phones open on Upcoming, month swipes horizontally, event popover is a bottom sheet. Explore UI/UX components and dev tools first.
+6. `[IN_PROGRESS]` **Device QA on the current build (#36):** four-tab bar and Crew sub-tabs, bell + notifications, nudge flow (after item 1), no zoom on field focus, remaining text-wrapping spots, Spotify connect and `tikcal://` return cold and warm, delete-account typed confirm, tour step 4 spotlight.
+7. `[TODO]` **Decide:** notifications shipped as a top-bar bell, not a fifth tab.
+8. `[TODO]` **App Store resubmission (#33):** reshoot 3 screenshots on the new UI, build 2 + Transporter upload, store listing, resubmit. iPad support was dropped (`c502972`), so no iPad screenshots. Builds from Xcode 27 need the UIScene lifecycle (`3d0c8a0`, done).
 
 ---
 
