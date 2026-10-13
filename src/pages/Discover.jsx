@@ -10,17 +10,19 @@ const norm = (s) => (s || '').trim().toLowerCase()
 
 // Each catalog is fetched on its own clock. One slow or dead source used to
 // hold the whole page on the loading blob (Promise.all with no timeout).
-const SOURCE_TIMEOUT_MS = 12000
+// RA and DICE are live scrapes (parse.bot) and routinely take far longer than
+// Ticketmaster's API; they get a long clock because the page no longer waits
+// on them -- their shows just join the list when they land.
 const FETCHERS = [
-  { key: 'ticketmaster', label: 'Ticketmaster', fetch: fetchTicketmaster },
-  { key: 'ra', label: 'RA', fetch: fetchRA },
-  { key: 'dice', label: 'DICE', fetch: fetchDice },
+  { key: 'ticketmaster', label: 'Ticketmaster', fetch: fetchTicketmaster, timeoutMs: 12000 },
+  { key: 'ra', label: 'RA', fetch: fetchRA, timeoutMs: 60000 },
+  { key: 'dice', label: 'DICE', fetch: fetchDice, timeoutMs: 60000 },
 ]
-const withTimeout = (promise) =>
+const withTimeout = (promise, ms) =>
   Promise.race([
     promise,
     new Promise((resolve) =>
-      setTimeout(() => resolve({ configured: true, events: [], error: 'timed out' }), SOURCE_TIMEOUT_MS),
+      setTimeout(() => resolve({ configured: true, events: [], error: 'timed out' }), ms),
     ),
   ])
 
@@ -54,7 +56,7 @@ export default function Discover() {
     let pending = FETCHERS.length
     fetchMyArtists(user.id).then((list) => active && setArtists(list))
     for (const f of FETCHERS) {
-      withTimeout(f.fetch({})).then((res) => {
+      withTimeout(f.fetch({}), f.timeoutMs).then((res) => {
         if (!active) return
         pending -= 1
         setResults((prev) => ({ ...prev, [f.key]: res }))

@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { Logo } from './ui.jsx'
 import { Icon, Totem } from './icons.jsx'
+import { loadNotifications } from '../lib/notifications.js'
 
 // One nav item, rendered once and laid out two ways so Tour's
 // `[data-tour=...]` selectors always hit the visible element:
@@ -50,9 +52,32 @@ const NavItem = ({ to, label, children, dataTour, also = [] }) => {
   )
 }
 
+// Unread count for the bell. Recounted on every route change (cheap: three
+// small reads) and when the notifications page reports it has been seen.
+const useUnreadCount = (userId) => {
+  const { pathname } = useLocation()
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    if (!userId) return
+    let active = true
+    const recount = () =>
+      loadNotifications(userId)
+        .then((items) => active && setCount(items.filter((i) => i.unread).length))
+        .catch(() => {})
+    recount()
+    window.addEventListener('tikcal:notifications-seen', recount)
+    return () => {
+      active = false
+      window.removeEventListener('tikcal:notifications-seen', recount)
+    }
+  }, [userId, pathname])
+  return count
+}
+
 export const Nav = () => {
-  const { profile, signOut } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
+  const unread = useUnreadCount(user?.id)
 
   return (
     // `sticky top-0` parks the bar at the very top of the viewport, which under
@@ -82,6 +107,24 @@ export const Nav = () => {
             {profile?.totem ? <Totem icon={profile.totem} size={24} /> : <Icon name="user" size={22} />}
           </NavItem>
         </div>
+        {/* Notifications live in the top bar, not the tab bar: the bar holds
+            the four destinations, this is an inbox reachable from all of them. */}
+        <NavLink
+          to="/notifications"
+          aria-label={unread ? `Notifications, ${unread} new` : 'Notifications'}
+          className={({ isActive }) =>
+            `relative shrink-0 ml-auto sm:ml-0 w-11 h-11 flex items-center justify-center rounded-full transition-colors ${
+              isActive ? 'text-white bg-white/[0.08]' : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+            }`
+          }
+        >
+          <Icon name="bell" size={22} />
+          {unread > 0 && (
+            <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-mint text-[#04221a] font-mono text-[11px] font-bold leading-[18px] text-center">
+              {unread > 9 ? '9+' : unread}
+            </span>
+          )}
+        </NavLink>
         {/* Sign out stays in the top bar at every size — the bottom bar holds
             exactly the four destinations (Plan and Sync live inside Crew). */}
         <button

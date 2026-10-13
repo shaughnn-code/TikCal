@@ -9,6 +9,7 @@ import { isSafeUrl } from '../lib/safeUrl.js'
 import { GridBg, Wrap, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 import { StageHero } from '../components/StageHero.jsx'
+import { NudgeBox } from '../components/NudgeBox.jsx'
 
 export default function EventDetail() {
   const { id } = useParams()
@@ -219,6 +220,8 @@ export default function EventDetail() {
             </div>
           )}
         </HudBox>
+
+        {isOwner && <NudgeBox event={event} onChanged={() => load(false)} />}
 
         {/* ── Add to your own calendar ────────────────────────── */}
         <HudBox className="p-5 mt-5">

@@ -17,6 +17,7 @@ import EventDetail from './pages/EventDetail.jsx'
 import AddEvent from './pages/AddEvent.jsx'
 import Profile from './pages/Profile.jsx'
 import Friends from './pages/Friends.jsx'
+import Notifications from './pages/Notifications.jsx'
 import Overlap from './pages/Overlap.jsx'
 import OverlapSession from './pages/OverlapSession.jsx'
 import DanceFloorLoader from './components/DanceFloorLoader.jsx'
@@ -90,6 +91,7 @@ export default function App() {
           <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/friends" element={<Friends />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/overlap" element={<Overlap />} />
         </Route>
 
