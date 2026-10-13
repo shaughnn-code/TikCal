@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { Logo } from './ui.jsx'
 import { Icon, Totem } from './icons.jsx'
@@ -10,9 +10,15 @@ import { Icon, Totem } from './icons.jsx'
 // Every active state uses the same aurora→violet chrome (DESIGN.md Chrome-Only
 // Rule). Per-tab rainbow hues would compete with the crew/RSVP data hues.
 const ACTIVE_FILL = 'linear-gradient(135deg,#c04bff,#8b5cff)'
-const NavItem = ({ to, label, children, dataTour }) => (
+// `also` lists extra routes that light this item up -- Crew owns Plan and Sync.
+const NavItem = ({ to, label, children, dataTour, also = [] }) => {
+  const { pathname } = useLocation()
+  const alsoActive = also.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+  return (
   <NavLink to={to} className="flex-1 sm:flex-none shrink-0 outline-none" data-tour={dataTour} aria-label={label}>
-    {({ isActive }) => (
+    {({ isActive: linkActive }) => {
+      const isActive = linkActive || alsoActive
+      return (
       <span className="group relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2 sm:rounded-full sm:px-3.5 sm:py-2 font-mono text-[11px] sm:text-[14px] tracking-wide uppercase">
         {/* desktop: whole pill fills */}
         <span
@@ -38,9 +44,11 @@ const NavItem = ({ to, label, children, dataTour }) => (
           {label}
         </span>
       </span>
-    )}
+      )
+    }}
   </NavLink>
-)
+  )
+}
 
 export const Nav = () => {
   const { profile, signOut } = useAuth()
@@ -69,15 +77,13 @@ export const Nav = () => {
         <div className="tabbar fixed inset-x-0 bottom-0 z-30 flex items-start justify-between px-2 pt-2.5 pb-[calc(0.75rem+var(--sab))] pl-[calc(0.5rem+var(--sal))] pr-[calc(0.5rem+var(--sar))] bg-ink/95 border-t border-white/[0.06] sm:static sm:z-auto sm:p-0 sm:bg-transparent sm:border-0 sm:ml-auto sm:items-center sm:justify-end sm:gap-2 min-w-0 sm:overflow-x-auto no-scrollbar">
           <NavItem to="/calendar" label="Cal" dataTour="nav-calendar"><Icon name="calendar-dots" size={22} /></NavItem>
           <NavItem to="/discover" label="Find" dataTour="nav-discover"><Icon name="compass" size={22} /></NavItem>
-          <NavItem to="/plan" label="Plan"><Icon name="magic-wand" size={22} /></NavItem>
-          <NavItem to="/friends" label="Crew"><Icon name="users-three" size={22} /></NavItem>
-          <NavItem to="/overlap" label="Sync" dataTour="nav-overlap"><Icon name="intersect" size={22} /></NavItem>
+          <NavItem to="/friends" label="Crew" also={['/plan', '/overlap']}><Icon name="users-three" size={22} /></NavItem>
           <NavItem to="/profile" label="You" dataTour="nav-profile">
             {profile?.totem ? <Totem icon={profile.totem} size={24} /> : <Icon name="user" size={22} />}
           </NavItem>
         </div>
         {/* Sign out stays in the top bar at every size — the bottom bar holds
-            exactly the six destinations. */}
+            exactly the four destinations (Plan and Sync live inside Crew). */}
         <button
           onClick={async () => {
             await signOut()

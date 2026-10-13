@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchVisibleEvents } from '../lib/db.js'
+import { isPhone } from '../lib/platform.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { EventCard } from '../components/EventCard.jsx'
@@ -20,7 +21,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
   const [selDate, setSelDate] = useState(null)
-  const [tab, setTab] = useState('calendar')
+  // Phones open on the Upcoming list: the zoom calendar is not phone-ready yet.
+  const [tab, setTab] = useState(() => (isPhone() ? 'upcoming' : 'calendar'))
   const [introDone, setIntroDone] = useState(introPlayed)
 
   useEffect(() => {

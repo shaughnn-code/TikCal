@@ -13,9 +13,9 @@ const STEP_OFFSET = 28 // px the incoming/outgoing content slides, per axis
 const WHEEL_THRESHOLD = 40 // accumulated px before a pinch counts as one step
 const WHEEL_COOLDOWN_MS = 400
 
-// Month view swipes/arrow-keys vertically (deliberate, unusual axis); Week
-// and Day swipe/arrow-key horizontally.
-const AXIS = { month: 'y', week: 'x', day: 'x' }
+// Every view swipes/arrow-keys horizontally. Month used to step vertically,
+// which fought the page scroll on phones.
+const AXIS = { month: 'x', week: 'x', day: 'x' }
 
 // Translate vector for the OUTGOING content on a step; the incoming
 // content uses the mirror (negated) vector, so both sides read as one

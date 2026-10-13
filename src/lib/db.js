@@ -213,10 +213,10 @@ export async function fetchMyArtists(userId) {
 export async function fetchTicketmaster(params = {}) {
   try {
     const { data, error } = await supabase.functions.invoke('ticketmaster-events', { body: params })
-    if (error || !data) return { configured: false, events: [] }
+    if (error || !data) return { configured: false, events: [], error: error?.message || 'no response' }
     return data
-  } catch {
-    return { configured: false, events: [] }
+  } catch (e) {
+    return { configured: false, events: [], error: e?.message || 'request failed' }
   }
 }
 
@@ -226,10 +226,10 @@ export async function fetchTicketmaster(params = {}) {
 export async function fetchRA(params = {}) {
   try {
     const { data, error } = await supabase.functions.invoke('ra-events', { body: params })
-    if (error || !data) return { configured: false, events: [] }
+    if (error || !data) return { configured: false, events: [], error: error?.message || 'no response' }
     return data
-  } catch {
-    return { configured: false, events: [] }
+  } catch (e) {
+    return { configured: false, events: [], error: e?.message || 'request failed' }
   }
 }
 
@@ -239,10 +239,10 @@ export async function fetchRA(params = {}) {
 export async function fetchDice(params = {}) {
   try {
     const { data, error } = await supabase.functions.invoke('dice-events', { body: params })
-    if (error || !data) return { configured: false, events: [] }
+    if (error || !data) return { configured: false, events: [], error: error?.message || 'no response' }
     return data
-  } catch {
-    return { configured: false, events: [] }
+  } catch (e) {
+    return { configured: false, events: [], error: e?.message || 'request failed' }
   }
 }
 

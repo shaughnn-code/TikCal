@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/auth.jsx'
 import { setRsvp, clearRsvp } from '../../lib/db.js'
@@ -6,6 +7,7 @@ import { HudBox, SecLabel } from '../ui.jsx'
 import { Icon, Totem } from '../icons.jsx'
 import { RSVP_OPTIONS, getEventAccent, getInitials, withAlpha } from '../../lib/constants.js'
 import { isSafeUrl } from '../../lib/safeUrl.js'
+import { isPhone } from '../../lib/platform.js'
 
 // Compact detail card for hovering (desktop, Month/Week) or clicking
 // (Month) an event -- crew + "who's in" + an inline RSVP + source link,
@@ -40,11 +42,21 @@ export default function EventPopover({ event, onClose, className = '' }) {
     setRsvping(false)
   }
 
-  return (
+  // On a phone the anchor is a ~45px week column, so a 16rem card hanging off
+  // it lands off-screen to the right. There it becomes a bottom sheet instead,
+  // portaled to <body>: the calendar's zoom animation leaves a transform on an
+  // ancestor, which would otherwise trap `position: fixed` inside the grid.
+  const sheet = isPhone()
+
+  const card = (
     <HudBox
       hero
       onClick={(e) => e.stopPropagation()}
-      className={`absolute z-30 w-64 p-3.5 top-full mt-2 left-0 ${className}`}
+      className={
+        sheet
+          ? `fixed z-40 inset-x-3 bottom-[calc(5.75rem+var(--sab))] p-3.5 text-left ${className}`
+          : `absolute z-30 w-64 p-3.5 top-full mt-2 left-0 ${className}`
+      }
     >
       <div className="flex items-start gap-2.5">
         <span
@@ -142,5 +154,14 @@ export default function EventPopover({ event, onClose, className = '' }) {
         View full details →
       </button>
     </HudBox>
+  )
+
+  if (!sheet) return card
+  return createPortal(
+    <>
+      {onClose && <div className="fixed inset-0 z-40 bg-ink2/60" onClick={(e) => { e.stopPropagation(); onClose() }} />}
+      {card}
+    </>,
+    document.body,
   )
 }

@@ -49,13 +49,13 @@ export default function CalRail({ view, focus, onView, onStep, onToday }) {
           the mobile-visible equivalent: one line, icon-led, same info
           density a coachmark would carry without the extra UI. */}
       <p className="lg:hidden flex items-center gap-1.5 text-[11px] text-faint">
-        <span aria-hidden="true">↕︎↔︎</span>
-        <span>Swipe to move, pinch to zoom, double-tap a day to dive in.</span>
+        <span aria-hidden="true">↔︎</span>
+        <span>Swipe left or right to move, double-tap a day to dive in.</span>
       </p>
 
       <div className="hidden lg:flex lg:flex-col lg:gap-3 text-[11.5px] text-faint leading-relaxed">
         <p>
-          <span className="text-muted font-semibold">Move around:</span> swipe/drag (↕ Month, ↔ Week/Day)
+          <span className="text-muted font-semibold">Move around:</span> swipe/drag left or right
           or arrow keys.
         </p>
         <p>

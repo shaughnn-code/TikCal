@@ -27,9 +27,24 @@
   }
   html {
     background-color: #060609;
-    /* Global scale-up for readability (lifts all rem-based text + spacing ~13%). */
-    font-size: 112.5%;
     @apply font-sans;
+  }
+  /* Scale-up for readability (lifts all rem-based text + spacing ~13%), from
+     `sm` up only: on a ~390px phone the same lift read as a zoomed-in page and
+     pushed labels into wrapping. */
+  @media (min-width: 640px) {
+    html {
+      font-size: 112.5%;
+    }
+  }
+  /* iOS zooms the whole page when a focused field's text is under 16px, and
+     stays zoomed afterwards. Hold form fields at 16px on phones. */
+  @media (max-width: 639px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
   body {
     margin: 0;

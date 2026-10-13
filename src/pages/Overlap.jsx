@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { GridBg, Wrap, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
+import { CrewTabs } from '../components/CrewTabs.jsx'
 import { Icon } from '../components/icons.jsx'
 import { FEATURE_NAME, DAYPARTS } from '../lib/overlap/theme.js'
 import { listMySessions } from '../lib/overlap/api.js'
@@ -41,6 +42,7 @@ export default function Overlap() {
     <>
       <GridBg lite />
       <Wrap>
+        <CrewTabs />
         <div className="flex items-center justify-between mb-6">
           <div>
             <div className="font-mono text-[11px] text-violet uppercase tracking-[0.16em]">{FEATURE_NAME}</div>

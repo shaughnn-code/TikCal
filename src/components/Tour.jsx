@@ -29,7 +29,7 @@ const STEPS = [
   },
   {
     route: '/overlap',
-    selector: '[data-tour="nav-overlap"]',
+    selector: '[data-tour="crew-sync"]',
     title: 'Sync with your crew',
     body: "See who's free and where your calendars overlap.",
   },

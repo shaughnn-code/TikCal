@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchTicketmaster, fetchRA, fetchDice, fetchMyArtists, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
@@ -7,6 +7,22 @@ import { Icon } from '../components/icons.jsx'
 import { openConnect } from '../lib/oauthFlow.js'
 
 const norm = (s) => (s || '').trim().toLowerCase()
+
+// Each catalog is fetched on its own clock. One slow or dead source used to
+// hold the whole page on the loading blob (Promise.all with no timeout).
+const SOURCE_TIMEOUT_MS = 12000
+const FETCHERS = [
+  { key: 'ticketmaster', label: 'Ticketmaster', fetch: fetchTicketmaster },
+  { key: 'ra', label: 'RA', fetch: fetchRA },
+  { key: 'dice', label: 'DICE', fetch: fetchDice },
+]
+const withTimeout = (promise) =>
+  Promise.race([
+    promise,
+    new Promise((resolve) =>
+      setTimeout(() => resolve({ configured: true, events: [], error: 'timed out' }), SOURCE_TIMEOUT_MS),
+    ),
+  ])
 
 const SOURCES = [
   { value: 'all', label: 'All' },
@@ -19,7 +35,8 @@ export default function Discover() {
   const { user, profile, refreshProfile } = useAuth()
   const [params, setParams] = useSearchParams()
 
-  const [tm, setTm] = useState({ configured: true, events: [] })
+  // Raw { configured, events, error? } per source key, filled in as each lands.
+  const [results, setResults] = useState({})
   const [artists, setArtists] = useState([])
   const [loading, setLoading] = useState(true)
   const [added, setAdded] = useState(() => new Set())
@@ -32,31 +49,44 @@ export default function Discover() {
   const [applied, setApplied] = useState(emptyFilters)
   const [view, setView] = useState('list')
 
-  const load = useCallback(() => {
-    Promise.all([fetchTicketmaster({}), fetchRA({}), fetchDice({}), fetchMyArtists(user.id)])
-      .then(([t, ra, dice, a]) => {
-        const tag = (src) => (e) => ({ ...e, source: src, key: `${src}-${e.id}` })
-        const merged = [
-          ...t.events.map(tag('ticketmaster')),
-          ...ra.events.map(tag('ra')),
-          ...dice.events.map(tag('dice')),
-        ]
-        // Some sources (RA in particular) repeat the same event across
-        // paginated/overlapping queries — dedupe by source+id so a stray
-        // duplicate can't collide on its React key and leave stale cards
-        // behind when the list re-filters.
-        const seen = new Set()
-        const events = merged.filter((e) => (seen.has(e.key) ? false : (seen.add(e.key), true)))
-        setTm({ configured: t.configured || ra.configured || dice.configured, events })
-        setArtists(a)
+  useEffect(() => {
+    let active = true
+    let pending = FETCHERS.length
+    fetchMyArtists(user.id).then((list) => active && setArtists(list))
+    for (const f of FETCHERS) {
+      withTimeout(f.fetch({})).then((res) => {
+        if (!active) return
+        pending -= 1
+        setResults((prev) => ({ ...prev, [f.key]: res }))
+        // Show the page as soon as there is something to show.
+        if (pending === 0 || res.events?.length) setLoading(false)
       })
-      .catch((e) => setErr(e.message))
-      .finally(() => setLoading(false))
+    }
+    return () => {
+      active = false
+    }
   }, [user.id])
 
-  useEffect(() => {
-    load()
-  }, [load])
+  const tm = useMemo(() => {
+    const merged = FETCHERS.flatMap((f) =>
+      (results[f.key]?.events || []).map((e) => ({ ...e, source: f.key, key: `${f.key}-${e.id}` })),
+    )
+    // Some sources (RA in particular) repeat the same event across
+    // paginated/overlapping queries — dedupe by source+id so a stray
+    // duplicate can't collide on its React key and leave stale cards
+    // behind when the list re-filters.
+    const seen = new Set()
+    const events = merged.filter((e) => (seen.has(e.key) ? false : (seen.add(e.key), true)))
+    const settled = FETCHERS.filter((f) => results[f.key])
+    return {
+      // Until something answers, assume configured so the setup notice doesn't flash.
+      configured: settled.length === 0 || settled.some((f) => results[f.key].configured),
+      events,
+    }
+  }, [results])
+
+  const waitingOn = FETCHERS.filter((f) => !results[f.key]).map((f) => f.label)
+  const failed = FETCHERS.filter((f) => results[f.key]?.error).map((f) => `${f.label}: ${results[f.key].error}`)
 
   // Return from Spotify OAuth (…/discover?spotify=connected|denied|error).
   useEffect(() => {
@@ -240,6 +270,12 @@ export default function Discover() {
         </p>
 
         {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
+        {waitingOn.length > 0 && (
+          <p className="font-mono text-[11px] text-slate-500 mb-4" role="status">Still loading {waitingOn.join(', ')}…</p>
+        )}
+        {failed.length > 0 && (
+          <p className="font-mono text-[11px] text-amber-400/80 mb-4">Couldn’t load {failed.join(' · ')}</p>
+        )}
 
         {/* Spotify connect / status */}
         {!spotifyOn ? (
@@ -289,7 +325,7 @@ export default function Discover() {
               </div>
             </div>
 
-            <div className="min-w-[200px]">
+            <div className="w-full sm:w-auto sm:min-w-[200px]">
               <SearchSel
                 label="Venue"
                 value={draft.venue}

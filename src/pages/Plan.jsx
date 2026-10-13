@@ -5,6 +5,7 @@ import { fetchVisibleEvents, getGoogleBusy } from '../lib/db.js'
 import { loadFriends } from '../lib/social.js'
 import { getEventAccent } from '../lib/constants.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
+import { CrewTabs } from '../components/CrewTabs.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 
 // How far ahead to scout, and which weekdays count as "a night out."
@@ -122,6 +123,7 @@ export default function Plan() {
     <>
       <GridBg lite />
       <Wrap>
+        <CrewTabs />
         <Kicker className="mb-1">// FREE-TIME RADAR</Kicker>
         <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8] mb-2">Plan a Night</h1>
         <p className="text-slate-400 text-sm mb-3 leading-relaxed">

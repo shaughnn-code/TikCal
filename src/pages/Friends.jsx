@@ -8,6 +8,7 @@ import {
 } from '../lib/social.js'
 import { CREW_COLORS, DEFAULT_CREW_COLOR } from '../lib/constants.js'
 import { GridBg, Wrap, Inp, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
+import { CrewTabs } from '../components/CrewTabs.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 
 // Row of crew-color swatches. `value` is the selected hex; `onPick(hex)` fires
@@ -165,6 +166,7 @@ export default function Friends() {
     <>
       <GridBg lite />
       <Wrap>
+        <CrewTabs />
         <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8] mb-5">Your Crew</h1>
         {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
 
