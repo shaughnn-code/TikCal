@@ -172,13 +172,13 @@ export default function Profile() {
         {/* Bento grid — mixed cell widths carry the "control room" read:
             three square stat cells, then full-width utility cards, then a
             three-up row of connection cards that mirrors the stat row. */}
-        <div id="stats" className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 scroll-mt-24">
+        <div id="stats" className="grid grid-cols-3 gap-2 mb-3 scroll-mt-24">
           {[
             { n: events.length, l: 'Total', tone: 'ice' },
             { n: upcoming, l: 'Upcoming', tone: 'mint' },
             { n: venues, l: 'Venues', tone: 'ice' },
           ].map((s) => (
-            <HudBox key={s.l} tone={s.tone} className="p-4 text-center">
+            <HudBox key={s.l} tone={s.tone} className="p-3 sm:p-4 text-center">
               <div className={`font-display font-extrabold text-2xl ${s.tone === 'mint' ? 'text-mint' : 'text-[#e8f4f8]'}`}>
                 {String(s.n).padStart(2, '0')}
               </div>
@@ -187,7 +187,7 @@ export default function Profile() {
           ))}
 
           {/* Show stats */}
-          <HudBox className="p-4 sm:col-span-3">
+          <HudBox className="p-4 col-span-3">
             <SecLabel className="mb-4">// show_stats</SecLabel>
             <div className="grid grid-cols-3 gap-3 items-end">
               <div className="text-center">
@@ -217,7 +217,7 @@ export default function Profile() {
           </HudBox>
 
           {/* Invite */}
-          <HudBox className="p-4 sm:col-span-3">
+          <HudBox className="p-4 col-span-3">
             <SecLabel className="mb-2">// invite_friends</SecLabel>
             <div className="flex gap-2">
               <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[11px] text-slate-500 truncate">
@@ -230,9 +230,9 @@ export default function Profile() {
           </HudBox>
 
           {/* Email auto-import */}
-          <HudBox tone="mint" className="p-4 sm:col-span-3" data-tour="forwarding">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <SecLabel className="flex items-center gap-1.5">
+          <HudBox tone="mint" className="p-4 col-span-3" data-tour="forwarding">
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 mb-2">
+              <SecLabel className="flex items-center gap-1.5 whitespace-nowrap">
                 <Icon name="sparkle" size={11} className="text-mint" /> // auto_import
               </SecLabel>
               <button
@@ -313,7 +313,7 @@ export default function Profile() {
           </HudBox>
 
           {/* Subscribe feed → Apple / Google / Outlook */}
-          <HudBox className="p-4 sm:col-span-3">
+          <HudBox className="p-4 col-span-3">
             <SecLabel className="mb-2 flex items-center gap-1.5">
               <Icon name="calendar-check" size={11} className="text-violet" /> // sync_calendar
             </SecLabel>
@@ -363,7 +363,7 @@ export default function Profile() {
           </HudBox>
 
           {/* Google Calendar connection (powers real free/busy in Plan) */}
-          <HudBox className="p-4">
+          <HudBox className="p-4 col-span-3 sm:col-span-1">
             <div className="flex flex-col items-start gap-1.5 mb-2">
               <SecLabel className="flex items-center gap-1.5">
                 <Icon name="google-logo" size={11} className="text-violet" /> // google_calendar
@@ -389,7 +389,7 @@ export default function Profile() {
           </HudBox>
 
           {/* Spotify — powers Discover / "For You" */}
-          <HudBox className="p-4">
+          <HudBox className="p-4 col-span-3 sm:col-span-1">
             <div className="flex flex-col items-start gap-1.5 mb-2">
               <SecLabel className="flex items-center gap-1.5">
                 <Icon name="spotify-logo" size={12} className="text-mint" /> // spotify
@@ -417,7 +417,7 @@ export default function Profile() {
           </HudBox>
 
           {/* Apple Music — needs Apple Developer setup (see functions/README) */}
-          <HudBox className="p-4">
+          <HudBox className="p-4 col-span-3 sm:col-span-1">
             <div className="flex flex-col items-start gap-1.5 mb-2">
               <SecLabel className="flex items-center gap-1.5">
                 <Icon name="apple-logo" size={12} className="text-slate-300" /> // apple_music
@@ -432,7 +432,7 @@ export default function Profile() {
           </HudBox>
 
           {/* Account */}
-          <HudBox className="p-4 sm:col-span-3">
+          <HudBox className="p-4 col-span-3">
             <SecLabel className="mb-2">// account</SecLabel>
             <p className="font-mono text-[11px] text-slate-500 mb-3">{user?.email}</p>
             <div className="flex flex-wrap gap-2">
@@ -445,7 +445,7 @@ export default function Profile() {
           {/* Delete account. Deliberately quiet: a plain text link at the very
               bottom, then a typed confirmation, so it can't be hit by a stray
               tap. It stays findable in-app, which the App Store requires. */}
-          <div className="sm:col-span-3 pt-2">
+          <div className="col-span-3 pt-2">
             {!confirmingDelete ? (
               <button
                 type="button"

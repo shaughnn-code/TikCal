@@ -14,7 +14,7 @@ import { Icon, Totem } from '../components/icons.jsx'
 // Row of crew-color swatches. `value` is the selected hex; `onPick(hex)` fires
 // on click. Used both when starting a crew and recoloring one.
 const ColorPicker = ({ value, onPick }) => (
-  <div className="flex flex-wrap gap-2">
+  <div className="grid grid-cols-5 gap-3 w-fit sm:flex sm:flex-wrap sm:gap-2">
     {CREW_COLORS.map((c) => (
       <button
         key={c.hex}

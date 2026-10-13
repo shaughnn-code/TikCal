@@ -53,15 +53,13 @@ export default function Discover() {
 
   useEffect(() => {
     let active = true
-    let pending = FETCHERS.length
     fetchMyArtists(user.id).then((list) => active && setArtists(list))
     for (const f of FETCHERS) {
       withTimeout(f.fetch({}), f.timeoutMs).then((res) => {
         if (!active) return
-        pending -= 1
         setResults((prev) => ({ ...prev, [f.key]: res }))
-        // Show the page as soon as there is something to show.
-        if (pending === 0 || res.events?.length) setLoading(false)
+        // Show the page as soon as any source has answered; the rest fill in.
+        setLoading(false)
       })
     }
     return () => {
@@ -300,9 +298,8 @@ export default function Discover() {
 
         {!tm.configured && (
           <HudBox className="p-4 mb-6">
-            <p className="font-mono text-[11px] text-slate-400">
-              Live show discovery isn’t switched on yet. Add a Ticketmaster, RA, or DICE API key to the{' '}
-              <span className="text-violet">ticketmaster-events</span> / <span className="text-violet">ra-events</span> / <span className="text-violet">dice-events</span> functions to light this up.
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Show discovery is unavailable right now. Check back in a bit.
             </p>
           </HudBox>
         )}
@@ -401,7 +398,7 @@ export default function Discover() {
           <SecLabel className="mb-3">▸ All NYC shows{rest.length ? ` · ${rest.length}` : ''}</SecLabel>
           {rest.length === 0 && forYou.length === 0 ? (
             <p className="font-mono text-[11px] text-slate-600">
-              {tm.configured ? 'No shows found right now.' : 'Discovery is not configured yet.'}
+              {waitingOn.length ? 'Loading shows…' : 'No shows found right now.'}
             </p>
           ) : (
             <ShowList items={rest} />

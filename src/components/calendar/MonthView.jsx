@@ -14,7 +14,7 @@ export default function MonthView({
   return (
     <div>
       <div className="flex items-baseline gap-3 mb-4">
-        <h2 className="font-heading font-extrabold text-[26px] text-[#eef6f7] leading-none">
+        <h2 className="font-heading font-extrabold text-xl sm:text-[26px] text-[#eef6f7] leading-none">
           {MONTH_NAMES[month]} {year}
         </h2>
         <span className="hidden sm:inline text-[12.5px] text-faint">Double-click a day for its week</span>

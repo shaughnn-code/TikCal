@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, Fragment } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
@@ -148,12 +148,12 @@ export default function AddEvent() {
           <Inp label="Event / Night Title" value={form.title} onChange={set('title')} placeholder="e.g. Open Air" required />
           <Inp label="Artist(s)" value={form.artist} onChange={set('artist')} placeholder="e.g. FJAAK" />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Inp label="Date" type="date" value={form.event_date} onChange={set('event_date')} required />
             <VenuePicker label="Venue" value={form.venue} onChange={set('venue')} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Inp label="Start Time (optional)" type="time" value={form.start_time} onChange={set('start_time')} />
               {!form.start_time && form.event_date && (form.artist || form.title) && (
@@ -216,8 +216,8 @@ export default function AddEvent() {
             <SecLabel className="mb-3">Who can see this?</SecLabel>
             <div className="space-y-2">
               {audienceBtn(shareFriends, () => setShareFriends((s) => !s), 'All my friends', shareFriends ? '✓ SHARED' : 'PRIVATE')}
-              {crews.map((c) =>
-                audienceBtn(
+              {crews.map((c) => (
+                <Fragment key={c.id}>{audienceBtn(
                   selCrews.has(c.id),
                   () => toggleCrew(c.id),
                   <span className="flex items-center gap-2">
@@ -228,7 +228,8 @@ export default function AddEvent() {
                     {c.name}
                   </span>,
                   selCrews.has(c.id) ? '✓ SHARED' : 'ADD',
-                ),
+                )}</Fragment>
+              )
               )}
             </div>
             <p className="font-mono text-[11px] text-slate-600 mt-2">Leave everything off to keep this show private to you.</p>

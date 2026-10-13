@@ -67,25 +67,25 @@ export const EventCard = ({ event, ownerLabel }) => {
               </span>
             )}
           </div>
-          <div className="font-mono text-[11px] text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
-            <span>{fmt}</span>
+          <div className="font-mono text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5 min-w-0">
+            <span className="shrink-0">{fmt}</span>
             {event.venue && (
               <>
-                <span className="text-slate-700">·</span>
-                <span className="uppercase">{event.venue}</span>
+                <span className="text-slate-700 shrink-0">·</span>
+                <span className="uppercase truncate min-w-0">{event.venue}</span>
               </>
             )}
             {ownerLabel && (
               <>
-                <span className="text-slate-700">·</span>
-                <span className="text-violet/80 normal-case flex items-center gap-0.5">
+                <span className="text-slate-700 shrink-0">·</span>
+                <span className="text-violet/80 normal-case flex items-center gap-0.5 shrink-0">
                   <Icon name="users-three" size={12} /> {ownerLabel}
                 </span>
               </>
             )}
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
+        <div className="flex flex-col items-end gap-1 shrink-0 whitespace-nowrap">
           {countdown && !isPast && (
             <span className="font-mono text-[12px] font-semibold" style={{ color: s.color }}>
               {countdown}
