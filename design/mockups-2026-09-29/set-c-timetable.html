@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TikCal — Set C · Timetable</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="icons.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+<script>window.__ICONS__.forEach((c) => IconifyIcon.addCollection(c))</script>
+<link rel="stylesheet" href="frame.css">
+<style>
+:root{
+  --bg:#ffffff; --surface:#f3f3f1; --line:#e3e3df; --ink:#0e0e0e; --ink2:#45453f; --mute:#686862;
+  --accent:#1d3bff;           /* the only brand color: primary actions, active tab, links */
+  --in:#0a7a3a; --in-bg:#e4f4ea;
+  --maybe:#8a5a00; --maybe-bg:#fbf0d9;
+  /* crew bullets, transit-line style */
+  --l-red:#d6322b; --l-green:#00873a; --l-yellow:#f2c200; --l-purple:#9b2fa0; --l-orange:#f26a1b;
+}
+.canvas{ background:#e6e6e2; }
+.phone{ background:#1b1b1a; box-shadow:0 0 0 1px #3a3a38, 0 30px 60px -30px rgba(0,0,0,.45); }
+.screen{ background:var(--bg); color:var(--ink); font-family:"Archivo",system-ui,sans-serif; font-stretch:100%; }
+.cond{ font-stretch:72%; font-weight:800; letter-spacing:-.01em; }
+.mono{ font-family:"IBM Plex Mono",monospace; font-weight:500; font-variant-numeric:tabular-nums; }
+.lt{ font:700 34px/1.05 "Archivo"; letter-spacing:-.025em; }        /* iOS-style large title */
+.h2{ font:700 17px/1.2 "Archivo"; letter-spacing:-.01em; }
+.sub{ font:400 14px/1.35 "Archivo"; color:var(--ink2); }
+.small{ font:400 13px/1.35 "Archivo"; color:var(--mute); }
+.btn{ height:54px; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:10px; font:600 17px/1 "Archivo"; }
+.btn.primary{ background:var(--accent); color:#fff; }
+.btn.outline{ border:1.5px solid var(--line); color:var(--ink); }
+.btn.ghost{ color:var(--accent); }
+.iconbtn{ width:44px; height:44px; border-radius:22px; display:flex; align-items:center; justify-content:center; font-size:22px; }
+.seg{ height:36px; border-radius:10px; background:#ececea; padding:2px; display:flex; }
+.seg > div{ flex:1; border-radius:8px; display:flex; align-items:center; justify-content:center; font:600 14px/1 "Archivo"; color:var(--ink2); }
+.seg > .on{ background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.14), 0 0 0 .5px rgba(0,0,0,.06); }
+.bullet{ width:22px; height:22px; border-radius:11px; display:inline-flex; align-items:center; justify-content:center; font:800 12px/1 "Archivo"; color:#fff; flex:none; }
+.tag{ height:28px; padding:0 10px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font:600 13px/1 "Archivo"; white-space:nowrap; }
+.tag.in{ background:var(--in-bg); color:var(--in); }
+.tag.maybe{ background:var(--maybe-bg); color:var(--maybe); }
+.tag.open{ border:1.5px solid var(--accent); color:var(--accent); height:32px; padding:0 14px; border-radius:16px; }
+.av{ width:32px; height:32px; border-radius:16px; display:flex; align-items:center; justify-content:center; font:700 13px/1 "Archivo"; color:#fff; flex:none; }
+.field{ height:54px; border-radius:12px; background:var(--surface); padding:0 16px; display:flex; flex-direction:column; justify-content:center; gap:4px; }
+.field label{ font:500 12px/1 "Archivo"; color:var(--mute); }
+.field span{ font:400 17px/1 "Archivo"; }
+.group{ background:var(--surface); border-radius:14px; overflow:hidden; }
+.row{ min-height:52px; padding:0 16px; display:flex; align-items:center; gap:12px; position:relative; }
+.row + .row::before{ content:""; position:absolute; top:0; left:16px; right:0; height:1px; background:var(--line); }
+.row .k{ font:400 16px/1.2 "Archivo"; flex:1; }
+.row .v{ font:400 15px/1.2 "Archivo"; color:var(--mute); }
+.row .chev{ color:#a8a8a2; font-size:16px; }
+.ghdr{ font:600 13px/1 "Archivo"; color:var(--mute); padding:0 16px 8px; }
+/* agenda */
+.ag{ display:flex; gap:14px; padding:14px 0; border-top:1px solid var(--line); }
+.ag .d{ width:44px; flex:none; }
+.ag .d .w{ font:600 13px/1 "Archivo"; color:var(--mute); }
+.ag .d .n{ font:800 34px/1 "Archivo"; font-stretch:68%; margin-top:4px; letter-spacing:-.01em; }
+.ag .t{ font:700 19px/1.15 "Archivo"; letter-spacing:-.015em; }
+/* tab bar */
+.tabbar{ position:absolute; left:0; right:0; bottom:0; height:84px; background:#fff; border-top:1px solid var(--line); z-index:30;
+  display:flex; padding:7px 8px 0; }
+.tab{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--mute); font:500 12px/1 "Archivo"; }
+.tab iconify-icon{ font-size:27px; }
+.tab.on{ color:var(--accent); }
+.art{ border-radius:10px; display:flex; align-items:flex-end; padding:7px; color:#fff; font:800 15px/.92 "Archivo"; font-stretch:62%; text-transform:uppercase; flex:none; }
+</style>
+</head>
+<body data-fonts='["700 30px \"Archivo\"","400 16px \"Archivo\"","500 12px \"IBM Plex Mono\""]'>
+
+<!-- ============ C1 WELCOME ============ -->
+<section class="canvas" id="c1-welcome"><div class="phone"><div class="screen" data-tone="light">
+  <div class="content" style="padding:70px 24px 0">
+    <div class="cond" style="font-size:26px;letter-spacing:-.01em">tikcal</div>
+    <div style="font:700 40px/1.02 'Archivo';letter-spacing:-.035em;margin-top:36px">Every show your friends are going to. One calendar.</div>
+    <div class="sub" style="font-size:16px;margin-top:14px;max-width:310px">Add a show once. Your crew sees it, says if they're in, and it lands in everyone's calendar.</div>
+
+    <!-- the product is the hero -->
+    <div style="margin-top:30px;border:1px solid var(--line);border-radius:16px;padding:4px 16px 2px">
+      <div class="ag" style="border-top:0">
+        <div class="d"><div class="w">Sat</div><div class="n">03</div></div>
+        <div style="flex:1;min-width:0">
+          <div class="t">Four Tet</div>
+          <div class="small" style="margin-top:3px">Knockdown Center · 10 PM</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:8px"><span class="bullet" style="background:var(--l-red)">N</span><span style="font:500 13px 'Archivo';color:var(--ink2)">Jess, Marco, Rae in</span></div>
+        </div>
+        <span class="tag in"><iconify-icon icon="ph:check-bold"></iconify-icon>Going</span>
+      </div>
+      <div class="ag">
+        <div class="d"><div class="w">Sat</div><div class="n">10</div></div>
+        <div style="flex:1;min-width:0">
+          <div class="t">Peggy Gou</div>
+          <div class="small" style="margin-top:3px">Brooklyn Mirage · 9 PM</div>
+        </div>
+        <span class="tag maybe">Maybe</span>
+      </div>
+      <div class="ag">
+        <div class="d"><div class="w">Sat</div><div class="n">17</div></div>
+        <div style="flex:1;min-width:0">
+          <div class="t">Fred again..</div>
+          <div class="small" style="margin-top:3px">Brooklyn Paramount · 8 PM</div>
+        </div>
+        <span class="tag open">Reply</span>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;left:24px;right:24px;bottom:42px">
+    <div class="btn primary">Create account</div>
+    <div class="btn ghost" style="margin-top:6px">I already have an account</div>
+    <div class="small" style="text-align:center;margin-top:8px;font-size:12px">By continuing you agree to the Terms and Privacy Policy.</div>
+  </div>
+</div></div></section>
+
+<!-- ============ C2 SIGN IN ============ -->
+<section class="canvas" id="c2-signin"><div class="phone"><div class="screen" data-tone="light">
+  <div class="content" style="padding:56px 20px 0">
+    <div class="iconbtn" style="margin-left:-10px"><iconify-icon icon="ph:caret-left-bold"></iconify-icon></div>
+    <div class="lt" style="margin-top:6px;padding:0 4px">Welcome back</div>
+    <div class="sub" style="margin-top:8px;padding:0 4px">Sign in to see what your crews are up to.</div>
+
+    <div class="btn outline" style="margin-top:28px"><iconify-icon icon="logos:google-icon" style="font-size:20px"></iconify-icon>Continue with Google</div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin:24px 0">
+      <div style="flex:1;height:1px;background:var(--line)"></div><span class="small">or use email</span><div style="flex:1;height:1px;background:var(--line)"></div>
+    </div>
+
+    <div class="field"><label>Email</label><span>jess.moreno@hey.com</span></div>
+    <div class="field" style="margin-top:10px;flex-direction:row;align-items:center;justify-content:space-between;outline:2px solid var(--accent);outline-offset:-2px;background:#fff">
+      <div style="display:flex;flex-direction:column;gap:4px"><label style="font:500 12px/1 'Archivo';color:var(--accent)">Password</label><span style="letter-spacing:.18em">••••••••••<span style="display:inline-block;width:2px;height:19px;background:var(--accent);vertical-align:-3px;margin-left:2px"></span></span></div>
+      <span style="font:600 15px 'Archivo';color:var(--accent)">Show</span>
+    </div>
+    <div style="font:600 15px 'Archivo';color:var(--accent);margin-top:16px;padding:0 4px">Forgot password?</div>
+  </div>
+  <div style="position:absolute;left:20px;right:20px;bottom:42px">
+    <div class="btn primary">Sign in</div>
+    <div style="text-align:center;margin-top:18px;font:400 15px 'Archivo';color:var(--ink2)">New to TikCal? <span style="color:var(--accent);font-weight:600">Create an account</span></div>
+  </div>
+</div></div></section>
+
+<!-- ============ C3 CALENDAR ============ -->
+<section class="canvas" id="c3-calendar"><div class="phone"><div class="screen" data-tone="light">
+  <div class="content" style="padding:58px 20px 0">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="lt">October <span style="color:#b0b0aa;font-weight:600">2026</span></div>
+      <div style="display:flex;gap:4px;margin-right:-6px">
+        <div class="iconbtn" style="color:var(--ink)"><iconify-icon icon="ph:magnifying-glass"></iconify-icon></div>
+        <div class="iconbtn" style="background:var(--accent);color:#fff;font-size:20px"><iconify-icon icon="ph:plus-bold"></iconify-icon></div>
+      </div>
+    </div>
+    <div class="seg" style="margin-top:14px"><div class="on">List</div><div>Week</div><div>Month</div></div>
+
+    <div id="cweek" style="display:grid;grid-template-columns:repeat(7,1fr);margin-top:16px;text-align:center"></div>
+
+    <div style="margin-top:18px;display:flex;align-items:baseline;justify-content:space-between">
+      <div class="h2">This weekend</div><span class="small">5 shows in October</span>
+    </div>
+    <div style="margin-top:10px">
+      <div class="ag">
+        <div class="d"><div class="w">Sat</div><div class="n">03</div></div>
+        <div style="flex:1;min-width:0">
+          <div class="t">Four Tet</div>
+          <div class="sub" style="margin-top:3px">Knockdown Center, Maspeth</div>
+          <div class="mono" style="font-size:13px;color:var(--ink2);margin-top:5px">Doors 10 PM · On 1 AM</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:9px"><span class="bullet" style="background:var(--l-red)">N</span><span style="font:500 13px 'Archivo';color:var(--ink2)">3 going · Kai maybe</span></div>
+        </div>
+        <span class="tag in"><iconify-icon icon="ph:check-bold"></iconify-icon>Going</span>
+      </div>
+    </div>
+    <div class="h2" style="margin-top:14px">Later this month</div>
+    <div style="margin-top:6px">
+      <div class="ag">
+        <div class="d"><div class="w">Sat</div><div class="n">10</div></div>
+        <div style="flex:1;min-width:0">
+          <div class="t">Peggy Gou</div>
+          <div class="sub" style="margin-top:3px">Brooklyn Mirage · 9:00 PM</div>
+        </div>
+        <span class="tag maybe"><iconify-icon icon="ph:question"></iconify-icon>Maybe</span>
+      </div>
+      <div class="ag">
+        <div class="d"><div class="w">Sat</div><div class="n">17</div></div>
+        <div style="flex:1;min-width:0">
+          <div class="t">Fred again..</div>
+          <div class="sub" style="margin-top:3px">Brooklyn Paramount · 8:00 PM</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:8px"><span class="bullet" style="background:var(--l-green)">D</span><span style="font:500 13px 'Archivo';color:var(--ink2)">Added by Sam</span></div>
+        </div>
+        <span class="tag open">Reply</span>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab on"><iconify-icon icon="ph:calendar-dots-fill"></iconify-icon>Calendar</div>
+    <div class="tab"><iconify-icon icon="ph:compass"></iconify-icon>Discover</div>
+    <div class="tab"><iconify-icon icon="ph:users-three"></iconify-icon>Crews</div>
+    <div class="tab"><iconify-icon icon="ph:user-circle"></iconify-icon>You</div>
+  </div>
+</div></div></section>
+
+<!-- ============ C4 EVENT DETAIL ============ -->
+<section class="canvas" id="c4-event"><div class="phone"><div class="screen" data-tone="light">
+  <div class="content" style="padding:54px 0 0">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 10px">
+      <div style="display:flex;align-items:center;color:var(--accent);font:400 17px 'Archivo'"><div class="iconbtn" style="width:30px"><iconify-icon icon="ph:caret-left-bold"></iconify-icon></div>October</div>
+      <div style="display:flex"><div class="iconbtn" style="color:var(--accent)"><iconify-icon icon="ph:export-bold"></iconify-icon></div><div class="iconbtn" style="color:var(--accent)"><iconify-icon icon="ph:dots-three-bold"></iconify-icon></div></div>
+    </div>
+
+    <!-- set-type poster block: no illustration, just the billing -->
+    <div style="margin:6px 20px 0;height:178px;border-radius:16px;background:var(--ink);color:#fff;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
+      <div class="mono" style="font-size:12px;color:#bdbdb6;display:flex;justify-content:space-between"><span>SAT 03.10.26</span><span>KNOCKDOWN CTR</span></div>
+      <div style="font:800 96px/.8 'Archivo';font-stretch:62%;letter-spacing:-.02em;text-transform:uppercase">Four Tet</div>
+      <div style="position:absolute;right:0;top:0;bottom:0;width:10px;background:var(--l-red)"></div>
+    </div>
+
+    <div style="padding:0 20px">
+      <div style="font:700 28px/1.1 'Archivo';letter-spacing:-.025em;margin-top:18px">Four Tet</div>
+      <div class="sub" style="margin-top:4px;font-size:15px">All night long · Knockdown Center</div>
+
+      <div class="group" style="margin-top:16px">
+        <div class="row"><iconify-icon icon="ph:clock" style="font-size:20px;color:var(--ink2)"></iconify-icon><div class="k">Sat, Oct 3</div><span class="mono" style="font-size:14px;color:var(--ink2)">10 PM – 5 AM</span></div>
+        <div class="row"><iconify-icon icon="ph:map-pin-fill" style="font-size:20px;color:var(--ink2)"></iconify-icon><div style="flex:1"><div class="k">52-19 Flushing Ave, Maspeth</div></div><iconify-icon class="chev" icon="ph:caret-right-bold"></iconify-icon></div>
+        <div class="row"><iconify-icon icon="ph:train-simple" style="font-size:20px;color:var(--ink2)"></iconify-icon><div class="k">L to Jefferson St</div><span class="v">16 min walk</span></div>
+        <div class="row"><iconify-icon icon="ph:ticket" style="font-size:20px;color:var(--ink2)"></iconify-icon><div class="k">$45 – $65 · 21+</div><span style="font:600 15px 'Archivo';color:var(--accent);display:flex;align-items:center;gap:4px">Tickets<iconify-icon icon="ph:arrow-up-right"></iconify-icon></span></div>
+      </div>
+
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:20px">
+        <div class="h2" style="display:flex;align-items:center;gap:8px"><span class="bullet" style="background:var(--l-red)">N</span>Night Shift</div>
+        <span class="small">3 going · 1 maybe</span>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px">
+        <div style="text-align:center"><div class="av" style="width:44px;height:44px;border-radius:22px;background:#2a5d8f">J</div><div style="font:500 12px 'Archivo';margin-top:5px">Jess</div></div>
+        <div style="text-align:center"><div class="av" style="width:44px;height:44px;border-radius:22px;background:#7a4b2a">M</div><div style="font:500 12px 'Archivo';margin-top:5px">Marco</div></div>
+        <div style="text-align:center"><div class="av" style="width:44px;height:44px;border-radius:22px;background:#4c6b3a">R</div><div style="font:500 12px 'Archivo';margin-top:5px">Rae</div></div>
+        <div style="text-align:center;opacity:.55"><div class="av" style="width:44px;height:44px;border-radius:22px;background:#6b6b66">K</div><div style="font:500 12px 'Archivo';margin-top:5px">Kai ?</div></div>
+      </div>
+    </div>
+  </div>
+  <!-- RSVP: sticky, thumb zone, state shown with text + color -->
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 20px 34px;z-index:30">
+    <div class="small" style="margin-bottom:8px">Your answer</div>
+    <div style="display:flex;gap:8px">
+      <div class="btn" style="flex:1.3;background:var(--in);color:#fff;height:50px;font-size:16px"><iconify-icon icon="ph:check-bold"></iconify-icon>Going</div>
+      <div class="btn outline" style="flex:1;height:50px;font-size:16px">Maybe</div>
+      <div class="btn outline" style="flex:1;height:50px;font-size:16px">Can't go</div>
+    </div>
+  </div>
+</div></div></section>
+
+<!-- ============ C5 DISCOVER ============ -->
+<section class="canvas" id="c5-discover"><div class="phone"><div class="screen" data-tone="light">
+  <div class="content" style="padding:58px 20px 0">
+    <div class="lt">Discover</div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <div style="flex:1;height:44px;border-radius:12px;background:var(--surface);display:flex;align-items:center;gap:8px;padding:0 12px;color:var(--mute);font:400 16px 'Archivo'"><iconify-icon icon="ph:magnifying-glass" style="font-size:19px"></iconify-icon>Artists, venues, genres</div>
+      <div class="iconbtn" style="border-radius:12px;background:var(--surface);color:var(--ink)"><iconify-icon icon="ph:sliders-horizontal"></iconify-icon></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;margin-right:-20px;overflow:hidden">
+      <span class="tag" style="height:36px;padding:0 14px;border-radius:18px;background:var(--ink);color:#fff;font-size:14px">For Night Shift</span>
+      <span class="tag" style="height:36px;padding:0 14px;border-radius:18px;border:1.5px solid var(--line);font-size:14px">This weekend</span>
+      <span class="tag" style="height:36px;padding:0 14px;border-radius:18px;border:1.5px solid var(--line);font-size:14px">Under $40</span>
+      <span class="tag" style="height:36px;padding:0 14px;border-radius:18px;border:1.5px solid var(--line);font-size:14px">Techno</span>
+    </div>
+
+    <div style="margin-top:20px">
+      <div class="h2">Picked for Night Shift</div>
+      <div class="small" style="margin-top:3px">From the Spotify listening of 4 members</div>
+    </div>
+    <div id="disc" style="margin-top:8px"></div>
+  </div>
+  <div class="tabbar">
+    <div class="tab"><iconify-icon icon="ph:calendar-dots"></iconify-icon>Calendar</div>
+    <div class="tab on"><iconify-icon icon="ph:compass-fill"></iconify-icon>Discover</div>
+    <div class="tab"><iconify-icon icon="ph:users-three"></iconify-icon>Crews</div>
+    <div class="tab"><iconify-icon icon="ph:user-circle"></iconify-icon>You</div>
+  </div>
+</div></div></section>
+
+<!-- ============ C6 PROFILE ============ -->
+<section class="canvas" id="c6-profile"><div class="phone"><div class="screen" data-tone="light" style="background:var(--surface)">
+  <div class="content" style="padding:58px 20px 0">
+    <div class="lt">You</div>
+    <div style="display:flex;align-items:center;gap:14px;margin-top:16px;background:#fff;border-radius:14px;padding:14px 16px">
+      <div class="av" style="width:56px;height:56px;border-radius:28px;background:#2a5d8f;font-size:20px">JM</div>
+      <div style="flex:1"><div style="font:700 19px 'Archivo';letter-spacing:-.01em">Jess Moreno</div><div class="small" style="margin-top:3px">jess.moreno@hey.com</div></div>
+      <iconify-icon class="chev" icon="ph:caret-right-bold" style="color:#a8a8a2"></iconify-icon>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px">
+      <div style="background:#fff;border-radius:14px;padding:12px 14px"><div style="font:800 30px/1 'Archivo';font-stretch:68%">23</div><div class="small" style="margin-top:4px">shows in 2026</div></div>
+      <div style="background:#fff;border-radius:14px;padding:12px 14px"><div style="font:800 30px/1 'Archivo';font-stretch:68%">11</div><div class="small" style="margin-top:4px">venues</div></div>
+      <div style="background:#fff;border-radius:14px;padding:12px 14px"><div style="font:800 30px/1 'Archivo';font-stretch:68%">2</div><div class="small" style="margin-top:4px">crews</div></div>
+    </div>
+
+    <div class="ghdr" style="margin-top:22px">Crews</div>
+    <div class="group" style="background:#fff">
+      <div class="row"><span class="bullet" style="background:var(--l-red);width:28px;height:28px;border-radius:14px;font-size:14px">N</span><div class="k">Night Shift</div><span class="v">6 people</span><iconify-icon class="chev" icon="ph:caret-right-bold"></iconify-icon></div>
+      <div class="row"><span class="bullet" style="background:var(--l-green);width:28px;height:28px;border-radius:14px;font-size:14px">D</span><div class="k">Day Party</div><span class="v">4 people</span><iconify-icon class="chev" icon="ph:caret-right-bold"></iconify-icon></div>
+      <div class="row" style="color:var(--accent)"><span style="width:28px;display:flex;justify-content:center;font-size:20px"><iconify-icon icon="ph:plus-bold"></iconify-icon></span><div class="k" style="font-weight:500">New crew</div></div>
+    </div>
+
+    <div class="ghdr" style="margin-top:22px">Connected</div>
+    <div class="group" style="background:#fff">
+      <div class="row"><iconify-icon icon="logos:google-icon" style="font-size:20px;width:28px;display:flex;justify-content:center"></iconify-icon><div style="flex:1"><div class="k">Google Calendar</div><div style="font:400 13px 'Archivo';color:var(--in);margin-top:3px;display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:4px;background:var(--in)"></span>Synced 2 min ago</div></div><iconify-icon class="chev" icon="ph:caret-right-bold"></iconify-icon></div>
+      <div class="row"><iconify-icon icon="ph:spotify-logo-fill" style="font-size:26px;color:#1db954;width:28px;display:flex;justify-content:center"></iconify-icon><div style="flex:1"><div class="k">Spotify</div><div class="small" style="margin-top:3px">Used for Discover picks</div></div><iconify-icon class="chev" icon="ph:caret-right-bold"></iconify-icon></div>
+    </div>
+
+    <div class="ghdr" style="margin-top:22px">Account</div>
+    <div class="group" style="background:#fff">
+      <div class="row"><div class="k">Notifications</div><span class="v">Crew replies</span><iconify-icon class="chev" icon="ph:caret-right-bold"></iconify-icon></div>
+      <div class="row"><div class="k">Sign out</div></div>
+      <div class="row"><div class="k" style="color:#c4271f">Delete account</div></div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab"><iconify-icon icon="ph:calendar-dots"></iconify-icon>Calendar</div>
+    <div class="tab"><iconify-icon icon="ph:compass"></iconify-icon>Discover</div>
+    <div class="tab"><iconify-icon icon="ph:users-three"></iconify-icon>Crews</div>
+    <div class="tab on"><iconify-icon icon="ph:user-circle-fill"></iconify-icon>You</div>
+  </div>
+</div></div></section>
+
+<script>
+// week strip: Mon Sep 28 – Sun Oct 4, today = Wed 30, show on Sat 3
+const days=[['M',28],['T',29],['W',30],['T',1],['F',2],['S',3],['S',4]];
+document.getElementById('cweek').innerHTML=days.map(([w,d])=>{
+  const today=d===30, ev=d===3, past=d<30&&d>20;
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <span style="font:500 12px 'Archivo';color:var(--mute)">${w}</span>
+    <span style="width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;font:${today?700:500} 18px 'Archivo';
+      ${today?'background:var(--ink);color:#fff':past?'color:#9a9a94':''}">${d}</span>
+    <span style="width:6px;height:6px;border-radius:3px;background:${ev?'var(--accent)':'transparent'}"></span></div>`}).join('');
+// discover list: flat-color artwork with set type, real reasons
+const picks=[
+  ['Jamie xx','#d6322b','Sat, Oct 24','Elsewhere','Jess and Rae have him on repeat','$38',false],
+  ['Honey Dijon','#0e0e0e','Sat, Oct 31','Nowadays','Matches 3 of your crew','$30',false],
+  ['Floating Points','#1d3bff','Sat, Nov 7','Superior Ingredients','Marco saw him twice this year','$42',false],
+  ['Fred again..','#00873a','Sat, Oct 17','Paramount','Already on your calendar','$85',true],
+];
+document.getElementById('disc').innerHTML=picks.map(([a,c,d,v,why,p,added])=>`
+  <div style="display:flex;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line)">
+    <div class="art" style="width:68px;height:68px;background:${c}">${a}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font:700 17px/1.15 'Archivo';letter-spacing:-.01em">${a}</div>
+      <div class="sub" style="margin-top:2px">${d} · ${v}</div>
+      <div style="font:400 13px/1.3 'Archivo';color:var(--mute);margin-top:3px">${why}</div>
+    </div>
+    ${added?`<span class="tag in" style="height:32px"><iconify-icon icon="ph:check-bold"></iconify-icon>Added</span>`
+           :`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span class="mono" style="font-size:13px;color:var(--ink2)">${p}</span><span class="tag open">Add</span></div>`}
+  </div>`).join('');
+</script>
+<script src="chrome.js"></script>
+</body>
+</html>

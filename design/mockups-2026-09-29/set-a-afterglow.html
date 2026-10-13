@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TikCal — Set A · Afterglow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@1,800&family=Syne:wght@600;700;800&family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="icons.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+<script>window.__ICONS__.forEach((c) => IconifyIcon.addCollection(c))</script>
+<link rel="stylesheet" href="frame.css">
+<style>
+:root{
+  --ink:#0b0b11; --ink2:#060609; --panel:#15151c; --panel2:#1c1c25; --line:#28282f;
+  --muted:#8f8fa3; --faint:#5a5a6b; --aurora:#c04bff; --violet:#8b5cff; --iris:#5b6bff;
+  --mint:#6EE7B7; --mint-ink:#04221a; --t1:#e8f4f8; --t2:#94a3b8; --body:#ececf4;
+  --ice:#4cc9f0; --peri:#6aa8ff; --amber:#ffb454; --coral:#ff7a7a;
+}
+/* presentation */
+.canvas{ background:#0c0c12; }
+.canvas::after{ content:""; position:absolute; inset:0; opacity:.22; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.phone{ background:linear-gradient(145deg,#3a3a44,#16161c 40%,#2a2a33); box-shadow:
+  0 0 0 1.5px #4a4a55, 0 40px 80px -30px rgba(0,0,0,.9), 0 0 90px -30px rgba(139,92,255,.35); }
+.screen{ background:var(--ink); color:var(--body); font-family:"Schibsted Grotesk",system-ui,sans-serif; }
+
+/* app primitives */
+.glow{ position:absolute; top:-30%; left:50%; transform:translateX(-50%); width:160%; height:75%;
+  filter:blur(60px); opacity:.95; pointer-events:none;
+  background: radial-gradient(40% 62% at 68% 4%, rgba(210,80,255,.62), transparent 68%),
+              radial-gradient(38% 58% at 30% 10%, rgba(139,92,255,.5), transparent 70%),
+              radial-gradient(30% 40% at 50% 30%, rgba(91,107,255,.25), transparent 72%); }
+.glow.lite{ opacity:.45; top:-40%; }
+.grain{ position:absolute; inset:0; opacity:.16; pointer-events:none; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.logo{ font-family:Barlow,system-ui; font-weight:800; font-style:italic; letter-spacing:-.02em; line-height:1;
+  background:linear-gradient(180deg,#fff 0%,#eef2f8 12%,#b9c3d3 30%,#7c8698 43%,#363d4c 49%,#444c5d 51%,#f4f7fb 56%,#c3ccda 70%,#8f9aac 84%,#d6dee9 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 22px rgba(192,75,255,.45)); }
+.mono{ font-family:"IBM Plex Mono",ui-monospace,monospace; text-transform:uppercase; letter-spacing:.14em; }
+.syne{ font-family:Syne,system-ui; font-weight:800; letter-spacing:-.01em; }
+.label{ font:500 11px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.label .sl{ color:var(--violet); }
+.btn{ display:flex; align-items:center; justify-content:center; gap:10px; height:54px; border-radius:6px;
+  font:600 14px/1 "IBM Plex Mono",monospace; letter-spacing:.08em; text-transform:uppercase; }
+.btn.aurora{ color:#fff; background:linear-gradient(100deg,var(--aurora),var(--violet)); box-shadow:0 10px 30px -10px rgba(192,75,255,.7), inset 0 1px 0 rgba(255,255,255,.25); }
+.btn.ghost{ color:#cbd5e1; border:1px solid rgba(255,255,255,.12); }
+.btn.mint{ background:var(--mint); color:var(--mint-ink); }
+.hud{ background:rgba(21,21,28,.72); border:1px solid rgba(255,255,255,.07); border-radius:16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 10px 30px -16px rgba(0,0,0,.8); }
+.hud.hero{ border-color:rgba(139,92,255,.35); background:linear-gradient(180deg,rgba(139,92,255,.12),rgba(21,21,28,.8) 60%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 18px 40px -20px rgba(139,92,255,.55); }
+.inp{ height:54px; border-radius:6px; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08);
+  display:flex; align-items:center; padding:0 16px; font-size:16px; color:var(--t1); gap:12px; }
+.inp.focus{ border-color:rgba(139,92,255,.6); }
+.inp iconify-icon{ color:var(--faint); font-size:20px; }
+
+/* tab bar */
+.tabbar{ position:absolute; left:0; right:0; bottom:0; height:92px; padding:10px 14px 0;
+  background:linear-gradient(180deg,rgba(11,11,17,.4),rgba(11,11,17,.96) 30%); border-top:1px solid rgba(255,255,255,.06);
+  display:flex; justify-content:space-between; z-index:30; backdrop-filter:blur(14px); }
+.tab{ width:58px; display:flex; flex-direction:column; align-items:center; gap:6px; color:var(--faint);
+  font:500 11px/1 "IBM Plex Mono",monospace; letter-spacing:.06em; text-transform:uppercase; }
+.tab iconify-icon{ font-size:25px; }
+.tab.on{ color:#fff; }
+.tab.on .ic{ background:linear-gradient(135deg,var(--aurora),var(--violet)); box-shadow:0 6px 18px -6px rgba(192,75,255,.8); }
+.tab .ic{ width:46px; height:32px; border-radius:16px; display:flex; align-items:center; justify-content:center; }
+.tab.on span{ color:#d9c9ff; }
+
+/* event card */
+.ev{ position:relative; padding:14px 14px 14px 20px; overflow:hidden; }
+.ev::before{ content:""; position:absolute; left:0; top:12px; bottom:12px; width:3px; border-radius:3px; background:var(--c); box-shadow:0 0 12px var(--c); }
+.ev .t{ font-size:17px; font-weight:600; color:var(--t1); }
+.ev .m{ font:500 12px/1.3 "IBM Plex Mono",monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--t2); margin-top:6px; }
+.date{ width:50px; text-align:center; flex-shrink:0; }
+.date .d{ font:800 24px/1 Syne; color:var(--t1); }
+.date .w{ font:500 11px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; color:var(--muted); margin-top:5px; }
+.faces{ display:flex; }
+.face{ width:26px; height:26px; border-radius:50%; margin-left:-7px; border:2px solid #15151c;
+  display:flex; align-items:center; justify-content:center; font:700 11px/1 "Schibsted Grotesk"; color:#0b0b11; }
+.face:first-child{ margin-left:0; }
+.chip{ height:34px; padding:0 14px; border-radius:17px; display:inline-flex; align-items:center; gap:7px;
+  font:500 12px/1 "IBM Plex Mono",monospace; letter-spacing:.08em; text-transform:uppercase; color:#cbd5e1;
+  border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); white-space:nowrap; }
+.chip.on{ color:#fff; border-color:rgba(139,92,255,.6); background:rgba(139,92,255,.18); }
+.tight .chip{padding:0 10px 0 6px;gap:6px;letter-spacing:.04em}
+.in-pill{ color:var(--mint); border-color:rgba(110,231,183,.35); background:rgba(110,231,183,.1); }
+</style>
+</head>
+<body data-fonts='["italic 800 30px Barlow","800 30px Syne","400 16px \"Schibsted Grotesk\"","500 12px \"IBM Plex Mono\""]'>
+
+<!-- ============ A1 WELCOME ============ -->
+<section class="canvas" id="a1-welcome"><div class="phone"><div class="screen">
+  <div class="glow"></div>
+  <!-- stage beams -->
+  <div style="position:absolute;top:0;left:0;right:0;height:520px;opacity:.5;
+    background:conic-gradient(from 180deg at 50% -8%, transparent 150deg, rgba(210,160,255,.18) 165deg, transparent 172deg, transparent 188deg, rgba(160,150,255,.16) 195deg, transparent 210deg);
+    -webkit-mask-image:linear-gradient(#000 20%,transparent 95%)"></div>
+  <img src="../discoball.png" style="position:absolute;top:92px;left:50%;transform:translateX(-50%);width:330px;mix-blend-mode:screen;opacity:.95;
+    -webkit-mask-image:radial-gradient(closest-side,#000 70%,transparent 100%)">
+  <div class="grain"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:430px;background:linear-gradient(180deg,transparent,rgba(11,11,17,.92) 30%,var(--ink) 55%)"></div>
+  <div class="content" style="padding:0 28px;">
+    <div style="position:absolute;left:28px;right:28px;bottom:66px;">
+      <div class="label" style="margin-bottom:18px"><span class="sl">//</span> every source · one calendar</div>
+      <div class="logo" style="font-size:66px;padding:4px 0">TikCal</div>
+      <p style="font-size:19px;line-height:1.4;color:var(--t2);margin:14px 0 30px;max-width:300px">Every show your crew is going to. One calendar, zero group-chat archaeology.</p>
+      <div class="btn aurora">Get started <iconify-icon icon="ph:arrow-right-bold"></iconify-icon></div>
+      <div class="btn ghost" style="margin-top:12px">I have an account</div>
+    </div>
+  </div>
+</div></div></section>
+
+<!-- ============ A2 SIGN IN ============ -->
+<section class="canvas" id="a2-signin"><div class="phone"><div class="screen">
+  <div class="glow lite"></div><div class="grain"></div>
+  <div class="content" style="padding:70px 28px 0">
+    <iconify-icon icon="ph:caret-left-bold" style="font-size:22px;color:var(--t2)"></iconify-icon>
+    <div class="logo" style="font-size:36px;margin-top:28px;padding:3px 0">TikCal</div>
+    <div class="syne" style="font-size:30px;color:var(--t1);margin-top:20px;line-height:1.1">Back on<br>the floor.</div>
+    <p style="font-size:16px;color:var(--t2);margin-top:12px">Sign in to see who's going where.</p>
+
+    <div style="margin-top:26px">
+      <div class="label" style="margin-bottom:10px">Email</div>
+      <div class="inp focus"><iconify-icon icon="ph:at"></iconify-icon>apple@tikcal.app</div>
+      <div class="label" style="margin:20px 0 10px">Password</div>
+      <div class="inp"><iconify-icon icon="ph:lock-simple"></iconify-icon><span style="letter-spacing:.3em;color:var(--t1)">••••••••••</span>
+        <iconify-icon icon="ph:eye" style="margin-left:auto"></iconify-icon></div>
+      <div style="text-align:right;margin-top:14px;font:500 13px 'IBM Plex Mono';color:#b69cff;letter-spacing:.04em">Forgot password?</div>
+    </div>
+    <div class="btn aurora" style="margin-top:22px">Sign in</div>
+    <div style="display:flex;align-items:center;gap:14px;margin:20px 0" class="label"><div style="flex:1;height:1px;background:var(--line)"></div>or<div style="flex:1;height:1px;background:var(--line)"></div></div>
+    <div class="btn ghost" style="gap:12px;text-transform:none;letter-spacing:.02em;font-size:15px;font-family:'Schibsted Grotesk';color:var(--t1)"><iconify-icon icon="ph:apple-logo-fill" style="font-size:20px"></iconify-icon>Continue with Apple</div>
+    <div class="btn ghost" style="gap:12px;margin-top:12px;text-transform:none;letter-spacing:.02em;font-size:15px;font-family:'Schibsted Grotesk';color:var(--t1)"><iconify-icon icon="logos:google-icon" style="font-size:18px"></iconify-icon>Continue with Google</div>
+    <p style="position:absolute;left:0;right:0;bottom:36px;text-align:center;font-size:15px;color:var(--t2)">New here? <span style="color:#c9b3ff;font-weight:600">Create an account</span></p>
+  </div>
+</div></div></section>
+
+<!-- ============ A3 CALENDAR HOME ============ -->
+<section class="canvas" id="a3-calendar"><div class="phone"><div class="screen">
+  <div class="glow lite"></div><div class="grain"></div>
+  <div class="content" style="padding:62px 20px 0">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="logo" style="font-size:30px;padding:2px 0">TikCal</div>
+      <div style="display:flex;gap:10px">
+        <div style="width:42px;height:42px;border-radius:21px;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><iconify-icon icon="ph:bell" style="font-size:20px;color:var(--t2)"></iconify-icon></div>
+        <div style="width:42px;height:42px;border-radius:21px;background:linear-gradient(135deg,var(--aurora),var(--violet));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -8px rgba(192,75,255,.8)"><iconify-icon icon="ph:plus-bold" style="font-size:20px;color:#fff"></iconify-icon></div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:24px">
+      <div>
+        <div class="label"><span class="sl">//</span> 5 shows · 2 crews</div>
+        <div class="syne" style="font-size:30px;color:var(--t1);margin-top:10px">October</div>
+      </div>
+      <div style="display:flex;gap:8px;padding-bottom:2px">
+        <iconify-icon icon="ph:caret-left-bold" style="font-size:18px;color:var(--faint)"></iconify-icon>
+        <iconify-icon icon="ph:caret-right-bold" style="font-size:18px;color:var(--t2)"></iconify-icon>
+      </div>
+    </div>
+
+    <!-- compact month -->
+    <div class="hud" style="margin-top:16px;padding:14px 10px 10px">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center" class="label">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <div id="amonth" style="display:grid;grid-template-columns:repeat(7,1fr);row-gap:4px;margin-top:10px;text-align:center;font:600 15px/1 'Schibsted Grotesk'"></div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:22px 2px 12px">
+      <div class="label"><span class="sl">//</span> up next</div>
+      <div class="label" style="color:#b69cff">See all</div>
+    </div>
+
+    <div class="hud ev" style="--c:var(--ice);display:flex;gap:12px;align-items:center">
+      <div class="date"><div class="d">03</div><div class="w">SAT</div></div>
+      <div style="flex:1;min-width:0">
+        <div class="t">Four Tet</div>
+        <div class="m">Knockdown · 10PM</div>
+      </div>
+      <div style="text-align:right">
+        <div class="faces" style="justify-content:flex-end"><div class="face" style="background:#6EE7B7">J</div><div class="face" style="background:#ffb454">M</div><div class="face" style="background:#6aa8ff">R</div></div>
+        <div class="mono" style="font-size:11px;color:var(--mint);margin-top:6px;letter-spacing:.1em">3 in</div>
+      </div>
+    </div>
+    <div class="hud ev" style="--c:var(--amber);display:flex;gap:12px;align-items:center;margin-top:10px">
+      <div class="date"><div class="d">10</div><div class="w">SAT</div></div>
+      <div style="flex:1;min-width:0">
+        <div class="t">Peggy Gou</div>
+        <div class="m">Brooklyn Mirage · 9PM</div>
+      </div>
+      <div style="text-align:right">
+        <div class="faces" style="justify-content:flex-end"><div class="face" style="background:#ff9ad5">K</div><div class="face" style="background:#6EE7B7">J</div></div>
+        <div class="mono" style="font-size:11px;color:var(--amber);margin-top:6px;letter-spacing:.1em">1 maybe</div>
+      </div>
+    </div>
+    <div class="hud ev" style="--c:var(--peri);display:flex;gap:12px;align-items:center;margin-top:10px">
+      <div class="date"><div class="d">17</div><div class="w">SAT</div></div>
+      <div style="flex:1;min-width:0">
+        <div class="t">Fred again..</div>
+        <div class="m">BK Paramount · 8PM</div>
+      </div>
+      <div style="text-align:right">
+        <div class="faces" style="justify-content:flex-end"><div class="face" style="background:#6EE7B7">J</div><div class="face" style="background:#6aa8ff">R</div></div>
+        <div class="mono" style="font-size:11px;color:var(--mint);margin-top:6px;letter-spacing:.1em">2 in</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab on"><div class="ic"><iconify-icon icon="ph:calendar-dots-fill"></iconify-icon></div><span>Cal</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:compass"></iconify-icon></div><span>Find</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:magic-wand"></iconify-icon></div><span>Plan</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:users-three"></iconify-icon></div><span>Crew</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:intersect"></iconify-icon></div><span>Sync</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:user-circle"></iconify-icon></div><span>You</span></div>
+  </div>
+</div></div></section>
+
+<!-- ============ A4 EVENT DETAIL ============ -->
+<section class="canvas" id="a4-event"><div class="phone"><div class="screen">
+  <!-- hero: stage light scene -->
+  <div style="position:absolute;top:0;left:0;right:0;height:390px;overflow:hidden;
+    background:radial-gradient(70% 45% at 50% 100%, rgba(120,220,255,.55), transparent 70%), radial-gradient(60% 70% at 50% 0%, rgba(76,201,240,.45), transparent 70%), radial-gradient(50% 60% at 15% 40%, rgba(192,75,255,.45), transparent 70%), radial-gradient(40% 50% at 90% 50%, rgba(192,75,255,.3), transparent 70%), #0a0a12;">
+    <div style="position:absolute;inset:0;background:
+      conic-gradient(from 180deg at 50% 102%, transparent 140deg, rgba(180,240,255,.35) 150deg, transparent 154deg, transparent 166deg, rgba(220,180,255,.4) 172deg, transparent 176deg, transparent 184deg, rgba(180,240,255,.45) 188deg, transparent 192deg, transparent 204deg, rgba(220,180,255,.35) 210deg, transparent 214deg);
+      filter:blur(1.5px)"></div>
+    <!-- crowd silhouette -->
+    <svg viewBox="0 0 393 140" style="position:absolute;bottom:70px;left:0;width:100%" preserveAspectRatio="none">
+      <path fill="#07070b" d="M0 140V92c10-6 16-24 26-24s14 16 20 18c6-14 12-36 24-36s14 22 18 30c8-8 10-20 20-20 12 0 12 16 18 22 8-24 18-48 30-48s16 26 20 34c6-10 12-18 22-18s12 14 18 20c8-18 14-40 28-40 12 0 16 20 20 30 6-6 12-14 20-14 12 0 14 18 20 22 8-12 14-28 26-28s14 18 18 26c6-4 10-10 18-10 10 0 12 14 16 18 6-6 10-14 18-14 8 0 10 8 13 12V140Z"/>
+      <path fill="#07070b" d="M58 70l-8-40 6-2 9 38z M292 58l6-42 6 1-4 42z M170 60l-2-46h6l2 46z"/>
+    </svg>
+    <div class="grain"></div>
+    <div style="position:absolute;inset:auto 0 0 0;height:72px;background:#07070b"></div><div style="position:absolute;inset:auto 0 0 0;height:120px;background:linear-gradient(transparent,var(--ink) 80%)"></div>
+  </div>
+  <div class="content" style="padding:62px 20px 0">
+    <div style="display:flex;justify-content:space-between">
+      <div style="width:42px;height:42px;border-radius:21px;background:rgba(11,11,17,.55);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><iconify-icon icon="ph:caret-left-bold" style="font-size:18px;color:#fff"></iconify-icon></div>
+      <div style="width:42px;height:42px;border-radius:21px;background:rgba(11,11,17,.55);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center"><iconify-icon icon="ph:share-network" style="font-size:18px;color:#fff"></iconify-icon></div>
+    </div>
+    <div style="margin-top:196px">
+      <div style="display:inline-flex;align-items:center;gap:8px" class="label"><span style="width:8px;height:8px;border-radius:4px;background:var(--ice);box-shadow:0 0 10px var(--ice)"></span><span style="color:#cfeefa">Night Shift crew</span></div>
+      <div class="syne" style="font-size:44px;color:#fff;margin-top:10px;line-height:1">Four Tet</div>
+      <div style="font-size:16px;color:var(--t2);margin-top:8px">with Floating Points &amp; Anz</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px">
+      <div class="hud" style="padding:14px">
+        <div class="label">When</div>
+        <div style="font:600 17px 'Schibsted Grotesk';color:var(--t1);margin-top:8px">Sat, Oct 3</div>
+        <div class="mono" style="font-size:12px;color:var(--t2);margin-top:4px;letter-spacing:.08em">Doors 10PM</div>
+      </div>
+      <div class="hud" style="padding:14px">
+        <div class="label">Where</div>
+        <div style="font:600 17px 'Schibsted Grotesk';color:var(--t1);margin-top:8px">Knockdown Ctr</div>
+        <div class="mono" style="font-size:12px;color:var(--t2);margin-top:4px;letter-spacing:.08em">Maspeth, QNS</div>
+      </div>
+    </div>
+
+    <div class="hud" style="margin-top:10px;padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="label">Who's in</div><div class="mono" style="font-size:12px;color:var(--mint);letter-spacing:.1em">3 in · 1 maybe</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px" class="tight">
+        <span class="chip in-pill"><span class="face" style="width:20px;height:20px;background:#6EE7B7;border:0;font-size:10px">J</span>Jess</span>
+        <span class="chip in-pill"><span class="face" style="width:20px;height:20px;background:#ffb454;border:0;font-size:10px">M</span>Marco</span>
+        <span class="chip in-pill"><span class="face" style="width:20px;height:20px;background:#6aa8ff;border:0;font-size:10px">R</span>Rae</span>
+        <span class="chip" style="color:var(--amber);border-color:rgba(255,180,84,.35)"><span class="face" style="width:20px;height:20px;background:#ff9ad5;border:0;font-size:10px">K</span>Kai</span>
+      </div>
+    </div>
+  <div class="hud" style="margin-top:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <iconify-icon icon="ph:ticket" style="font-size:22px;color:#c9b3ff"></iconify-icon>
+      <div style="flex:1"><div style="font:600 16px 'Schibsted Grotesk';color:var(--t1)">Tickets</div><div class="mono" style="font-size:11px;color:var(--t2);margin-top:4px;letter-spacing:.08em">Resident Advisor · from $45</div></div>
+      <iconify-icon icon="ph:arrow-up-right" style="font-size:18px;color:var(--t2)"></iconify-icon>
+    </div>
+    <!-- RSVP dock -->
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 20px 38px;background:linear-gradient(180deg,rgba(11,11,17,0),var(--ink) 26%)">
+      <div class="label" style="text-align:center;margin-bottom:12px">Are you going?</div>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px">
+        <div class="btn mint"><iconify-icon icon="ph:check-bold" style="font-size:18px"></iconify-icon>I'm in</div>
+        <div class="btn ghost">Maybe</div>
+        <div class="btn ghost">Out</div>
+      </div>
+    </div>
+  </div>
+</div></div></section>
+
+<!-- ============ A5 DISCOVER ============ -->
+<section class="canvas" id="a5-discover"><div class="phone"><div class="screen">
+  <div class="glow lite"></div><div class="grain"></div>
+  <div class="content" style="padding:62px 20px 0">
+    <div class="label"><span class="sl">//</span> NYC · this month</div>
+    <div class="syne" style="font-size:32px;color:var(--t1);margin-top:10px">Shows for you</div>
+    <div class="inp" style="margin-top:18px;height:50px"><iconify-icon icon="ph:magnifying-glass"></iconify-icon><span style="color:var(--faint)">Artist, venue, or vibe</span></div>
+    <div style="display:flex;gap:8px;margin-top:14px;overflow:hidden;margin-right:-20px">
+      <span class="chip on">All</span><span class="chip">Techno</span><span class="chip">House</span><span class="chip">Live</span><span class="chip">Disco</span>
+    </div>
+
+    <!-- featured -->
+    <div class="hud hero" style="margin-top:20px;overflow:hidden;padding:0">
+      <div style="height:168px;position:relative;overflow:hidden;
+        background:radial-gradient(70% 90% at 70% 10%, rgba(255,180,84,.55), transparent 65%), radial-gradient(60% 80% at 15% 90%, rgba(192,75,255,.45), transparent 70%), #120d18;">
+        <div style="position:absolute;inset:0;opacity:.55;background:repeating-linear-gradient(100deg,transparent 0 22px,rgba(255,220,170,.10) 22px 24px)"></div>
+        <svg viewBox="0 0 353 70" style="position:absolute;bottom:0;width:100%"><path fill="#15151c" d="M0 70V40c14 0 18-18 32-18s16 20 26 22c10-16 16-30 30-30s18 24 26 30c10-8 14-18 26-18 14 0 16 18 24 22 12-20 20-38 34-38s18 26 24 34c8-6 14-12 24-12s14 14 22 18c8-10 14-24 26-24s16 18 20 26c6-4 10-8 18-8 8 0 14 8 21 10V70Z"/></svg>
+        <div class="grain"></div>
+        <span class="chip in-pill" style="position:absolute;top:14px;left:14px;height:30px;background:rgba(4,34,26,.7);backdrop-filter:blur(6px)"><iconify-icon icon="ph:users-three-fill"></iconify-icon>2 crew going</span>
+        <div style="position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:18px;background:rgba(11,11,17,.6);display:flex;align-items:center;justify-content:center"><iconify-icon icon="ph:heart-fill" style="color:#ff7aa8;font-size:18px"></iconify-icon></div>
+      </div>
+      <div style="padding:14px 16px 16px">
+        <div style="font:600 19px 'Schibsted Grotesk';color:var(--t1)">Fred again..</div>
+        <div class="mono" style="font-size:12px;color:var(--t2);margin-top:6px;letter-spacing:.08em">Sat Oct 17 · Brooklyn Paramount</div>
+      </div>
+    </div>
+
+    <div class="label" style="margin:22px 2px 12px"><span class="sl">//</span> because you like Four Tet</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="hud" style="overflow:hidden">
+        <div style="height:120px;background:radial-gradient(80% 90% at 50% 100%, rgba(106,168,255,.7), transparent 70%),radial-gradient(60% 80% at 20% 0%, rgba(192,75,255,.35), transparent 70%),#0f1220;position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:conic-gradient(from 180deg at 50% 110%, transparent 150deg, rgba(255,255,255,.22) 160deg, transparent 165deg, transparent 176deg, rgba(255,255,255,.26) 180deg, transparent 184deg, transparent 195deg, rgba(255,255,255,.2) 200deg, transparent 210deg)"></div><svg viewBox="0 0 170 40" style="position:absolute;bottom:0;width:100%" preserveAspectRatio="none"><path fill="#15151c" d="M0 40V24c8 0 10-10 18-10s9 10 14 12c6-10 10-18 18-18s10 14 14 18c6-4 8-10 15-10 8 0 9 10 13 12 7-12 12-20 20-20s10 14 14 18c5-3 8-7 14-7 6 0 9 6 12 8 4-3 8-6 13-6V40Z"/></svg><div class="grain"></div></div>
+        <div style="padding:10px 12px 12px"><div style="font:600 16px 'Schibsted Grotesk';color:var(--t1)">Jamie xx</div><div class="mono" style="font-size:11px;color:var(--t2);margin-top:5px;letter-spacing:.08em">Oct 24 · Elsewhere</div></div>
+      </div>
+      <div class="hud" style="overflow:hidden">
+        <div style="height:120px;background:radial-gradient(80% 90% at 50% 100%, rgba(255,122,168,.6), transparent 70%),radial-gradient(60% 80% at 80% 0%, rgba(255,180,84,.35), transparent 70%),#170d14;position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:conic-gradient(from 180deg at 50% 110%, transparent 150deg, rgba(255,255,255,.22) 160deg, transparent 165deg, transparent 176deg, rgba(255,255,255,.26) 180deg, transparent 184deg, transparent 195deg, rgba(255,255,255,.2) 200deg, transparent 210deg)"></div><svg viewBox="0 0 170 40" style="position:absolute;bottom:0;width:100%" preserveAspectRatio="none"><path fill="#15151c" d="M0 40V24c8 0 10-10 18-10s9 10 14 12c6-10 10-18 18-18s10 14 14 18c6-4 8-10 15-10 8 0 9 10 13 12 7-12 12-20 20-20s10 14 14 18c5-3 8-7 14-7 6 0 9 6 12 8 4-3 8-6 13-6V40Z"/></svg><div class="grain"></div></div>
+        <div style="padding:10px 12px 12px"><div style="font:600 16px 'Schibsted Grotesk';color:var(--t1)">Honey Dijon</div><div class="mono" style="font-size:11px;color:var(--t2);margin-top:5px;letter-spacing:.08em">Oct 31 · Nowadays</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:calendar-dots"></iconify-icon></div><span>Cal</span></div>
+    <div class="tab on"><div class="ic"><iconify-icon icon="ph:compass-fill"></iconify-icon></div><span>Find</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:magic-wand"></iconify-icon></div><span>Plan</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:users-three"></iconify-icon></div><span>Crew</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:intersect"></iconify-icon></div><span>Sync</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:user-circle"></iconify-icon></div><span>You</span></div>
+  </div>
+</div></div></section>
+
+<!-- ============ A6 PROFILE ============ -->
+<section class="canvas" id="a6-profile"><div class="phone"><div class="screen">
+  <div class="glow"></div><div class="grain"></div>
+  <div class="content" style="padding:62px 20px 0">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="label"><span class="sl">//</span> you</div>
+      <iconify-icon icon="ph:gear-six" style="font-size:22px;color:var(--t2)"></iconify-icon>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;margin-top:6px">
+      <div style="width:92px;height:92px;border-radius:46px;padding:3px;background:conic-gradient(from 200deg,var(--aurora),var(--violet),var(--iris),var(--aurora));box-shadow:0 0 40px -6px rgba(192,75,255,.7)">
+        <div style="width:100%;height:100%;border-radius:50%;background:#12121a;display:flex;align-items:center;justify-content:center;overflow:hidden">
+          <iconify-icon icon="noto:sparkler" style="font-size:88px;display:block"></iconify-icon>
+        </div>
+      </div>
+      <div class="syne" style="font-size:28px;color:#fff;margin-top:16px">Apple</div>
+      <div class="mono" style="font-size:12px;color:#c9b3ff;margin-top:8px;letter-spacing:.12em">Glow Stick · Brooklyn</div>
+      <div style="font-size:15px;color:var(--t2);margin-top:8px;font-style:italic">“Main character. Visible from space.”</div>
+    </div>
+
+    <div class="hud" style="margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);padding:14px 0">
+      <div style="text-align:center"><div style="font:800 italic 30px Barlow;color:#fff">24</div><div class="label" style="margin-top:6px">Shows</div></div>
+      <div style="text-align:center;border-left:1px solid var(--line);border-right:1px solid var(--line)"><div style="font:800 italic 30px Barlow;color:var(--mint)">05</div><div class="label" style="margin-top:6px">Upcoming</div></div>
+      <div style="text-align:center"><div style="font:800 italic 30px Barlow;color:#fff">11</div><div class="label" style="margin-top:6px">Venues</div></div>
+    </div>
+
+    <div class="label" style="margin:18px 2px 10px"><span class="sl">//</span> your crews</div>
+    <div class="hud" style="padding:4px 0">
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px">
+        <span style="width:12px;height:12px;border-radius:6px;background:var(--ice);box-shadow:0 0 10px var(--ice)"></span>
+        <div style="flex:1;font:600 16px 'Schibsted Grotesk';color:var(--t1)">Night Shift</div>
+        <div class="faces"><div class="face" style="background:#6EE7B7">J</div><div class="face" style="background:#ffb454">M</div><div class="face" style="background:#6aa8ff">R</div></div>
+        <iconify-icon icon="ph:caret-right" style="color:var(--faint);font-size:16px"></iconify-icon>
+      </div>
+      <div style="height:1px;background:var(--line);margin:0 16px"></div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px">
+        <span style="width:12px;height:12px;border-radius:6px;background:var(--amber);box-shadow:0 0 10px var(--amber)"></span>
+        <div style="flex:1;font:600 16px 'Schibsted Grotesk';color:var(--t1)">Sunday Service</div>
+        <div class="faces"><div class="face" style="background:#ff9ad5">K</div><div class="face" style="background:#6EE7B7">J</div></div>
+        <iconify-icon icon="ph:caret-right" style="color:var(--faint);font-size:16px"></iconify-icon>
+      </div>
+    </div>
+    <div class="btn ghost" style="margin-top:10px;height:48px;color:#d9c9ff;border-color:rgba(139,92,255,.35)"><iconify-icon icon="ph:user-plus" style="font-size:18px"></iconify-icon>Invite friends</div>
+    <div class="label" style="margin:18px 2px 10px"><span class="sl">//</span> next up · in 3 days</div>
+    <div class="hud ev" style="--c:var(--ice);display:flex;gap:12px;align-items:center">
+      <div class="date"><div class="d">03</div><div class="w">SAT</div></div>
+      <div style="flex:1"><div class="t">Four Tet</div><div class="m">Knockdown · 10PM</div></div>
+      <span class="chip in-pill" style="height:30px">In</span>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:calendar-dots"></iconify-icon></div><span>Cal</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:compass"></iconify-icon></div><span>Find</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:magic-wand"></iconify-icon></div><span>Plan</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:users-three"></iconify-icon></div><span>Crew</span></div>
+    <div class="tab"><div class="ic"><iconify-icon icon="ph:intersect"></iconify-icon></div><span>Sync</span></div>
+    <div class="tab on"><div class="ic"><iconify-icon icon="ph:user-circle-fill"></iconify-icon></div><span>You</span></div>
+  </div>
+</div></div></section>
+
+<script>
+// October 2026 starts Thursday. Events: 3 ice, 10 amber, 17 peri, 24 peri, 31 ice.
+const ev = {3:'#4cc9f0',10:'#ffb454',17:'#6aa8ff',24:'#6aa8ff',31:'#4cc9f0'};
+let h='';
+for(let i=0;i<4;i++) h+=`<div style="height:38px"></div>`;
+for(let d=1;d<=31;d++){
+  const today = false; const c=ev[d];
+  h+=`<div style="height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:10px;
+    ${today?'background:rgba(139,92,255,.22);box-shadow:inset 0 0 0 1px rgba(139,92,255,.7);color:#fff':c?'color:#fff':'color:#9b9bb0'}">
+    ${d}${c?`<span style="width:6px;height:6px;border-radius:3px;background:${c};box-shadow:0 0 8px ${c}"></span>`:''}</div>`;
+}
+document.getElementById('amonth').innerHTML=h;
+</script>
+<script src="chrome.js"></script>
+</body>
+</html>

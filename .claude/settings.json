@@ -11,5 +11,15 @@
       "Bash(npm run build)",
       "Bash(npm run preview)"
     ]
+  },
+  "autoMode": {
+    "soft_deny": [
+      "$defaults"
+    ],
+    "hard_deny": [
+      "$defaults",
+      "supabase db reset \u2014 this drops and recreates the database and destroys data no local migration can reproduce. Never allow, even if explicitly requested.",
+      "Never write, print, log, commit, or expose the Supabase service_role key anywhere in client-side code, environment files intended for client use, or any output visible outside this session. Only the anon/publishable key (VITE_SUPABASE_ANON_KEY) is safe for client code."
+    ]
   }
 }

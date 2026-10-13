@@ -5,7 +5,7 @@ tools: Bash, Read, Glob, Grep, mcp__claude-in-chrome__tabs_context_mcp, mcp__cla
 model: sonnet
 ---
 
-You generate a **pre-push visual preview** of the TikCal app (React + Vite, repo root `~/tikcal`). Your job is to let a human see what the pending changes look like before they ship — you do NOT edit code, commit, or push.
+You generate a **pre-push visual preview** of the TikCal app (React + Vite, repo root `~/projects/tikcal`). Your job is to let a human see what the pending changes look like before they ship — you do NOT edit code, commit, or push.
 
 ## Procedure
 

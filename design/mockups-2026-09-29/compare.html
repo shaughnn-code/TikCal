@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TikCal Mockup Compare</title>
+<style>
+:root{ --bg:#f3f3f1; --fg:#0e0e0e; --mute:#5f5f59; --line:#dcdcd7; --card:#fff; --accent:#1d3bff; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#121211; --fg:#f2f2ee; --mute:#a3a39c; --line:#2c2c2a; --card:#1b1b1a; --accent:#7f93ff; } }
+:root[data-theme="dark"]{ --bg:#121211; --fg:#f2f2ee; --mute:#a3a39c; --line:#2c2c2a; --card:#1b1b1a; --accent:#7f93ff; }
+*{ box-sizing:border-box; margin:0; }
+body{ background:var(--bg); color:var(--fg); font:15px/1.45 -apple-system, system-ui, sans-serif; }
+header{ position:sticky; top:0; z-index:5; background:var(--bg); border-bottom:1px solid var(--line); padding:14px 16px; }
+.bar{ max-width:1500px; margin:0 auto; display:flex; flex-wrap:wrap; gap:12px 20px; align-items:center; justify-content:space-between; }
+h1{ font-size:18px; font-weight:700; letter-spacing:-.01em; }
+.ctl{ display:flex; flex-wrap:wrap; gap:8px; }
+button{ font:600 14px/1 inherit; font-family:inherit; height:36px; padding:0 14px; border-radius:18px; border:1.5px solid var(--line); background:var(--card); color:var(--fg); cursor:pointer; }
+button.on{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+main{ max-width:1500px; margin:0 auto; padding:20px 16px 60px; }
+.heads, .row{ display:grid; grid-template-columns:repeat(var(--n,3), minmax(0,1fr)); gap:16px; }
+.heads{ margin-bottom:6px; }
+.head h2{ font-size:16px; font-weight:700; }
+.head p{ color:var(--mute); font-size:13px; }
+section.screen{ margin-top:28px; }
+section.screen > h3{ font-size:13px; font-weight:600; color:var(--mute); margin-bottom:8px; }
+figure{ background:var(--card); border-radius:14px; overflow:hidden; border:1px solid var(--line); }
+figure img{ width:100%; height:auto; display:block; cursor:zoom-in; }
+figcaption{ font-size:12px; color:var(--mute); padding:6px 10px; border-top:1px solid var(--line); }
+.hide{ display:none !important; }
+dialog{ border:0; padding:0; background:transparent; max-width:96vw; max-height:96vh; }
+dialog::backdrop{ background:rgba(0,0,0,.8); }
+dialog img{ max-height:94vh; max-width:94vw; display:block; border-radius:12px; cursor:zoom-out; }
+@media (max-width:700px){ .heads,.row{ grid-template-columns:1fr; } .heads{ display:none; } figcaption{ display:block; } }
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <h1>TikCal mockups: A / B / C</h1>
+  <div class="ctl" id="sets"></div>
+  <div class="ctl" id="screens"></div>
+</div></header>
+<main>
+  <div class="heads" id="heads"></div>
+  <div id="grid"></div>
+</main>
+<dialog id="zoom"></dialog>
+<script>
+const SETS = [
+  { k:'a', name:'A · Afterglow', note:'Current DESIGN.md system, polished. Dark, violet chrome, aurora bloom.' },
+  { k:'b', name:'B · Wristband', note:'New direction. Cream paper, riso poster, ticket stubs.' },
+  { k:'c', name:'C · Timetable', note:'Usability-first. White, one cobalt accent, transit-line crews.' },
+];
+const SCREENS = [['1','welcome','Welcome'],['2','signin','Sign in'],['3','calendar','Calendar'],['4','event','Event detail'],['5','discover','Discover'],['6','profile','Profile']];
+let state = { sets:new Set(['a','b','c']), screen:'all' };
+try { const s = JSON.parse(localStorage.getItem('cmp') || 'null'); if (s) state = { sets:new Set(s.sets), screen:s.screen }; } catch {}
+const save = () => { try { localStorage.setItem('cmp', JSON.stringify({ sets:[...state.sets], screen:state.screen })); } catch {} };
+
+function render(){
+  const active = SETS.filter(s => state.sets.has(s.k));
+  document.documentElement.style.setProperty('--n', active.length || 1);
+  document.getElementById('sets').innerHTML = SETS.map(s => `<button data-set="${s.k}" class="${state.sets.has(s.k)?'on':''}">${s.name}</button>`).join('');
+  document.getElementById('screens').innerHTML = [['all','All screens'], ...SCREENS.map(([n,,l]) => [n,l])]
+    .map(([v,l]) => `<button data-screen="${v}" class="${state.screen===v?'on':''}">${l}</button>`).join('');
+  document.getElementById('heads').innerHTML = active.map(s => `<div class="head"><h2>${s.name}</h2><p>${s.note}</p></div>`).join('');
+  document.getElementById('grid').innerHTML = SCREENS.filter(([n]) => state.screen==='all' || state.screen===n).map(([n,id,label]) => `
+    <section class="screen"><h3>${n} · ${label}</h3><div class="row">
+      ${active.map(s => `<figure><img loading="lazy" src="png/${s.k}${n}-${id}.png" alt="Set ${s.name} ${label}"><figcaption>${s.name}</figcaption></figure>`).join('')}
+    </div></section>`).join('');
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (b?.dataset.set){ const k = b.dataset.set; if (state.sets.has(k) && state.sets.size > 1) state.sets.delete(k); else state.sets.add(k); save(); render(); }
+  else if (b?.dataset.screen){ state.screen = b.dataset.screen; save(); render(); }
+  else if (e.target.matches('figure img')){ const d = document.getElementById('zoom'); d.innerHTML = `<img src="${e.target.src}" alt="${e.target.alt}">`; d.showModal(); }
+  else if (e.target.closest('dialog')) document.getElementById('zoom').close();
+});
+render();
+</script>
+</body>
+</html>
