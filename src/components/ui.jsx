@@ -1,17 +1,51 @@
 // Shared design-token primitives for the "Wide Ice" system.
 
-import { useEffect, useRef, useState } from 'react'
+import { Component, lazy, Suspense, useEffect, useRef, useState } from 'react'
+import GlassWordmark from './GlassWordmark.jsx'
+import { hasWebGL2 } from '../lib/wordmark.js'
+
+// The large hero mark is live liquid metal (WebGL, lazy-loaded); every other
+// size is the static SVG chrome-glass mark, so the sticky nav never runs a
+// GPU loop. The CSS .logo-3d text stays as the fallback while the shader
+// chunk loads and wherever webgl2 is missing. The word itself is sr-only
+// text; the graphics are aria-hidden.
+const LiquidWordmark = lazy(() => import('./LiquidWordmark.jsx'))
+
+// A failed chunk load (a deploy renamed it under an open tab) or a throw from
+// the shader mount falls back to the static mark instead of blanking the page.
+class MarkBoundary extends Component {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  render() { return this.state.failed ? this.props.fallback : this.props.children }
+}
 
 export const Logo = ({ size = 'md', className = '', framed = false }) => {
-  const cls = size === 'lg' ? 'logo-3d text-[56px]' : size === 'sm' ? 'logo-3d-sm text-[20px]' : 'logo-3d-sm text-[30px]'
-  const word = <span className={cls}>TikCal</span>
-  if (!framed) return <span className={className}>{word}</span>
+  const fallback = <span aria-hidden="true" className={size === 'lg' ? 'logo-3d text-[72px]' : 'logo-3d-sm text-[30px]'}>TikCal</span>
+  const mark =
+    size === 'lg' ? (
+      // Fixed 72px line box = the CSS fallback's height, so the frame doesn't
+      // shrink when the (glyph-tight) shader canvas swaps in.
+      <span className="inline-flex items-center h-[72px]">
+        {hasWebGL2() ? (
+          <MarkBoundary fallback={fallback}>
+            <Suspense fallback={fallback}><LiquidWordmark fontSize={72} fallback={fallback} /></Suspense>
+          </MarkBoundary>
+        ) : fallback}
+      </span>
+    ) : (
+      <GlassWordmark fontSize={size === 'sm' ? 20 : 30} />
+    )
+  const word = (
+    <>
+      <span className="sr-only">TikCal</span>
+      {mark}
+    </>
+  )
+  if (!framed) return <span className={`inline-flex items-center ${className}`}>{word}</span>
   // Chrome rounded-rectangle frame: a silver metallic gradient border (bright
   // highlight → steel → specular → shadow) with a top edge-light and soft
   // sheen, matching the chrome wordmark. Padding + radius scale with size.
-  // Asymmetric horizontal padding (more left) optically centers the italic
-  // wordmark, whose trailing advance otherwise leaves it sitting left-of-center.
-  const box = size === 'lg' ? 'rounded-2xl pl-9 pr-5 py-3' : 'rounded-xl pl-[20px] pr-[11px] py-1.5'
+  const box = size === 'lg' ? 'rounded-2xl px-7 py-4' : 'rounded-xl px-3.5 py-2'
   return (
     <span
       className={`inline-flex items-center ${box} ${className}`}
