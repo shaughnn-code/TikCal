@@ -5,7 +5,8 @@
 // Two ways in:
 //   * Resend receiving (in.tikcal.nyc MX → Resend): an `email.received` event,
 //     signed with RESEND_WEBHOOK_SECRET (Svix). The event has no body, so the
-//     full email is fetched from the Receiving API with RESEND_API_KEY.
+//     full email is fetched from the Receiving API with RESEND_RECEIVING_KEY
+//     (a full-access key; sending-only keys can't read received mail).
 //   * Legacy (SendGrid Parse / Postmark / generic JSON), gated by
 //     ?secret=INBOUND_SECRET. Remove once Resend receiving is confirmed.
 //
@@ -95,14 +96,19 @@ Deno.serve(async (req) => {
 
   if (req.headers.get('svix-id')) {
     // ── Resend receiving ──────────────────────────────────────────────────
-    if (!webhookSecret || !(await verifySvix(raw, req.headers, webhookSecret))) {
-      return new Response('forbidden', { status: 401 })
+    let valid = false
+    try {
+      valid = !!webhookSecret && (await verifySvix(raw, req.headers, webhookSecret.trim()))
+    } catch (err) {
+      console.error(`inbound: signature check crashed (bad RESEND_WEBHOOK_SECRET format?) ${err}`)
     }
+    if (!valid) return new Response('forbidden', { status: 401 })
     let event: { type?: string; data?: { email_id?: string } }
     try { event = JSON.parse(raw) } catch (_) { return ok('unparseable') }
     if (event.type !== 'email.received' || !event.data?.email_id) return ok('ignored')
-    const key = Deno.env.get('RESEND_API_KEY')
-    if (!key) { console.error('inbound: RESEND_API_KEY missing'); return ok('no-resend-key') }
+    // Reading received mail needs a full-access key; the sending key can't.
+    const key = Deno.env.get('RESEND_RECEIVING_KEY') || Deno.env.get('RESEND_API_KEY')
+    if (!key) { console.error('inbound: RESEND_RECEIVING_KEY missing'); return ok('no-resend-key') }
     const r = await fetch(`https://api.resend.com/emails/receiving/${encodeURIComponent(event.data.email_id)}`, {
       headers: { Authorization: `Bearer ${key}` },
     })
