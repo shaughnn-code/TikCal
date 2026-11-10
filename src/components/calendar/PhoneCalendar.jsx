@@ -186,7 +186,7 @@ export default function PhoneCalendar({ events = [], userId, selectedDate, onSel
                 className="pb-3"
               >
                 <h3
-                  className="sticky z-[5] -mx-4 px-4 sm:mx-0 sm:px-1 py-2 bg-ink/95 flex items-baseline justify-between gap-3"
+                  className="sticky z-[5] -mx-4 px-4 sm:mx-0 sm:px-1 py-2 bg-ink flex items-baseline justify-between gap-3"
                   style={{ top: 'calc(var(--nav-h) + var(--strip-h))' }}
                 >
                   <span className={`font-heading font-extrabold text-[15px] ${isToday ? 'text-violet' : row.dateStr < today ? 'text-slate-500' : 'text-[#e8f4f8]'}`}>

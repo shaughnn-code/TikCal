@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { DOW, MONTH_NAMES, monthMatrix } from '../../lib/calendar/zoom.js'
+import { DOW, monthMatrix } from '../../lib/calendar/zoom.js'
 import { parseYmd, stripLabel, weekOf } from '../../lib/calendar/agenda.js'
 import { Icon } from '../icons.jsx'
 
@@ -44,32 +44,47 @@ export default function DateStrip({
   }
 
   const a = parseYmd(anchor)
-  const label = expanded ? `${MONTH_NAMES[a.getMonth()]} ${a.getFullYear()}` : stripLabel(weekOf(anchor))
+  const label = expanded ? stripLabel([anchor]) : stripLabel(weekOf(anchor))
   const unit = expanded ? 'month' : 'week'
 
   return (
-    <div className="bg-ink/95 border-b border-white/[0.07] shadow-[0_12px_24px_-18px_rgba(0,0,0,0.9)]">
-      <div className="flex items-center gap-1 px-1">
+    <div className="bg-ink border-b border-white/[0.07] shadow-[0_12px_24px_-18px_rgba(0,0,0,0.9)]">
+      <div className="flex items-center gap-0.5 pl-2 pr-1">
+        {/* The period label is the expand/collapse toggle (as in iOS Calendar):
+            one 44px control instead of a fourth icon button, which left the
+            label truncated on a 320px phone. */}
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={expanded}
+          data-strip-toggle
+          className="flex-1 min-w-0 h-11 pl-1 flex items-center gap-1.5 rounded-xl text-left
+                     outline-none focus-visible:ring-2 focus-visible:ring-violet active:scale-[0.98] transition-transform"
+        >
+          <h2 className="min-w-0 font-heading font-extrabold text-[14px] min-[360px]:text-[15px] text-[#eef6f7] truncate" aria-live="polite">
+            {label}
+          </h2>
+          <Icon
+            name="caret-down-bold"
+            size={13}
+            className={`shrink-0 text-violet transition-transform duration-200 motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`}
+          />
+          <span className="sr-only">{expanded ? ', showing month' : ', showing week'}</span>
+        </button>
         <StripBtn label={`Previous ${unit}`} onClick={() => onStep(-1)}>
           <Icon name="caret-left-bold" size={16} />
         </StripBtn>
-        <h2 className="flex-1 min-w-0 font-heading font-extrabold text-[15px] text-[#eef6f7] truncate" aria-live="polite">
-          {label}
-        </h2>
+        <StripBtn label={`Next ${unit}`} onClick={() => onStep(1)}>
+          <Icon name="caret-right-bold" size={16} />
+        </StripBtn>
         <button
           type="button"
           onClick={onToday}
-          className="h-11 px-3 rounded-full font-mono text-[11px] uppercase tracking-wide text-violet
+          className="h-11 pl-1 pr-2 rounded-full font-mono text-[11px] uppercase tracking-wide text-violet
                      outline-none focus-visible:ring-2 focus-visible:ring-violet active:scale-[0.96] transition-transform"
         >
           <span className="inline-flex items-center h-7 px-2.5 rounded-full border border-violet/50 bg-violet/10">Today</span>
         </button>
-        <StripBtn label={`Next ${unit}`} onClick={() => onStep(1)}>
-          <Icon name="caret-right-bold" size={16} />
-        </StripBtn>
-        <StripBtn label={expanded ? 'Show one week' : 'Show the whole month'} onClick={onToggle} expanded={expanded}>
-          <Icon name={expanded ? 'caret-up-bold' : 'calendar-dots'} size={16} />
-        </StripBtn>
       </div>
 
       <div
@@ -154,12 +169,11 @@ function DayCell({ dateStr, out, isToday, isSel, mark, onPick }) {
   )
 }
 
-const StripBtn = ({ children, onClick, label, expanded }) => (
+const StripBtn = ({ children, onClick, label }) => (
   <button
     type="button"
     onClick={onClick}
     aria-label={label}
-    aria-expanded={expanded}
     className="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-muted
                hover:text-violet active:scale-[0.9] transition-[color,transform] duration-150 motion-reduce:transition-none
                outline-none focus-visible:ring-2 focus-visible:ring-violet"
