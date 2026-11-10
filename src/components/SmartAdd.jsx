@@ -110,7 +110,7 @@ export function SmartAdd({ onResult }) {
       )}
 
       {err && <p className="text-red-400 text-xs mt-2">{err}</p>}
-      {done && !err && <p className="text-mint text-xs mt-2">✓ Filled in below — review and save.</p>}
+      {done && !err && <p className="text-mint text-xs mt-2"><Icon name="check" size={12} className="inline -mt-0.5" /> Filled in below — review and save.</p>}
 
       <div className="mt-3">
         <Btn variant="mint" onClick={run} disabled={loading}>

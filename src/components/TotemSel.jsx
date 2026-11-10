@@ -1,7 +1,7 @@
 import { TOTEMS } from '../lib/constants.js'
 import { Totem } from './icons.jsx'
 
-// Totem picker — 20 full-color totems with a hover "vibe" card.
+// Totem picker — 20 Phosphor duotone totems with a hover "vibe" card.
 // `value`/`onChange` store the icon id (e.g. "noto:pill").
 export const TotemSel = ({ value, onChange }) => (
   <div className="grid grid-cols-4 gap-2">

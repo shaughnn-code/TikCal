@@ -127,7 +127,10 @@ export default function AddEvent() {
       }`}
     >
       <span className="text-sm text-[#e8f4f8]">{label}</span>
-      <span className={`font-mono text-[11px] ${active ? 'text-mint' : 'text-slate-600'}`}>{state}</span>
+      <span className={`font-mono text-[11px] inline-flex items-center gap-1 ${active ? 'text-mint' : 'text-slate-600'}`}>
+        {active && <Icon name="check" size={12} />}
+        {state}
+      </span>
     </button>
   )
 
@@ -215,7 +218,7 @@ export default function AddEvent() {
           <div>
             <SecLabel className="mb-3">Who can see this?</SecLabel>
             <div className="space-y-2">
-              {audienceBtn(shareFriends, () => setShareFriends((s) => !s), 'All my friends', shareFriends ? '✓ SHARED' : 'PRIVATE')}
+              {audienceBtn(shareFriends, () => setShareFriends((s) => !s), 'All my friends', shareFriends ? 'SHARED' : 'PRIVATE')}
               {crews.map((c) => (
                 <Fragment key={c.id}>{audienceBtn(
                   selCrews.has(c.id),
@@ -227,7 +230,7 @@ export default function AddEvent() {
                     />
                     {c.name}
                   </span>,
-                  selCrews.has(c.id) ? '✓ SHARED' : 'ADD',
+                  selCrews.has(c.id) ? 'SHARED' : 'ADD',
                 )}</Fragment>
               )
               )}

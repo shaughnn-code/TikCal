@@ -225,7 +225,7 @@ export default function Profile() {
                 {shareLink}
               </div>
               <Btn variant={copied ? 'ghost' : 'ice'} onClick={copy} cls="shrink-0">
-                {copied ? '✓ Copied' : 'Copy'}
+                {copied ? <><Icon name="check" size={12} className="inline -mt-0.5" /> Copied</> : 'Copy'}
               </Btn>
             </div>
           </HudBox>
@@ -258,7 +258,7 @@ export default function Profile() {
                 {importAddr || 'generating…'}
               </div>
               <Btn variant={copiedAddr ? 'ghost' : 'ghost'} onClick={copyAddr} disabled={!importAddr} cls="shrink-0">
-                {copiedAddr ? '✓ Copied' : 'Copy'}
+                {copiedAddr ? <><Icon name="check" size={12} className="inline -mt-0.5" /> Copied</> : 'Copy'}
               </Btn>
             </div>
 
@@ -338,7 +338,7 @@ export default function Profile() {
                     }
                     cls="shrink-0"
                   >
-                    {copiedFeed ? '✓ Copied' : 'Copy'}
+                    {copiedFeed ? <><Icon name="check" size={12} className="inline -mt-0.5" /> Copied</> : 'Copy'}
                   </Btn>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
