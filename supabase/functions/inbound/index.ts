@@ -1,13 +1,20 @@
 // TikCal inbound email → auto-import. A forwarded ticket confirmation hits this
-// webhook (from an inbound-email provider: SendGrid Parse / Postmark / generic),
-// gets routed to a user by their import token, parsed by Claude, and filed as an
-// event. Public webhook: verify_jwt = false, gated by INBOUND_SECRET.
+// webhook, gets routed to a user by their import token, parsed by Claude, and
+// filed as an event. Public webhook: deploy with --no-verify-jwt.
+//
+// Two ways in:
+//   * Resend receiving (in.tikcal.nyc MX → Resend): an `email.received` event,
+//     signed with RESEND_WEBHOOK_SECRET (Svix). The event has no body, so the
+//     full email is fetched from the Receiving API with RESEND_API_KEY.
+//   * Legacy (SendGrid Parse / Postmark / generic JSON), gated by
+//     ?secret=INBOUND_SECRET. Remove once Resend receiving is confirmed.
 //
 // Special case: Gmail's "Forwarding Confirmation" email is detected and the
-// confirmation code + verify link are relayed to the user's real inbox (via the
-// SendGrid mail API) so they can finish setting up auto-forwarding.
+// confirmation code + verify link are relayed to the user's real inbox so they
+// can finish setting up auto-forwarding.
 import Anthropic from 'npm:@anthropic-ai/sdk@^0.69.0'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/email.ts'
 
 const MODEL = 'claude-opus-4-8'
 const INBOX_DOMAIN = 'in.tikcal.nyc'
@@ -42,16 +49,22 @@ function stripHtml(html: string): string {
     .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')
     .replace(/[ \t]+/g, ' ').replace(/\n\s*\n\s*\n+/g, '\n\n').trim()
 }
-async function sendViaSendGrid(key: string, to: string, subject: string, body: string): Promise<Response> {
-  return await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      personalizations: [{ to: [{ email: to }] }],
-      from: { email: 'noreply@tikcal.nyc', name: 'TikCal' },
-      subject,
-      content: [{ type: 'text/plain', value: body }],
-    }),
+// Svix signature check for Resend webhooks
+// (https://docs.svix.com/receiving/verifying-payloads/how-manual).
+async function verifySvix(body: string, headers: Headers, secret: string): Promise<boolean> {
+  const id = headers.get('svix-id') || ''
+  const ts = headers.get('svix-timestamp') || ''
+  const sigs = headers.get('svix-signature') || ''
+  if (!id || !ts || !sigs) return false
+  // Reject stale or future timestamps (5 minutes) to stop replays.
+  if (Math.abs(Date.now() / 1000 - Number(ts)) > 300) return false
+  const keyBytes = Uint8Array.from(atob(secret.replace(/^whsec_/, '')), (c) => c.charCodeAt(0))
+  const key = await crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const mac = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${id}.${ts}.${body}`))
+  const expected = btoa(String.fromCharCode(...new Uint8Array(mac)))
+  return sigs.split(' ').some((part) => {
+    const [ver, sig] = part.split(',')
+    return ver === 'v1' && !!sig && timingSafeEqual(sig, expected)
   })
 }
 
@@ -76,33 +89,64 @@ const SCHEMA = {
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return ok('ignored')
 
-  const url = new URL(req.url)
-  const secret = url.searchParams.get('secret') || req.headers.get('x-inbound-secret') || ''
-  const expected = Deno.env.get('INBOUND_SECRET')
-  if (!expected || !timingSafeEqual(secret, expected)) {
-    return new Response('forbidden', { status: 401 })
-  }
-
   let recipients = '', from = '', subject = '', text = ''
-  try {
-    const ct = req.headers.get('content-type') || ''
-    if (ct.includes('application/json')) {
-      const b: Record<string, unknown> = await req.json()
-      recipients = [b.To, b.OriginalRecipient, b.Recipient, b.to, JSON.stringify(b.ToFull || ''), JSON.stringify(b.envelope || '')].filter(Boolean).join(' ')
-      from = String(b.From || b.from || JSON.stringify(b.FromFull || ''))
-      subject = String(b.Subject || b.subject || '')
-      text = String(b.TextBody || b.text || (b.HtmlBody ? stripHtml(String(b.HtmlBody)) : '') || (b.html ? stripHtml(String(b.html)) : ''))
-    } else {
-      const f = await req.formData()
-      recipients = [f.get('to'), f.get('envelope'), f.get('recipient')].filter(Boolean).join(' ')
-      from = String(f.get('from') || '')
-      subject = String(f.get('subject') || '')
-      const t = f.get('text') || f.get('email') || ''
-      const h = f.get('html') || ''
-      text = String(t) || (h ? stripHtml(String(h)) : '')
+  const raw = await req.text()
+  const webhookSecret = Deno.env.get('RESEND_WEBHOOK_SECRET')
+
+  if (req.headers.get('svix-id')) {
+    // ── Resend receiving ──────────────────────────────────────────────────
+    if (!webhookSecret || !(await verifySvix(raw, req.headers, webhookSecret))) {
+      return new Response('forbidden', { status: 401 })
     }
-  } catch (_) {
-    return ok('unparseable')
+    let event: { type?: string; data?: { email_id?: string } }
+    try { event = JSON.parse(raw) } catch (_) { return ok('unparseable') }
+    if (event.type !== 'email.received' || !event.data?.email_id) return ok('ignored')
+    const key = Deno.env.get('RESEND_API_KEY')
+    if (!key) { console.error('inbound: RESEND_API_KEY missing'); return ok('no-resend-key') }
+    const r = await fetch(`https://api.resend.com/emails/receiving/${encodeURIComponent(event.data.email_id)}`, {
+      headers: { Authorization: `Bearer ${key}` },
+    })
+    if (!r.ok) {
+      console.error(`inbound: resend fetch ${r.status} ${await r.text()}`)
+      // 500 so Resend retries the webhook later.
+      return new Response('fetch failed', { status: 500 })
+    }
+    const e: Record<string, unknown> = await r.json()
+    const list = (v: unknown) => (Array.isArray(v) ? v.join(' ') : String(v || ''))
+    // Gmail auto-forwarding keeps the original To:, so the import address may
+    // only appear in received_for.
+    recipients = [e.to, e.cc, e.bcc, e.received_for].map(list).join(' ')
+    from = String(e.from || '')
+    subject = String(e.subject || '')
+    text = String(e.text || '') || (e.html ? stripHtml(String(e.html)) : '')
+  } else {
+    // ── Legacy providers, gated by INBOUND_SECRET ─────────────────────────
+    const url = new URL(req.url)
+    const secret = url.searchParams.get('secret') || req.headers.get('x-inbound-secret') || ''
+    const expected = Deno.env.get('INBOUND_SECRET')
+    if (!expected || !timingSafeEqual(secret, expected)) {
+      return new Response('forbidden', { status: 401 })
+    }
+    try {
+      const ct = req.headers.get('content-type') || ''
+      if (ct.includes('application/json')) {
+        const b: Record<string, unknown> = JSON.parse(raw)
+        recipients = [b.To, b.OriginalRecipient, b.Recipient, b.to, JSON.stringify(b.ToFull || ''), JSON.stringify(b.envelope || '')].filter(Boolean).join(' ')
+        from = String(b.From || b.from || JSON.stringify(b.FromFull || ''))
+        subject = String(b.Subject || b.subject || '')
+        text = String(b.TextBody || b.text || (b.HtmlBody ? stripHtml(String(b.HtmlBody)) : '') || (b.html ? stripHtml(String(b.html)) : ''))
+      } else {
+        const f = await new Response(raw, { headers: { 'content-type': ct } }).formData()
+        recipients = [f.get('to'), f.get('envelope'), f.get('recipient')].filter(Boolean).join(' ')
+        from = String(f.get('from') || '')
+        subject = String(f.get('subject') || '')
+        const t = f.get('text') || f.get('email') || ''
+        const h = f.get('html') || ''
+        text = String(t) || (h ? stripHtml(String(h)) : '')
+      }
+    } catch (_) {
+      return ok('unparseable')
+    }
   }
 
   const lp = localpartFor(recipients)
@@ -117,7 +161,6 @@ Deno.serve(async (req) => {
   const isGmailConfirm =
     /forwarding-noreply@google\.com/i.test(from) || /forwarding confirmation/i.test(subject)
   if (isGmailConfirm) {
-    const sgKey = Deno.env.get('SENDGRID_API_KEY')
     const { data: u } = await admin.auth.admin.getUserById(inbox.user_id)
     const userEmail = u?.user?.email
     const code =
@@ -125,21 +168,22 @@ Deno.serve(async (req) => {
       text.match(/confirmation code[^0-9]*(\d{5,})/i)?.[1] ||
       text.match(/\b(\d{6,12})\b/)?.[1] || ''
     const link = text.match(/https?:\/\/[^\s"'<>]*google\.com[^\s"'<>]*/i)?.[0] || ''
-    if (sgKey && userEmail) {
-      const resp = await sendViaSendGrid(
-        sgKey, userEmail,
-        'Confirm your TikCal email auto-import',
+    if (!userEmail) {
+      console.log('gmail-confirmation: missing user email')
+      return ok('gmail-confirmation-no-email')
+    }
+    const sent = await sendEmail({
+      to: userEmail,
+      fromName: 'TikCal',
+      subject: 'Confirm your TikCal email auto-import',
+      text:
         `Gmail wants you to confirm forwarding to your TikCal import address.\n\n` +
         `Confirmation code: ${code || '(see the link below)'}\n\n` +
         `Confirm here: ${link || '(or open Gmail → Settings → Forwarding and enter the code)'}\n\n` +
         `Once confirmed, your forwarded ticket emails will auto-import into TikCal.`,
-      )
-      const detail = resp.status >= 400 ? await resp.text() : ''
-      console.log(`gmail-relay → ${userEmail} · sendgrid ${resp.status} ${detail}`)
-      return ok('relayed-gmail-confirmation')
-    }
-    console.log(`gmail-confirmation: missing ${sgKey ? 'user email' : 'SENDGRID_API_KEY'}`)
-    return ok('gmail-confirmation-no-key')
+    })
+    console.log(`gmail-relay → ${userEmail} · resend ${sent.status} ${sent.detail}`)
+    return ok(sent.ok ? 'relayed-gmail-confirmation' : 'gmail-confirmation-send-failed')
   }
 
   // ── normal event extraction ─────────────────────────────────────────────

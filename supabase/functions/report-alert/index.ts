@@ -8,10 +8,11 @@
 // is still in public.user_reports with status 'open' -- check the Table
 // Editor daily as the backstop.
 //
-// Secrets: SENDGRID_API_KEY (already set for inbound), optional REPORT_ALERT_TO.
+// Secrets: RESEND_API_KEY + EMAIL_FROM (see _shared/email.ts), optional REPORT_ALERT_TO.
 // Deploy: supabase functions deploy report-alert
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
+import { sendEmail } from '../_shared/email.ts'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -74,24 +75,15 @@ Deno.serve(async (req) => {
     "account if it breaks the Terms, then set status to 'actioned' or 'dismissed'.",
   ].join('\n')
 
-  const key = Deno.env.get('SENDGRID_API_KEY')
-  if (!key) {
-    console.error('report-alert: SENDGRID_API_KEY missing')
-    return json({ ok: true, emailed: false })
-  }
   const to = Deno.env.get('REPORT_ALERT_TO') || 'dev@tikcal.nyc'
-  const resp = await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      personalizations: [{ to: [{ email: to }] }],
-      from: { email: 'noreply@tikcal.nyc', name: 'TikCal reports' },
-      subject: `[TikCal report] ${report.reason}: ${nameOf(report.reported_user_id)}`,
-      content: [{ type: 'text/plain', value: text }],
-    }),
+  const sent = await sendEmail({
+    to,
+    fromName: 'TikCal reports',
+    subject: `[TikCal report] ${report.reason}: ${nameOf(report.reported_user_id)}`,
+    text,
   })
-  if (!resp.ok) {
-    console.error(`report-alert: sendgrid ${resp.status} ${await resp.text()}`)
+  if (!sent.ok) {
+    console.error(`report-alert: resend ${sent.status} ${sent.detail}`)
     // Release the claim so a retry can send it.
     await admin.from('user_reports').update({ alerted_at: null }).eq('id', report.id)
     return json({ ok: true, emailed: false })
