@@ -5,6 +5,7 @@ import { acceptFriend, acceptCrewInvite, declineCrewInvite } from '../lib/social
 import { loadNotifications, markNudgesRead, markSeenNow } from '../lib/notifications.js'
 import { GridBg, Wrap, Btn, Kicker, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
+import SafetyMenu from '../components/SafetyMenu.jsx'
 
 const shortDate = (d) =>
   new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -131,6 +132,7 @@ export default function Notifications() {
           <div className="shrink-0 flex items-center gap-1 font-mono text-[11px] text-slate-500">
             {ago(it.at)}
             {onOpen && <Icon name="caret-right" size={12} />}
+            {p?.id && <SafetyMenu person={p} eventId={it.kind === 'nudge' ? it.row.event_id : null} onBlocked={() => load()} />}
           </div>
         </div>
       </HudBox>

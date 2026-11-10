@@ -4,11 +4,14 @@ import { fetchMyCrews } from '../lib/db.js'
 import {
   loadFriends, searchPeople, sendFriendRequest, acceptFriend, removeFriend,
   loadCrewInvites, createCrew, inviteToCrew, acceptCrewInvite, declineCrewInvite, loadCrewMembers,
+  loadBlockedIds,
   updateCrewColor, fetchCrewShowStats,
 } from '../lib/social.js'
 import { CREW_COLORS, DEFAULT_CREW_COLOR } from '../lib/constants.js'
 import { GridBg, Wrap, Inp, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { CrewTabs } from '../components/CrewTabs.jsx'
+import SafetyMenu from '../components/SafetyMenu.jsx'
+import { withoutBlockedPeople } from '../lib/blocking.js'
 import { Icon, Totem } from '../components/icons.jsx'
 
 // Row of crew-color swatches. `value` is the selected hex; `onPick(hex)` fires
@@ -89,10 +92,12 @@ export default function Friends() {
   const [expanded, setExpanded] = useState(null)
   const [members, setMembers] = useState([])
   const [leaderboard, setLeaderboard] = useState([])
+  const [blocked, setBlocked] = useState(new Set())
 
   const reload = useCallback(async () => {
     try {
-      const [f, c, ci] = await Promise.all([loadFriends(user.id), fetchMyCrews(user.id), loadCrewInvites(user.id)])
+      const [f, c, ci, b] = await Promise.all([loadFriends(user.id), fetchMyCrews(user.id), loadCrewInvites(user.id), loadBlockedIds()])
+      setBlocked(b)
       setFriends(f.friends); setIncoming(f.incoming); setOutgoing(f.outgoing)
       setCrews(c); setCrewInvites(ci)
     } catch (e) { setErr(e.message) } finally { setLoading(false) }
@@ -104,14 +109,17 @@ export default function Friends() {
     if (query.trim().length < 2) { setResults([]); return }
     setSearching(true)
     const t = setTimeout(async () => {
-      try { setResults(await searchPeople(query, user.id)) }
+      try { setResults(withoutBlockedPeople(await searchPeople(query, user.id), blocked)) }
       catch (e) { setErr(e.message) } finally { setSearching(false) }
     }, 300)
     return () => clearTimeout(t)
-  }, [query, user.id])
+  }, [query, user.id, blocked])
 
   const friendIds = new Set(friends.map((f) => f.other?.id))
   const pendingIds = new Set([...outgoing, ...incoming].map((r) => r.other?.id))
+
+  // Report / block control shown beside another person's row.
+  const safety = (profile) => <SafetyMenu person={profile} onBlocked={() => reload()} />
 
   const guard = (fn) => async (...a) => { const { error } = await fn(...a); if (error) return setErr(error.message); reload() }
   const doSend = guard((id) => sendFriendRequest(id, user.id))
@@ -184,9 +192,12 @@ export default function Friends() {
                 {searching && <p className="font-mono text-[11px] text-slate-600">Searching…</p>}
                 {results.map((p) => (
                   <Row key={p.id} profile={p} right={
-                    friendIds.has(p.id) ? <span className="font-mono text-[11px] text-slate-600">FRIENDS</span>
-                    : pendingIds.has(p.id) ? <span className="font-mono text-[11px] text-slate-600">PENDING</span>
-                    : <Btn variant="ice" onClick={() => doSend(p.id)} cls="!px-3 !py-2">Add</Btn>
+                    <div className="flex items-center gap-1">
+                      {friendIds.has(p.id) ? <span className="font-mono text-[11px] text-slate-600">FRIENDS</span>
+                      : pendingIds.has(p.id) ? <span className="font-mono text-[11px] text-slate-600">PENDING</span>
+                      : <Btn variant="ice" onClick={() => doSend(p.id)} cls="!px-3 !py-2">Add</Btn>}
+                      {safety(p)}
+                    </div>
                   } />
                 ))}
                 {query.trim().length >= 2 && !searching && results.length === 0 && (
@@ -204,6 +215,7 @@ export default function Friends() {
                       <div className="flex gap-2">
                         <Btn variant="mint" onClick={() => doAccept(r.id)} cls="!px-3 !py-2">Accept</Btn>
                         <Btn variant="ghost" onClick={() => doRemove(r.id)} cls="!px-3 !py-2">Ignore</Btn>
+                        {safety(r.other)}
                       </div>
                     } />
                   ))}
@@ -219,7 +231,10 @@ export default function Friends() {
                 <div className="space-y-2">
                   {friends.map((r) => (
                     <Row key={r.id} profile={r.other} right={
-                      <Btn variant="ghost" onClick={() => doRemove(r.id)} cls="!px-3 !py-2">Remove</Btn>
+                      <div className="flex items-center gap-1">
+                        <Btn variant="ghost" onClick={() => doRemove(r.id)} cls="!px-3 !py-2">Remove</Btn>
+                        {safety(r.other)}
+                      </div>
                     } />
                   ))}
                 </div>
@@ -257,6 +272,7 @@ export default function Friends() {
                       <div className="flex gap-2 shrink-0">
                         <Btn variant="mint" onClick={() => doAcceptCrew(inv.id)} cls="!px-3 !py-2">Join</Btn>
                         <Btn variant="ghost" onClick={() => doDeclineCrew(inv.id)} cls="!px-3 !py-2">Decline</Btn>
+                        {inv.inviter && safety({ ...inv.inviter, id: inv.inviter_id })}
                       </div>
                     </HudBox>
                   ))}
@@ -349,8 +365,11 @@ export default function Friends() {
                                               </div>
                                             </span>
                                           </span>
-                                          <span className="font-mono text-[11px] text-slate-500 shrink-0">
-                                            {stat.shows_count} show{stat.shows_count === 1 ? '' : 's'}
+                                          <span className="flex items-center gap-1 shrink-0">
+                                            <span className="font-mono text-[11px] text-slate-500">
+                                              {stat.shows_count} show{stat.shows_count === 1 ? '' : 's'}
+                                            </span>
+                                            {m.user_id !== user.id && safety({ ...m.profile, id: m.user_id })}
                                           </span>
                                         </div>
                                       )

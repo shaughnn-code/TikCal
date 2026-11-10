@@ -3,7 +3,7 @@ import Seo from '../components/Seo.jsx'
 
 export default function Terms() {
   return (
-    <InfoPage kicker="TERMS" title="Terms of Service" updated="Effective August 20, 2026">
+    <InfoPage kicker="TERMS" title="Terms of Service" updated="Effective November 9, 2026">
       <Seo
         title="Terms of Service"
         path="/terms"
@@ -53,6 +53,19 @@ export default function Terms() {
         violate this.
       </p>
 
+      <H2>Zero tolerance for objectionable content and abuse</H2>
+      <p>
+        TikCal has no tolerance for objectionable content or abusive users. That includes
+        harassment, bullying, threats, hate speech, sexual or explicit content, spam, scams, and
+        impersonation, whether in show titles, notes, flyers, profile names, crew names, or nudges.
+      </p>
+      <p>
+        You can report any person or show, and block any person, from the menu next to their name.
+        Blocking ends your friendship, cancels pending invites, hides their shows from you, and
+        stops them adding you, inviting you to crews, or nudging you. We review every report within
+        24 hours and remove offending content and suspend or remove the accounts responsible.
+      </p>
+
       <H2>Availability and changes</H2>
       <p>
         TikCal is provided "as is." We work to keep it running reliably but don't guarantee
@@ -68,8 +81,8 @@ export default function Terms() {
 
       <H2>Ending your account</H2>
       <p>
-        You can delete your account anytime by emailing us below. We may suspend or terminate
-        accounts that violate these terms.
+        You can delete your account anytime from Profile → Delete account, or by emailing us below.
+        We may suspend or terminate accounts that violate these terms.
       </p>
 
       <H2>Changes to these terms</H2>

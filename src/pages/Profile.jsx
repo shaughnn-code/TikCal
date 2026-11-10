@@ -8,6 +8,7 @@ import { Icon, Totem } from '../components/icons.jsx'
 import { totemByIcon } from '../lib/constants.js'
 import { publicUrl } from '../lib/platform.js'
 import { openConnect } from '../lib/oauthFlow.js'
+import BlockedPeople from '../components/BlockedPeople.jsx'
 
 // Connection-state pill — the mint/muted dot-and-label read used across the
 // bento grid below wherever a card needs a live status at a glance instead
@@ -430,6 +431,9 @@ export default function Profile() {
                 : 'Apple Music sync is coming soon.'}
             </p>
           </HudBox>
+
+          {/* Safety: blocked people + how to report */}
+          <BlockedPeople />
 
           {/* Account */}
           <HudBox className="p-4 col-span-3">

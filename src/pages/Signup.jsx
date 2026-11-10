@@ -13,6 +13,7 @@ export default function Signup() {
   const [err, setErr] = useState('')
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(false)
+  const [agreed, setAgreed] = useState(false)
 
   useEffect(() => {
     if (user && profile) navigate(profile.setup_complete ? '/calendar' : '/setup', { replace: true })
@@ -22,6 +23,7 @@ export default function Signup() {
     e.preventDefault()
     setErr('')
     setMsg('')
+    if (!agreed) return setErr('Please agree to the Terms to continue.')
     if (pw !== conf) return setErr('Passwords do not match.')
     const pwErr = validatePassword(pw)
     if (pwErr) return setErr(pwErr)
@@ -45,9 +47,24 @@ export default function Signup() {
           <Inp label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required />
           <Inp label="Password" type="password" value={pw} onChange={setPw} placeholder="Min. 8 characters, 1 letter + 1 number" required />
           <Inp label="Confirm Password" type="password" value={conf} onChange={setConf} placeholder="••••••••" required />
+          <label className="flex items-start gap-3 text-xs text-slate-400 leading-relaxed cursor-pointer min-h-11">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-0.5 w-5 h-5 shrink-0 accent-violet"
+              required
+            />
+            <span>
+              I agree to the{' '}
+              <Link to="/terms" className="text-violet underline underline-offset-2">Terms</Link> and{' '}
+              <Link to="/privacy" className="text-violet underline underline-offset-2">Privacy Policy</Link>. TikCal has
+              zero tolerance for objectionable content or abusive users.
+            </span>
+          </label>
           {err && <p className="text-red-400 text-xs text-center py-1">{err}</p>}
           {msg && <p className="text-mint text-xs text-center py-1">{msg}</p>}
-          <Btn type="submit" variant="mint" disabled={loading} cls="w-full">
+          <Btn type="submit" variant="mint" disabled={loading || !agreed} cls="w-full">
             {loading ? 'Creating account…' : 'Create account →'}
           </Btn>
         </form>

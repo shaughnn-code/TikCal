@@ -10,6 +10,7 @@ import { GridBg, Wrap, Btn, SecLabel, HudBox, Spinner } from '../components/ui.j
 import { Icon, Totem } from '../components/icons.jsx'
 import { StageHero } from '../components/StageHero.jsx'
 import { NudgeBox } from '../components/NudgeBox.jsx'
+import SafetyMenu from '../components/SafetyMenu.jsx'
 
 export default function EventDetail() {
   const { id } = useParams()
@@ -142,6 +143,14 @@ export default function EventDetail() {
           <Field label="Added by">
             {event.owner?.totem && <Totem icon={event.owner.totem} size={16} />}
             {isOwner ? 'You' : event.owner?.name || 'A friend'}
+            {!isOwner && event.owner?.id && (
+              <SafetyMenu
+                person={event.owner}
+                eventId={event.id}
+                label="Report this show or block its owner"
+                onBlocked={() => navigate('/calendar', { replace: true })}
+              />
+            )}
           </Field>
           {isSafeUrl(event.source_url) && (
             <div className="col-span-2">

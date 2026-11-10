@@ -1,5 +1,12 @@
 import { supabase, supabaseUrl } from '../supabaseClient.js'
 import { platform } from './platform.js'
+import { withoutBlockedEvents } from './blocking.js'
+
+// Ids of people the signed-in user blocked (RLS returns only their own rows).
+async function myBlockedIds() {
+  const { data } = await supabase.from('user_blocks').select('blocked_id')
+  return new Set((data || []).map((r) => r.blocked_id))
+}
 
 // events.owner_id references auth.users, so PostgREST can't embed profiles
 // directly. We fetch events (RLS scopes them to owner + friends + crews) and
@@ -30,12 +37,18 @@ export async function fetchVisibleEvents() {
   }))
   const rsvpsByEvent = groupBy(rsvps || [], 'event_id', (r) => ({ user_id: r.user_id, status: r.status }))
 
-  return events.map((e) => ({
-    ...e,
-    owner: owners[e.owner_id] || null,
-    crews: crewsByEvent[e.id] || [],
-    rsvps: rsvpsByEvent[e.id] || [],
-  }))
+  const { data: { session } } = await supabase.auth.getSession()
+  const blocked = await myBlockedIds()
+  return withoutBlockedEvents(
+    events.map((e) => ({
+      ...e,
+      owner: owners[e.owner_id] || null,
+      crews: crewsByEvent[e.id] || [],
+      rsvps: rsvpsByEvent[e.id] || [],
+    })),
+    blocked,
+    session?.user?.id,
+  )
 }
 
 // Small grouping helper: rows → { [key]: mapped[] }.
@@ -53,6 +66,10 @@ export async function fetchEvent(id) {
     .maybeSingle()
   if (error) throw error
   if (!event) return null
+  // A show by someone you blocked reads as not found.
+  const { data: { session } } = await supabase.auth.getSession()
+  const blocked = await myBlockedIds()
+  if (event.owner_id !== session?.user?.id && blocked.has(event.owner_id)) return null
   const { data: owner } = await supabase
     .from('profiles')
     .select('id, name, totem')
@@ -75,7 +92,9 @@ export async function fetchEvent(id) {
       .select('id, name, totem')
       .in('id', rsvpRows.map((r) => r.user_id))
     const byId = Object.fromEntries((rp || []).map((p) => [p.id, p]))
-    rsvps = rsvpRows.map((r) => ({ ...r, profile: byId[r.user_id] || null }))
+    rsvps = rsvpRows
+      .filter((r) => !blocked.has(r.user_id))
+      .map((r) => ({ ...r, profile: byId[r.user_id] || null }))
   }
   const crews = (ec || []).map((c) => ({ crew_id: c.crew_id, name: c.crews?.name || null, color: c.crews?.color || null }))
   return { ...event, owner: owner || null, crews, rsvps }
