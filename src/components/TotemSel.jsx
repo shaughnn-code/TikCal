@@ -12,7 +12,7 @@ export const TotemSel = ({ value, onChange }) => (
           key={t.icon}
           type="button"
           onClick={() => onChange(t.icon)}
-          className={`totem-host group relative flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-lg border transition-all hover:-translate-y-0.5 ${
+          className={`totem-host ${sel ? 'totem-picked' : ''} group relative flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-lg border transition-all hover:-translate-y-0.5 ${
             sel
               ? 'border-mint bg-mint/10 shadow-[0_0_14px_rgba(110,231,183,0.2)]'
               : 'border-white/10 hover:border-violet/50'

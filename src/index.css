@@ -535,6 +535,13 @@
     animation: totemSpin 6s linear infinite;
     filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
   }
+  /* Touch screens have no hover: the totem you tap in the picker spins. */
+  @media (hover: none) {
+    .totem-host.totem-picked .totem > svg {
+      animation: totemSpin 6s linear infinite;
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+    }
+  }
   @keyframes totemSpin {
     0% { transform: rotateY(0deg) rotateX(0deg); }
     50% { transform: rotateY(180deg) rotateX(10deg); }
@@ -542,6 +549,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .totem:hover > svg,
-    .totem-host:hover .totem > svg { animation: none; }
+    .totem-host:hover .totem > svg,
+    .totem-host.totem-picked .totem > svg { animation: none; }
   }
 }
