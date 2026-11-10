@@ -131,6 +131,17 @@ export default function PhoneCalendar({ events = [], userId, selectedDate, onSel
     setPending({ date: landed }) // fresh object: a repeat tap re-scrolls
   }
 
+  // Opening the month makes the strip taller, which pushes the sticky header
+  // line down while the list stays put: the selected night's header would pin
+  // under the month with its shows hidden behind the strip. If that night is
+  // currently stuck under the strip, re-anchor it to the new line. (Not when
+  // the list hasn't been scrolled to yet: then just open the month.)
+  const toggleStrip = () => {
+    const el = rowEls.current[selRef.current]
+    if (el && el.getBoundingClientRect().top <= stickyLine() + 2) setPending({ date: selRef.current })
+    setExpanded((x) => !x)
+  }
+
   const hasEvents = events.length > 0
 
   return (
@@ -148,7 +159,7 @@ export default function PhoneCalendar({ events = [], userId, selectedDate, onSel
           marks={marks}
           onPickDate={goTo}
           onStep={(dir) => setAnchor((a) => stepAnchor(a, expanded ? 'month' : 'week', dir))}
-          onToggle={() => setExpanded((x) => !x)}
+          onToggle={toggleStrip}
           onToday={() => goTo(today)}
         />
       </div>

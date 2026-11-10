@@ -89,7 +89,10 @@ export const Nav = () => {
     // of the rounded corners in landscape. All four are 0px on the web.
     // backdrop-blur is sm-only: a backdrop-filter makes the nav the containing
     // block for `fixed` children, which would trap the mobile tab bar inside it.
-    <nav className="relative z-20 border-b border-white/[0.07] px-4 py-4 pt-[calc(1rem+var(--sat))] pr-[calc(1rem+var(--sar))] pl-[calc(1rem+var(--sal))] sticky top-0 bg-ink/95 sm:bg-ink/80 sm:backdrop-blur">
+    // Opaque below lg: the phone calendar's sticky date headers scroll up under
+    // the bar, and a translucent bar (including its safe-area padding) let them
+    // ghost through.
+    <nav className="relative z-20 border-b border-white/[0.07] px-4 py-4 pt-[calc(1rem+var(--sat))] pr-[calc(1rem+var(--sar))] pl-[calc(1rem+var(--sal))] sticky top-0 bg-ink lg:bg-ink/80 lg:backdrop-blur">
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-2 min-w-0">
         <button onClick={() => navigate('/calendar')} className="shrink-0" aria-label="TikCal home">
           <Logo size="md" framed />
