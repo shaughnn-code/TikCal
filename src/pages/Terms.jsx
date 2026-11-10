@@ -90,8 +90,8 @@ export default function Terms() {
 
       <Note>
         Questions about these terms? Email{' '}
-        <a href="mailto:dev@tikcal.nyc" className="text-violet hover:text-white transition-colors">
-          dev@tikcal.nyc
+        <a href="mailto:support@tikcal.nyc" className="text-violet hover:text-white transition-colors">
+          support@tikcal.nyc
         </a>
         .
       </Note>

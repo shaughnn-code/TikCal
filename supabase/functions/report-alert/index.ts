@@ -1,4 +1,4 @@
-// Emails dev@tikcal.nyc about a new user report so it can be acted on within
+// Emails support@tikcal.nyc about a new user report so it can be acted on within
 // 24 hours (App Store guideline 1.2). JWT-protected (verify_jwt = true).
 //
 // The client calls report_content() (which files the report and returns its
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     "account if it breaks the Terms, then set status to 'actioned' or 'dismissed'.",
   ].join('\n')
 
-  const to = Deno.env.get('REPORT_ALERT_TO') || 'dev@tikcal.nyc'
+  const to = Deno.env.get('REPORT_ALERT_TO') || 'support@tikcal.nyc'
   const sent = await sendEmail({
     to,
     fromName: 'TikCal reports',

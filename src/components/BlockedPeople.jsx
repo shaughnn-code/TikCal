@@ -29,7 +29,7 @@ export default function BlockedPeople() {
       <p className="text-slate-500 text-xs mb-3">
         Report or block anyone from the <Icon name="dots-three-outline-vertical" size={11} className="inline" /> menu
         next to their name. We review reports within 24 hours. Questions or urgent safety issues:{' '}
-        <a href="mailto:dev@tikcal.nyc" className="text-violet underline underline-offset-2">dev@tikcal.nyc</a>
+        <a href="mailto:support@tikcal.nyc" className="text-violet underline underline-offset-2">support@tikcal.nyc</a>
       </p>
       <div className="font-mono text-[11px] text-slate-400 uppercase tracking-[0.1em] mb-2">Blocked people</div>
       {people === null ? (

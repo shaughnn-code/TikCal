@@ -75,8 +75,8 @@ export default function Privacy() {
 
       <Note>
         Questions about this policy or your data? Email{' '}
-        <a href="mailto:dev@tikcal.nyc" className="text-violet hover:text-white transition-colors">
-          dev@tikcal.nyc
+        <a href="mailto:privacy@tikcal.nyc" className="text-violet hover:text-white transition-colors">
+          privacy@tikcal.nyc
         </a>
         .
       </Note>
