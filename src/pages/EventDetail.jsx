@@ -135,6 +135,19 @@ export default function EventDetail() {
         {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
 
 
+        {/* Kept outside the inner Field component: Field is redefined on every
+            render, which would remount the menu and close an open report sheet. */}
+        {!isOwner && event.owner?.id && (
+          <div className="flex items-center justify-end gap-1 -mt-2 mb-1 font-mono text-[11px] text-slate-500">
+            Report or block
+            <SafetyMenu
+              person={event.owner}
+              eventId={event.id}
+              label="Report this show or block its owner"
+              onBlocked={() => navigate('/calendar', { replace: true })}
+            />
+          </div>
+        )}
         <HudBox className="p-5 grid grid-cols-2 gap-4">
           {event.artist && <Field label="Artist">{event.artist}</Field>}
           <Field label="Date">{fmt}</Field>
@@ -143,14 +156,6 @@ export default function EventDetail() {
           <Field label="Added by">
             {event.owner?.totem && <Totem icon={event.owner.totem} size={16} />}
             {isOwner ? 'You' : event.owner?.name || 'A friend'}
-            {!isOwner && event.owner?.id && (
-              <SafetyMenu
-                person={event.owner}
-                eventId={event.id}
-                label="Report this show or block its owner"
-                onBlocked={() => navigate('/calendar', { replace: true })}
-              />
-            )}
           </Field>
           {isSafeUrl(event.source_url) && (
             <div className="col-span-2">

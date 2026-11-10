@@ -91,6 +91,8 @@ create index if not exists user_reports_reporter_idx on public.user_reports (rep
 alter table public.user_reports enable row level security;
 -- No policies at all: users can neither read nor write this table directly.
 revoke all on public.user_reports from anon, authenticated;
+-- The report-alert function reads and stamps reports with the service role.
+grant select, update on public.user_reports to service_role;
 
 -- ── block_user / report_content ──────────────────────────────────────────────
 create or replace function public.block_user(p_user uuid)
@@ -122,9 +124,8 @@ begin
      or (requester_id = p_user and addressee_id = me);
 
   delete from public.crew_invites
-  where status = 'pending'
-    and ((inviter_id = me and invitee_id = p_user)
-      or (inviter_id = p_user and invitee_id = me));
+  where (inviter_id = me and invitee_id = p_user)
+     or (inviter_id = p_user and invitee_id = me);
 
   delete from public.event_nudges
   where (sender_id = me and recipient_id = p_user)
@@ -162,13 +163,18 @@ begin
   end if;
 
   if p_event is not null then
-    select owner_id into target from public.events where id = p_event;
+    -- Same visibility rule as the events SELECT policy, so a report can't be
+    -- used to probe for shows you can't see. Missing and hidden read the same.
+    select e.owner_id into target
+    from public.events e
+    where e.id = p_event
+      and (e.owner_id = me
+        or (e.share_friends and private.are_friends(e.owner_id, me))
+        or private.event_visible_via_crew(e.id, me));
     if not found then
       raise exception 'That show no longer exists.';
     end if;
-    if p_user is not null then
-      target := p_user;
-    end if;
+    -- A show report is always filed against the show's owner.
   end if;
 
   if target = me then
@@ -202,6 +208,18 @@ create policy "no requests between blocked people" on public.friendships
 drop policy if exists "no invites between blocked people" on public.crew_invites;
 create policy "no invites between blocked people" on public.crew_invites
   as restrictive for insert to authenticated
+  with check (not private.is_blocked_pair(inviter_id, invitee_id));
+
+-- UPDATE too: otherwise an existing row could be edited to point at someone
+-- who blocked you (or flip a declined invite back to pending).
+drop policy if exists "no request edits between blocked people" on public.friendships;
+create policy "no request edits between blocked people" on public.friendships
+  as restrictive for update to authenticated
+  with check (not private.is_blocked_pair(requester_id, addressee_id));
+
+drop policy if exists "no invite edits between blocked people" on public.crew_invites;
+create policy "no invite edits between blocked people" on public.crew_invites
+  as restrictive for update to authenticated
   with check (not private.is_blocked_pair(inviter_id, invitee_id));
 
 -- ── nudge_event: skip blocked recipients ─────────────────────────────────────

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { acceptFriend, acceptCrewInvite, declineCrewInvite } from '../lib/social.js'
@@ -64,7 +64,9 @@ export default function Notifications() {
 
   if (loading) return <Spinner />
 
-  const Row = ({ it }) => {
+  // Called as a plain function, not <Row/>: a component defined in render would
+  // remount every render and close an open report sheet.
+  const renderRow = (it) => {
     const p = it.person
     const pending = busy === it.key
     let icon = 'bell'
@@ -156,7 +158,7 @@ export default function Notifications() {
         ) : (
           <div className="space-y-2">
             {items.map((it) => (
-              <Row key={it.key} it={it} />
+              <Fragment key={it.key}>{renderRow(it)}</Fragment>
             ))}
           </div>
         )}

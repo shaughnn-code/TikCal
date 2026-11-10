@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
   // Claim the alert atomically: only the reporter, only once.
-  const { data: report } = await admin
+  const { data: report, error: claimErr } = await admin
     .from('user_reports')
     .update({ alerted_at: new Date().toISOString() })
     .eq('id', reportId)
@@ -43,6 +43,10 @@ Deno.serve(async (req) => {
     .is('alerted_at', null)
     .select('id, reason, details, created_at, reporter_id, reported_user_id, event_id')
     .maybeSingle()
+  if (claimErr) {
+    console.error(`report-alert: claim failed ${claimErr.message}`)
+    return json({ error: 'Could not read the report.' }, 500)
+  }
   if (!report) return json({ ok: true, skipped: true })
 
   const ids = [report.reporter_id, report.reported_user_id].filter(Boolean)
