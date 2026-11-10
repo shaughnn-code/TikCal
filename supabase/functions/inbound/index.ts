@@ -2,13 +2,10 @@
 // webhook, gets routed to a user by their import token, parsed by Claude, and
 // filed as an event. Public webhook: deploy with --no-verify-jwt.
 //
-// Two ways in:
-//   * Resend receiving (in.tikcal.nyc MX → Resend): an `email.received` event,
-//     signed with RESEND_WEBHOOK_SECRET (Svix). The event has no body, so the
-//     full email is fetched from the Receiving API with RESEND_RECEIVING_KEY
-//     (a full-access key; sending-only keys can't read received mail).
-//   * Legacy (SendGrid Parse / Postmark / generic JSON), gated by
-//     ?secret=INBOUND_SECRET. Remove once Resend receiving is confirmed.
+// Mail to in.tikcal.nyc goes to Resend, which posts an `email.received` event
+// signed with RESEND_WEBHOOK_SECRET (Svix). The event has no body, so the full
+// email is fetched from the Receiving API with RESEND_RECEIVING_KEY (a
+// full-access key; sending-only keys can't read received mail).
 //
 // Special case: Gmail's "Forwarding Confirmation" email is detected and the
 // confirmation code + verify link are relayed to the user's real inbox so they
@@ -23,7 +20,7 @@ const INBOX_DOMAIN = 'in.tikcal.nyc'
 const ok = (msg = 'ok') => new Response(JSON.stringify({ status: msg }), { status: 200, headers: { 'Content-Type': 'application/json' } })
 
 // Constant-time string compare so a mistimed `!==` can't leak how many
-// leading bytes of INBOUND_SECRET a guess got right.
+// leading bytes of a signature a guess got right.
 function timingSafeEqual(a: string, b: string): boolean {
   const enc = new TextEncoder()
   const ab = enc.encode(a)
@@ -94,66 +91,36 @@ Deno.serve(async (req) => {
   const raw = await req.text()
   const webhookSecret = Deno.env.get('RESEND_WEBHOOK_SECRET')
 
-  if (req.headers.get('svix-id')) {
-    // ── Resend receiving ──────────────────────────────────────────────────
-    let valid = false
-    try {
-      valid = !!webhookSecret && (await verifySvix(raw, req.headers, webhookSecret.trim()))
-    } catch (err) {
-      console.error(`inbound: signature check crashed (bad RESEND_WEBHOOK_SECRET format?) ${err}`)
-    }
-    if (!valid) return new Response('forbidden', { status: 401 })
-    let event: { type?: string; data?: { email_id?: string } }
-    try { event = JSON.parse(raw) } catch (_) { return ok('unparseable') }
-    if (event.type !== 'email.received' || !event.data?.email_id) return ok('ignored')
-    // Reading received mail needs a full-access key; the sending key can't.
-    const key = Deno.env.get('RESEND_RECEIVING_KEY') || Deno.env.get('RESEND_API_KEY')
-    if (!key) { console.error('inbound: RESEND_RECEIVING_KEY missing'); return ok('no-resend-key') }
-    const r = await fetch(`https://api.resend.com/emails/receiving/${encodeURIComponent(event.data.email_id)}`, {
-      headers: { Authorization: `Bearer ${key}` },
-    })
-    if (!r.ok) {
-      console.error(`inbound: resend fetch ${r.status} ${await r.text()}`)
-      // 500 so Resend retries the webhook later.
-      return new Response('fetch failed', { status: 500 })
-    }
-    const e: Record<string, unknown> = await r.json()
-    const list = (v: unknown) => (Array.isArray(v) ? v.join(' ') : String(v || ''))
-    // Gmail auto-forwarding keeps the original To:, so the import address may
-    // only appear in received_for.
-    recipients = [e.to, e.cc, e.bcc, e.received_for].map(list).join(' ')
-    from = String(e.from || '')
-    subject = String(e.subject || '')
-    text = String(e.text || '') || (e.html ? stripHtml(String(e.html)) : '')
-  } else {
-    // ── Legacy providers, gated by INBOUND_SECRET ─────────────────────────
-    const url = new URL(req.url)
-    const secret = url.searchParams.get('secret') || req.headers.get('x-inbound-secret') || ''
-    const expected = Deno.env.get('INBOUND_SECRET')
-    if (!expected || !timingSafeEqual(secret, expected)) {
-      return new Response('forbidden', { status: 401 })
-    }
-    try {
-      const ct = req.headers.get('content-type') || ''
-      if (ct.includes('application/json')) {
-        const b: Record<string, unknown> = JSON.parse(raw)
-        recipients = [b.To, b.OriginalRecipient, b.Recipient, b.to, JSON.stringify(b.ToFull || ''), JSON.stringify(b.envelope || '')].filter(Boolean).join(' ')
-        from = String(b.From || b.from || JSON.stringify(b.FromFull || ''))
-        subject = String(b.Subject || b.subject || '')
-        text = String(b.TextBody || b.text || (b.HtmlBody ? stripHtml(String(b.HtmlBody)) : '') || (b.html ? stripHtml(String(b.html)) : ''))
-      } else {
-        const f = await new Response(raw, { headers: { 'content-type': ct } }).formData()
-        recipients = [f.get('to'), f.get('envelope'), f.get('recipient')].filter(Boolean).join(' ')
-        from = String(f.get('from') || '')
-        subject = String(f.get('subject') || '')
-        const t = f.get('text') || f.get('email') || ''
-        const h = f.get('html') || ''
-        text = String(t) || (h ? stripHtml(String(h)) : '')
-      }
-    } catch (_) {
-      return ok('unparseable')
-    }
+  let valid = false
+  try {
+    valid = !!webhookSecret && (await verifySvix(raw, req.headers, webhookSecret.trim()))
+  } catch (err) {
+    console.error(`inbound: signature check crashed (bad RESEND_WEBHOOK_SECRET format?) ${err}`)
   }
+  if (!valid) return new Response('forbidden', { status: 401 })
+
+  let event: { type?: string; data?: { email_id?: string } }
+  try { event = JSON.parse(raw) } catch (_) { return ok('unparseable') }
+  if (event.type !== 'email.received' || !event.data?.email_id) return ok('ignored')
+  // Reading received mail needs a full-access key; the sending key can't.
+  const key = Deno.env.get('RESEND_RECEIVING_KEY') || Deno.env.get('RESEND_API_KEY')
+  if (!key) { console.error('inbound: RESEND_RECEIVING_KEY missing'); return ok('no-resend-key') }
+  const r = await fetch(`https://api.resend.com/emails/receiving/${encodeURIComponent(event.data.email_id)}`, {
+    headers: { Authorization: `Bearer ${key}` },
+  })
+  if (!r.ok) {
+    console.error(`inbound: resend fetch ${r.status} ${await r.text()}`)
+    // 500 so Resend retries the webhook later.
+    return new Response('fetch failed', { status: 500 })
+  }
+  const e: Record<string, unknown> = await r.json()
+  const list = (v: unknown) => (Array.isArray(v) ? v.join(' ') : String(v || ''))
+  // Gmail auto-forwarding keeps the original To:, so the import address may
+  // only appear in received_for.
+  recipients = [e.to, e.cc, e.bcc, e.received_for].map(list).join(' ')
+  from = String(e.from || '')
+  subject = String(e.subject || '')
+  text = String(e.text || '') || (e.html ? stripHtml(String(e.html)) : '')
 
   const lp = localpartFor(recipients)
   if (!lp) return ok('no-recipient')
