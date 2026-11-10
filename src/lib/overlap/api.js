@@ -113,15 +113,14 @@ export async function updateAvailability(sessionId, participantId, availability,
 }
 
 // ── Realtime ─────────────────────────────────────────────────────────────────
-// Live grid updates as participants fill in. Returns an unsubscribe fn.
+// Live grid updates as participants fill in. A database trigger broadcasts a
+// data-free "changed" event on `overlap:<sessionId>` (the channel name needs
+// the session id, the same secret as the share link); onChange should refetch
+// through getSession(). Returns an unsubscribe fn.
 export function subscribeParticipants(sessionId, onChange) {
   const channel = supabase
     .channel(`overlap:${sessionId}`)
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'overlap_participants', filter: `session_id=eq.${sessionId}` },
-      onChange,
-    )
+    .on('broadcast', { event: 'changed' }, onChange)
     .subscribe()
   return () => supabase.removeChannel(channel)
 }

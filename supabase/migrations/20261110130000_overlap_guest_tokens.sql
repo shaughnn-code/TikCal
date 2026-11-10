@@ -13,7 +13,8 @@
 --     could create (or be handed back) a row bound to someone else's account,
 --     which also made session_event_busy() expose that person's show dates.
 --   * The participants table itself was readable through the Data API with the
---     anon key, user_id included, for every session.
+--     anon key (policy USING (true)), for every session: user_ids, and every
+--     session_id, which is the share-link secret.
 --
 -- New contract (all SECURITY DEFINER, callable by anon + authenticated):
 --   get_session(p_session_id, p_guest_token default null)
@@ -39,8 +40,16 @@
 -- Participant ids stay in the API as public ids (the grid, best-windows and
 -- session_event_busy() key on them). They are no longer a capability.
 --
--- Guest tokens are stored only as sha256 hashes, in private.overlap_guest_tokens:
--- not in the participants table, which anon can read and Realtime streams.
+-- Guest tokens are stored only as sha256 hashes, in private.overlap_guest_tokens.
+--
+-- Live updates: the participants table is no longer readable by anon or
+-- authenticated at all, so Realtime postgres_changes on it is gone. Instead a
+-- trigger broadcasts a content-free "changed" event on the public Realtime
+-- channel `overlap:<session_id>` (realtime.send). Only someone who already
+-- holds the session id can name that channel, and the event carries no data:
+-- the client refetches through get_session(). App builds from before this
+-- change still listen for postgres_changes, so they lose live updates (the
+-- board still refreshes on load and after their own actions).
 --
 -- Guests who joined before this migration have no token. Their row stays on the
 -- board (read-only) and still counts toward the 4-person cap; the app asks them
@@ -67,13 +76,53 @@ alter table private.overlap_guest_tokens enable row level security;
 -- No policies on purpose: only the definer functions below touch this table.
 revoke all on table private.overlap_guest_tokens from public, anon, authenticated;
 
--- ── Participants: anon/authenticated may read every column except user_id ───
--- The world-readable SELECT policy stays (Realtime needs it for guests), but
--- user_id is no longer selectable. Column-level grants: revoke the table-wide
--- SELECT, then grant the safe columns back.
-revoke select on table public.overlap_participants from public, anon, authenticated;
-grant select (id, session_id, display_name, color, sources, availability, google_synced_at, joined_at)
-  on table public.overlap_participants to anon, authenticated;
+-- ── Participants: no direct reads by anon/authenticated ─────────────────────
+-- Drop the world-readable SELECT policy and every grant. All reads go through
+-- get_session(), which needs the session id. RLS stays on with no policies, so
+-- even a stray default-privilege grant reads nothing.
+drop policy if exists "overlap_participants realtime select" on public.overlap_participants;
+revoke all on table public.overlap_participants from public, anon, authenticated;
+
+-- Stop streaming the table through postgres_changes (nobody could read it now).
+do $$
+begin
+  if exists (select 1 from pg_publication_tables
+              where pubname = 'supabase_realtime' and schemaname = 'public'
+                and tablename = 'overlap_participants') then
+    alter publication supabase_realtime drop table public.overlap_participants;
+  end if;
+end $$;
+
+-- Broadcast "something changed" on overlap:<session_id>. No row data is sent.
+-- A failure to broadcast must never block the write.
+create or replace function private.overlap_participants_broadcast()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_session uuid := coalesce(new.session_id, old.session_id);
+begin
+  begin
+    perform realtime.send(
+      pg_catalog.jsonb_build_object('session_id', v_session),
+      'changed',
+      'overlap:' || v_session::text,
+      false
+    );
+  exception when others then
+    null; -- realtime unavailable: live refresh is best-effort
+  end;
+  return null;
+end;
+$$;
+revoke execute on function private.overlap_participants_broadcast() from public, anon, authenticated;
+
+drop trigger if exists overlap_participants_broadcast on public.overlap_participants;
+create trigger overlap_participants_broadcast
+  after insert or update or delete on public.overlap_participants
+  for each row execute function private.overlap_participants_broadcast();
 
 -- ── Old signatures go away (a changed signature is a new overload otherwise) ─
 drop function if exists public.get_session(uuid);

@@ -31,6 +31,11 @@ insert into auth.users values ('${A}'), ('${B}'), ('${C}');
 create table public.events (id uuid primary key default gen_random_uuid(), owner_id uuid not null references auth.users(id),
   title text not null, event_date date not null default current_date);
 create publication supabase_realtime;
+-- Stub of Supabase's realtime.send(): record what would be broadcast.
+create schema realtime;
+create table realtime.sent (payload jsonb, event text, topic text, private boolean, at timestamptz default clock_timestamp());
+create function realtime.send(payload jsonb, event text, topic text, private boolean default true) returns void
+  language sql as $$ insert into realtime.sent (payload, event, topic, private) values (payload, event, topic, private) $$;
 -- Simulate Supabase default privileges handing everything to anon/authenticated.
 alter default privileges in schema public grant all on tables to anon, authenticated;
 alter default privileges in schema private grant all on tables to anon, authenticated;
@@ -119,13 +124,28 @@ await db.exec(`insert into public.overlap_sessions (id, creator_id, range_start,
 const h = await rpc(null, `public.join_session($1, 'H')`, [S2])
 ok("session 2 guest token can't edit in session 1", (await upd(null, g1.id, 'x', h.guest_token))?.error === 'forbidden')
 
-// Direct table access.
-const direct = await as(null, `select * from public.overlap_participants`)
-ok('anon cannot select * (user_id hidden)', !!direct.error)
-const directU = await as(B, `select user_id from public.overlap_participants`)
-ok('authenticated cannot select user_id', !!directU.error)
-const safeCols = await as(null, `select id, session_id, display_name, availability from public.overlap_participants`)
-ok('anon can still select the safe columns (Realtime/grid)', !safeCols.error && safeCols.rows.length === 5)
+// Direct table access: nobody can list participants or sessions table-wide.
+const none = (r) => !!r.error || r.rows.length === 0
+ok('anon: select session_id from overlap_participants returns nothing', none(await as(null, `select session_id from public.overlap_participants`)))
+ok('anon: select * from overlap_participants returns nothing', none(await as(null, `select * from public.overlap_participants`)))
+ok('authenticated member: select session_id from overlap_participants returns nothing', none(await as(B, `select session_id from public.overlap_participants`)))
+ok('authenticated creator: select from overlap_participants returns nothing', none(await as(A, `select id from public.overlap_participants`)))
+ok('anon: select from overlap_sessions returns nothing', none(await as(null, `select id from public.overlap_sessions`)))
+ok('non-creator: select from overlap_sessions returns nothing', none(await as(B, `select id from public.overlap_sessions`)))
+ok('creator still lists own sessions', (await as(A, `select id from public.overlap_sessions`)).rows?.length === 2)
+ok('participants dropped from supabase_realtime publication',
+  (await db.query(`select count(*)::int n from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'overlap_participants'`)).rows[0].n === 0)
+
+// Live updates: a data-free broadcast on overlap:<session_id>.
+await db.exec('delete from realtime.sent')
+await upd(null, g1.id, 'bcast', g1.guest_token)
+const sent = (await db.query(`select * from realtime.sent`)).rows
+ok('edit broadcasts "changed" on overlap:<session> (public channel)', sent.length === 1 && sent[0].event === 'changed' && sent[0].topic === `overlap:${S}` && sent[0].private === false)
+ok('broadcast carries no row data', !JSON.stringify(sent[0]?.payload).includes('bcast') && !JSON.stringify(sent[0]?.payload).includes(g1.id))
+await db.exec('drop function realtime.send(jsonb, text, text, boolean)')
+ok('a broken realtime.send never blocks the write', (await upd(null, g1.id, 'nort', g1.guest_token))?.id === g1.id)
+await db.exec(`create function realtime.send(payload jsonb, event text, topic text, private boolean default true) returns void
+  language sql as $$ insert into realtime.sent (payload, event, topic, private) values (payload, event, topic, private) $$`)
 const before = JSON.stringify(await availOf(g1.id))
 const w = await as(null, `update public.overlap_participants set availability = '{"pwn":"free"}'`)
 ok('anon cannot write participants directly (RLS: no update policy)', !!w.error || JSON.stringify(await availOf(g1.id)) === before)
