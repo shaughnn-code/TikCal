@@ -1,17 +1,19 @@
 import { supabase } from '../../supabaseClient.js'
+import { readGuestToken, writeGuestToken, hasLegacyGuest } from './guestToken.js'
 
 // Data access for Overlap. Cross-participant reads/writes go through the
-// SECURITY DEFINER RPCs (see supabase/migrations/20260707000001_overlap_feature.sql);
+// SECURITY DEFINER RPCs (see supabase/migrations/20261110130000_overlap_guest_tokens.sql);
 // the creator's own sessions list uses a direct RLS-scoped select.
 
-// ── Guest capability token (participant id) ──────────────────────────────────
-const guestKey = (sessionId) => `overlap:guest:${sessionId}`
-export const getGuestParticipantId = (sessionId) => {
-  try { return localStorage.getItem(guestKey(sessionId)) } catch { return null }
+// ── Guest secret ─────────────────────────────────────────────────────────────
+// join_session() returns a guest_token once, to the guest who joined. It is the
+// guest's only way to edit their row, so it lives in this browser's storage.
+// Participant ids are public and authorize nothing. See guestToken.js.
+const store = () => {
+  try { return globalThis.localStorage } catch { return undefined }
 }
-export const setGuestParticipantId = (sessionId, participantId) => {
-  try { localStorage.setItem(guestKey(sessionId), participantId) } catch { /* private mode */ }
-}
+export const getGuestToken = (sessionId) => readGuestToken(store(), sessionId)
+export const isLegacyGuest = (sessionId) => hasLegacyGuest(store(), sessionId)
 
 // ── Sessions ─────────────────────────────────────────────────────────────────
 export async function listMySessions() {
@@ -67,36 +69,46 @@ export async function deleteSession(sessionId) {
 
 // ── RPC-backed reads/writes ──────────────────────────────────────────────────
 
-// Returns { session, participants } | { error: 'expired' } | null (not found).
+// Returns { session, is_creator, participants } | { error: 'expired' } | null.
+// Each participant: { id, display_name, color, sources, availability,
+// google_synced_at, joined_at, is_me }. Other people's user_ids never appear.
 export async function getSession(sessionId) {
-  const { data, error } = await supabase.rpc('get_session', { p_session_id: sessionId })
+  const { data, error } = await supabase.rpc('get_session', {
+    p_session_id: sessionId,
+    p_guest_token: getGuestToken(sessionId),
+  })
   if (error) throw error
   return data
 }
 
-// Join (idempotent for logged-in users). Returns the participant row, or
-// { error: 'full' | 'expired' | 'not_found' }.
+// Join (idempotent for logged-in users). Returns the caller's participant, or
+// { error: 'full' | 'expired' | 'not_found' }. A new guest also gets
+// guest_token, which is saved here and never sent back by the server again.
 export async function joinSession(sessionId, displayName) {
   const { data, error } = await supabase.rpc('join_session', {
     p_session_id: sessionId,
     p_display_name: displayName,
   })
   if (error) throw error
-  if (data && !data.error) {
-    // Persist the participant id so guests can re-edit on return visits.
-    setGuestParticipantId(sessionId, data.id)
+  if (data?.guest_token) {
+    writeGuestToken(store(), sessionId, data.guest_token)
+    delete data.guest_token
   }
   return data
 }
 
+// Save the caller's own availability. The server picks the row from the login
+// or the guest token; participantId only has to match it.
 export async function updateAvailability(sessionId, participantId, availability, sources) {
   const { data, error } = await supabase.rpc('update_availability', {
     p_session_id: sessionId,
-    p_participant_id: participantId,
+    p_participant_id: participantId ?? null,
     p_availability: availability,
     p_sources: sources ?? null,
+    p_guest_token: getGuestToken(sessionId),
   })
   if (error) throw error
+  if (data?.error) throw new Error(data.error === 'forbidden' ? 'You can only edit your own nights.' : data.error)
   return data
 }
 

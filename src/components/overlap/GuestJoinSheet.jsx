@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { Btn, Inp, HudBox } from '../ui.jsx'
 import { FEATURE_NAME } from '../../lib/overlap/theme.js'
 
-// No-login entry (spec §7): a guest picks a display name to join. The returned
-// participant id becomes their bearer capability (kept in localStorage by the api).
-export default function GuestJoinSheet({ sessionName, onJoin, error }) {
+// No-login entry (spec §7): a guest picks a display name to join. join_session
+// returns a one-time guest token, kept in localStorage by the api; it is what
+// lets this browser edit the guest's row later. `rejoin` is set for guests who
+// joined before tokens existed: their old entry stays on the board, read-only.
+export default function GuestJoinSheet({ sessionName, onJoin, error, rejoin = false }) {
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -21,7 +23,9 @@ export default function GuestJoinSheet({ sessionName, onJoin, error }) {
         <div className="font-mono text-[11px] text-violet uppercase tracking-[0.16em] mb-2">{FEATURE_NAME}</div>
         <div className="font-heading font-bold text-xl text-[#e8f4f8] mb-1">{sessionName || 'Find a night'}</div>
         <div className="font-mono text-[11px] text-slate-500 mb-5">
-          Add your name to mark when you're free — no account needed.
+          {rejoin
+            ? "We tightened up Sync, so please join again to keep editing. Your earlier entry stays on the board."
+            : "Add your name to mark when you're free — no account needed."}
         </div>
         <Inp value={name} onChange={setName} placeholder="Your name" />
         {error && <div className="font-mono text-xs text-red-400 mt-3">{error}</div>}

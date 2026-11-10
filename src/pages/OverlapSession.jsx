@@ -11,8 +11,9 @@ import {
   joinSession,
   updateAvailability,
   subscribeParticipants,
-  getGuestParticipantId,
+  isLegacyGuest,
 } from '../lib/overlap/api.js'
+import { findMe } from '../lib/overlap/guestToken.js'
 import { fetchSessionEventBusy, applyTikcalSource } from '../lib/overlap/tikcal.js'
 import OverlapGrid from '../components/overlap/OverlapGrid.jsx'
 import Legend from '../components/overlap/Legend.jsx'
@@ -81,16 +82,11 @@ export default function OverlapSession() {
     return () => { alive = false }
   }, [sessionId, load])
 
-  // Identify "me": logged-in matches on user_id, a guest bears the participant
-  // id returned by join_session (kept in localStorage).
+  // Identify "me": the server marks the caller's own row (is_me) from the login
+  // or the guest token, so the page never needs anyone's user_id.
   useEffect(() => {
     if (status !== 'ready' || authLoading) return
-    let mine = null
-    if (user) mine = participants.find((p) => p.user_id === user.id)
-    else {
-      const gid = getGuestParticipantId(sessionId)
-      if (gid) mine = participants.find((p) => p.id === gid)
-    }
+    const mine = findMe(participants)
     if (mine) {
       setMyId(mine.id)
       // Only seed from the server before the first local edit, so an in-flight
@@ -298,7 +294,12 @@ export default function OverlapSession() {
             </div>
           )
         ) : (
-          <GuestJoinSheet sessionName={session.name} onJoin={onJoinAsGuest} error={joinErr} />
+          <GuestJoinSheet
+            sessionName={session.name}
+            onJoin={onJoinAsGuest}
+            error={joinErr}
+            rejoin={!user && isLegacyGuest(sessionId)}
+          />
         ))}
     </>
   )
