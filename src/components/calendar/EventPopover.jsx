@@ -17,7 +17,9 @@ import { isPhone } from '../../lib/platform.js'
 // letting the fastest glance-and-decide surface actually complete the
 // decide step, not just preview it. A parent refetch will reconcile the
 // authoritative state next time the popover reopens.
-export default function EventPopover({ event, onClose, className = '' }) {
+// `onViewDetails(event)` lets the calendar own navigation; falls back to the
+// event page route when the parent doesn't pass one.
+export default function EventPopover({ event, onClose, onViewDetails, className = '' }) {
   const navigate = useNavigate()
   const { user, profile } = useAuth()
   const [rsvps, setRsvps] = useState(event.rsvps || [])
@@ -148,7 +150,11 @@ export default function EventPopover({ event, onClose, className = '' }) {
       )}
 
       <button
-        onClick={(e) => { e.stopPropagation(); navigate(`/events/${event.id}`) }}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (onViewDetails) onViewDetails(event)
+          else navigate(`/events/${event.id}`)
+        }}
         className="mt-3 font-mono text-[11px] text-slate-400 hover:text-white transition-colors"
       >
         View full details →

@@ -17,7 +17,7 @@ const hourLabel = (i) => {
 // 6PM–1AM gutter + 7 day columns. TikCal events carry no start time today, so
 // an event without one is stacked in a "time TBA" band at the top of its column
 // rather than being given a fabricated position.
-export default function WeekView({ focus, today, eventsByDate, onZoomOut, suppressClickRef }) {
+export default function WeekView({ focus, today, eventsByDate, onZoomOut, onPick, suppressClickRef }) {
   const days = weekDays(focus)
   const zoomOut = () => {
     if (suppressClickRef?.current) return
@@ -82,7 +82,7 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, suppre
 
                 <div className="absolute inset-x-1 top-1 flex flex-col gap-1">
                   {untimed.map((ev) => (
-                    <Chip key={ev.id} ev={ev} tba />
+                    <Chip key={ev.id} ev={ev} tba onPick={onPick} />
                   ))}
                 </div>
 
@@ -92,7 +92,7 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, suppre
                     className="absolute inset-x-1"
                     style={{ top: `${off * COL_H + 4}px` }}
                   >
-                    <Chip ev={ev} />
+                    <Chip ev={ev} onPick={onPick} />
                   </div>
                 ))}
               </div>
@@ -104,7 +104,7 @@ export default function WeekView({ focus, today, eventsByDate, onZoomOut, suppre
   )
 }
 
-function Chip({ ev, tba }) {
+function Chip({ ev, tba, onPick }) {
   const [hover, setHover] = useState(false)
   const [open, setOpen] = useState(false)
   const s = getEventAccent(ev)
@@ -112,7 +112,9 @@ function Chip({ ev, tba }) {
     <div className="relative" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <button
         onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
-        onDoubleClick={(e) => e.stopPropagation()}
+        // Double-click opens the show (onPick); single click keeps pinning
+        // the preview, which is the only way in on touch.
+        onDoubleClick={(e) => { e.stopPropagation(); onPick?.(ev) }}
         className="relative w-full text-left rounded-lg pl-2.5 pr-2 py-[7px] overflow-hidden border border-white/10 bg-panel
                    transition-[border-color,transform] duration-150 hover:border-white/20 hover:-translate-y-px active:scale-[0.98] active:translate-y-0
                    outline-none focus-visible:ring-2 focus-visible:ring-violet focus-visible:ring-offset-2 focus-visible:ring-offset-panel"
@@ -134,7 +136,9 @@ function Chip({ ev, tba }) {
           chip and gives touch a way in, since hover never fires there --
           previously click jumped straight to full detail, which silently
           dropped the preview on mobile entirely). */}
-      {(hover || open) && <EventPopover event={ev} onClose={open ? () => setOpen(false) : undefined} />}
+      {(hover || open) && (
+        <EventPopover event={ev} onClose={open ? () => setOpen(false) : undefined} onViewDetails={onPick} />
+      )}
     </div>
   )
 }
