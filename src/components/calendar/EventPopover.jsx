@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/auth.jsx'
@@ -8,6 +8,7 @@ import { Icon, Totem } from '../icons.jsx'
 import { RSVP_OPTIONS, getEventAccent, getInitials, withAlpha } from '../../lib/constants.js'
 import { isSafeUrl } from '../../lib/safeUrl.js'
 import { isPhone } from '../../lib/platform.js'
+import { placePopover, visibleBounds } from '../../lib/calendar/popoverPlacement.js'
 
 // Compact detail card for hovering (desktop, Month/Week) or clicking
 // (Month) an event -- crew + "who's in" + an inline RSVP + source link,
@@ -50,6 +51,31 @@ export default function EventPopover({ event, onClose, onViewDetails, className 
   // ancestor, which would otherwise trap `position: fixed` inside the grid.
   const sheet = isPhone()
 
+  // Desktop: the card is portaled to <body> and positioned fixed next to its
+  // chip, flipped/clamped so it always opens inward and never gets cut off by
+  // the calendar's rounded, overflow-hidden frame (or the viewport).
+  const markerRef = useRef(null)
+  const cardRef = useRef(null)
+  const [pos, setPos] = useState(null)
+  useLayoutEffect(() => {
+    if (sheet) return
+    const place = () => {
+      const anchorEl = markerRef.current?.parentElement
+      const cardEl = cardRef.current
+      if (!anchorEl || !cardEl) return
+      const box = (anchorEl.closest('[data-popover-bounds]') || document.documentElement).getBoundingClientRect()
+      const bounds = visibleBounds(box, { width: window.innerWidth, height: window.innerHeight })
+      setPos(placePopover(anchorEl.getBoundingClientRect(), cardEl.getBoundingClientRect(), bounds))
+    }
+    place()
+    window.addEventListener('scroll', place, true)
+    window.addEventListener('resize', place)
+    return () => {
+      window.removeEventListener('scroll', place, true)
+      window.removeEventListener('resize', place)
+    }
+  }, [sheet])
+
   const card = (
     <HudBox
       hero
@@ -57,7 +83,7 @@ export default function EventPopover({ event, onClose, onViewDetails, className 
       className={
         sheet
           ? `fixed z-40 inset-x-3 bottom-[calc(5.75rem+var(--sab))] p-3.5 text-left ${className}`
-          : `absolute z-30 w-64 p-3.5 top-full mt-2 left-0 ${className}`
+          : `w-64 p-3.5 text-left ${className}`
       }
     >
       <div className="flex items-start gap-2.5">
@@ -162,7 +188,23 @@ export default function EventPopover({ event, onClose, onViewDetails, className 
     </HudBox>
   )
 
-  if (!sheet) return card
+  if (!sheet) {
+    return (
+      <>
+        <span ref={markerRef} hidden />
+        {createPortal(
+          <div
+            ref={cardRef}
+            className="fixed z-50"
+            style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, visibility: pos ? 'visible' : 'hidden' }}
+          >
+            {card}
+          </div>,
+          document.body,
+        )}
+      </>
+    )
+  }
   return createPortal(
     <>
       {onClose && <div className="fixed inset-0 z-40 bg-ink2/60" onClick={(e) => { e.stopPropagation(); onClose() }} />}

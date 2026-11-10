@@ -158,7 +158,7 @@ export default function CalendarZoom({ events = [], selectedDate, onSelectDate, 
   const stepIn = stepOut ? { tx: -stepOut.tx, ty: -stepOut.ty } : null
 
   return (
-    <div className="flex flex-col lg:flex-row rounded-2xl border border-line bg-[#0a0d10] overflow-hidden">
+    <div data-popover-bounds className="flex flex-col lg:flex-row rounded-2xl border border-line bg-[#0a0d10] overflow-hidden">
       <CalRail view={view} focus={focus} onView={transitionTo} onStep={step} onToday={() => setFocus(new Date())} />
 
       <div
