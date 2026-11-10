@@ -1,28 +1,28 @@
 // ─── TOTEMS ──────────────────────────────────────────────────────────────
-// Each: { icon, ph, name, vibe }. `icon` is the id stored on profiles.totem
-// (e.g. "noto:pill") and stays stable so existing profiles keep their totem;
-// `ph` is the Phosphor icon actually drawn (duotone). No emoji are rendered.
+// Each: { icon, name, vibe }. `icon` is the id stored on profiles.totem
+// (e.g. "noto:pill"); it stays stable so existing profiles keep their totem.
+// The drawing for each id lives in components/totemArt.jsx. No emoji render.
 export const TOTEMS = [
-  { icon: 'noto:headphone', ph: 'headphones', name: 'Earplugs', vibe: 'Still hears tomorrow. The responsible legend.' },
-  { icon: 'noto:pill', ph: 'pill', name: 'The Press', vibe: 'You know the one. Sender of two-day weekends.' },
-  { icon: 'noto:candy', ph: 'tooth', name: 'Gum', vibe: 'Jaw’s been working overtime since 1am.' },
-  { icon: 'noto:sunglasses', ph: 'sunglasses', name: 'Shades', vibe: 'It’s 7am and the sun is the enemy.' },
-  { icon: 'noto:sparkler', ph: 'shooting-star', name: 'Glow Stick', vibe: 'Main character. Visible from space.' },
-  { icon: 'noto:cup-with-straw', ph: 'drop', name: 'Hydration', vibe: 'Logs water like it’s a whole personality.' },
-  { icon: 'noto:key', ph: 'key', name: 'Lost Keys', vibe: 'Future-you’s problem. Probably fine.' },
-  { icon: 'noto:battery', ph: 'battery-empty', name: 'Dead Battery', vibe: 'Off-grid by 2am. Only memories, no photos.' },
-  { icon: 'noto:folding-hand-fan', ph: 'fan', name: 'Hand Fan', vibe: 'Dramatic, devastating, staying cool.' },
-  { icon: 'noto:money-with-wings', ph: 'money-wavy', name: 'Crumpled Cash', vibe: 'Arrived with $200, leaving with lint.' },
-  { icon: 'noto:snowflake', ph: 'snowflake', name: 'Bumps', vibe: 'Talking your ear off in the smoking area.' },
-  { icon: 'noto:herb', ph: 'leaf', name: "Devil's Lettuce", vibe: 'Horizontal energy. Vibes only.' },
-  { icon: 'noto:mushroom', ph: 'spiral', name: 'Shrooms', vibe: 'The walls are breathing and that’s fine.' },
-  { icon: 'noto:cigarette', ph: 'cigarette', name: 'Last Cig', vibe: 'Always bumming, never carrying.' },
-  { icon: 'noto:woozy-face', ph: 'smiley-melting', name: 'Woozy', vibe: 'One too many. Sending it regardless.' },
-  { icon: 'noto:sweat-droplets', ph: 'fire', name: 'Sweaty', vibe: 'Front row, soaked through, no regrets.' },
-  { icon: 'noto:tongue', ph: 'waveform', name: 'Tongue', vibe: 'No thoughts. Just lights and bass.' },
-  { icon: 'noto:peach', ph: 'heart', name: 'Peach', vibe: 'Here for the after-after-party.' },
-  { icon: 'noto:eggplant', ph: 'crown', name: 'Eggplant', vibe: 'Confidence unmatched. Knows the assignment.' },
-  { icon: 'noto:smiling-face-with-horns', ph: 'skull', name: 'Menace', vibe: 'Up to no good and proud of it.' },
+  { icon: 'noto:headphone', name: 'Earplugs', vibe: 'Still hears tomorrow. The responsible legend.' },
+  { icon: 'noto:pill', name: 'The Press', vibe: 'You know the one. Sender of two-day weekends.' },
+  { icon: 'noto:candy', name: 'Gum', vibe: 'Jaw’s been working overtime since 1am.' },
+  { icon: 'noto:sunglasses', name: 'Shades', vibe: 'It’s 7am and the sun is the enemy.' },
+  { icon: 'noto:sparkler', name: 'Glow Stick', vibe: 'Main character. Visible from space.' },
+  { icon: 'noto:cup-with-straw', name: 'Hydration', vibe: 'Logs water like it’s a whole personality.' },
+  { icon: 'noto:key', name: 'Lost Keys', vibe: 'Future-you’s problem. Probably fine.' },
+  { icon: 'noto:battery', name: 'Dead Battery', vibe: 'Off-grid by 2am. Only memories, no photos.' },
+  { icon: 'noto:folding-hand-fan', name: 'Hand Fan', vibe: 'Dramatic, devastating, staying cool.' },
+  { icon: 'noto:money-with-wings', name: 'Crumpled Cash', vibe: 'Arrived with $200, leaving with lint.' },
+  { icon: 'noto:snowflake', name: 'Bumps', vibe: 'Talking your ear off in the smoking area.' },
+  { icon: 'noto:herb', name: "Devil's Lettuce", vibe: 'Horizontal energy. Vibes only.' },
+  { icon: 'noto:mushroom', name: 'Shrooms', vibe: 'The walls are breathing and that’s fine.' },
+  { icon: 'noto:cigarette', name: 'Last Cig', vibe: 'Always bumming, never carrying.' },
+  { icon: 'noto:woozy-face', name: 'Woozy', vibe: 'One too many. Sending it regardless.' },
+  { icon: 'noto:sweat-droplets', name: 'Sweaty', vibe: 'Front row, soaked through, no regrets.' },
+  { icon: 'noto:tongue', name: 'Tongue', vibe: 'No thoughts. Just lights and bass.' },
+  { icon: 'noto:peach', name: 'Peach', vibe: 'Here for the after-after-party.' },
+  { icon: 'noto:eggplant', name: 'Eggplant', vibe: 'Confidence unmatched. Knows the assignment.' },
+  { icon: 'noto:smiling-face-with-horns', name: 'Menace', vibe: 'Up to no good and proud of it.' },
 ]
 
 // Lookup helper: returns the totem object for a stored icon id (or null).

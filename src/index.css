@@ -523,3 +523,25 @@
      status bar / notch and the rounded corner. */
   .wel-skip { position: absolute; top: calc(18px + var(--sat)); right: calc(20px + var(--sar)); z-index: 5; font-size: 11px; color: #5b6b78; background: none; border: none; cursor: pointer; letter-spacing: .08em; }
 }
+
+/* Profile totems: slow 3D spin on hover (icon handoff 2026-11-10). */
+@layer components {
+  .totem { perspective: 600px; }
+  .totem > svg { display: block; transform-style: preserve-3d; transition: filter 0.3s ease; }
+  /* True fine line: stroke width in screen px, not scaled with the icon. */
+  .totem > svg * { vector-effect: non-scaling-stroke; }
+  .totem:hover > svg,
+  .totem-host:hover .totem > svg {
+    animation: totemSpin 6s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+  }
+  @keyframes totemSpin {
+    0% { transform: rotateY(0deg) rotateX(0deg); }
+    50% { transform: rotateY(180deg) rotateX(10deg); }
+    100% { transform: rotateY(360deg) rotateX(0deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .totem:hover > svg,
+    .totem-host:hover .totem > svg { animation: none; }
+  }
+}
