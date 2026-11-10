@@ -6,8 +6,10 @@
 // Deploy with:  supabase functions deploy ics --no-verify-jwt
 //
 // Because there's no user JWT, we use the service role and re-implement the same
-// visibility rules the app's RLS enforces (own + friends' shared + crew events).
+// visibility rules the app's RLS enforces (own + friends' shared + crew events,
+// minus shows owned by people in a blocked pair with the feed owner).
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { withoutBlockedOwners } from '../_shared/blockedPairs.js'
 
 const esc = (s = '') =>
   String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n')
@@ -87,7 +89,17 @@ Deno.serve(async (req) => {
     collect(cr.data)
   }
 
-  const events = Object.values(byId).sort((a, b) =>
+  // Blocks, either direction: hide shows owned by anyone in a blocked pair with
+  // the feed owner (they can still reach the feed through a shared crew). Fail
+  // closed: a feed that can't check blocks returns an error, and calendar apps
+  // keep their last good copy.
+  const { data: blockRows, error: blockErr } = await admin
+    .from('user_blocks')
+    .select('blocker_id, blocked_id')
+    .or(`blocker_id.eq.${uid},blocked_id.eq.${uid}`)
+  if (blockErr) return new Response('Feed temporarily unavailable', { status: 503 })
+
+  const events = withoutBlockedOwners(Object.values(byId) as { owner_id: string }[], blockRows, uid).sort((a, b) =>
     (a as { event_date: string }).event_date < (b as { event_date: string }).event_date ? -1 : 1,
   )
 
