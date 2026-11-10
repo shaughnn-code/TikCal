@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { getEventAccent, getInitials, rsvpByValue } from '../lib/constants.js'
 import { Icon } from './icons.jsx'
+import { todayYmd } from '../lib/calendar/agenda.js'
 
 // One event row, HUD-styled. `event` uses DB fields (event_date, owner_id…) and
 // may carry hydrated `crews` (with color) + `rsvps` from fetchVisibleEvents.
 export const EventCard = ({ event, ownerLabel }) => {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayYmd() // local, not UTC: tonight's show isn't "past" at 8pm
   const isPast = event.event_date < today
   const s = getEventAccent(event)
 

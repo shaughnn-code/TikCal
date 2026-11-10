@@ -1,12 +1,16 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchVisibleEvents } from '../lib/db.js'
-import { isPhone } from '../lib/platform.js'
+import { todayYmd } from '../lib/calendar/agenda.js'
+import useMediaQuery from '../components/useMediaQuery.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { EventCard } from '../components/EventCard.jsx'
-import CalendarZoom from '../components/calendar/CalendarZoom.jsx'
+// Each layout is its own chunk: phones never download the zoom calendar and
+// desktop never downloads the agenda.
+const CalendarZoom = lazy(() => import('../components/calendar/CalendarZoom.jsx'))
+const PhoneCalendar = lazy(() => import('../components/calendar/PhoneCalendar.jsx'))
 import SiteFooter from '../components/SiteFooter.jsx'
 import DanceFloorLoader from '../components/DanceFloorLoader.jsx'
 
@@ -21,8 +25,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
   const [selDate, setSelDate] = useState(null)
-  // Phones open on the Upcoming list: the zoom calendar is not phone-ready yet.
-  const [tab, setTab] = useState(() => (isPhone() ? 'upcoming' : 'calendar'))
+  // Desktop (>= lg) keeps the zoom calendar + Upcoming tab. Below lg the
+  // agenda calendar replaces both, so there is no tab to pick.
+  const wide = useMediaQuery('(min-width: 1024px)')
+  const [tab, setTab] = useState('calendar')
   const [introDone, setIntroDone] = useState(introPlayed)
 
   useEffect(() => {
@@ -38,7 +44,7 @@ export default function Dashboard() {
 
   const ownerLabel = (e) => (e.owner_id === user.id ? null : e.owner?.name?.split(' ')[0] || 'Friend')
 
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayYmd() // local date; toISOString() is UTC and flips at ~7pm ET
   const upcoming = events.filter((e) => e.event_date >= today)
   const past = events.filter((e) => e.event_date < today)
   const selEvs = selDate ? events.filter((e) => e.event_date === selDate) : []
@@ -127,6 +133,19 @@ export default function Dashboard() {
           </div>
         )}
 
+        {!wide ? (
+          <Suspense fallback={<div className="h-64" aria-busy="true" />}>
+            <PhoneCalendar
+              events={events}
+              userId={user.id}
+              selectedDate={selDate}
+              onSelectDate={setSelDate}
+              ownerLabel={ownerLabel}
+              empty={<Empty />}
+            />
+          </Suspense>
+        ) : (
+        <>
         {/* tab toggle */}
         <div className="flex gap-1 mb-6 bg-white/[0.04] rounded p-1 w-fit">
           {['upcoming', 'calendar'].map((t) => (
@@ -144,12 +163,14 @@ export default function Dashboard() {
 
         {tab === 'calendar' ? (
           <div>
-            <CalendarZoom
-              events={events}
-              selectedDate={selDate}
-              onSelectDate={(d) => setSelDate(selDate === d ? null : d)}
-              onPickEvent={(ev) => navigate(`/events/${ev.id}`)}
-            />
+            <Suspense fallback={<div className="h-64" aria-busy="true" />}>
+              <CalendarZoom
+                events={events}
+                selectedDate={selDate}
+                onSelectDate={(d) => setSelDate(selDate === d ? null : d)}
+                onPickEvent={(ev) => navigate(`/events/${ev.id}`)}
+              />
+            </Suspense>
             {selDate && selEvs.length > 0 && (
               <div className="mt-6">
                 <SecLabel className="mb-3">
@@ -202,6 +223,8 @@ export default function Dashboard() {
             )}
             {events.length === 0 && <Empty />}
           </div>
+        )}
+        </>
         )}
         <SiteFooter />
       </Wrap>
