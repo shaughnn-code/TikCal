@@ -61,9 +61,9 @@ export default function DateStrip({
           className="flex-1 min-w-0 h-11 pl-1 flex items-center gap-1.5 rounded-xl text-left
                      outline-none focus-visible:ring-2 focus-visible:ring-violet active:scale-[0.98] transition-transform"
         >
-          <h2 className="min-w-0 font-heading font-extrabold text-[14px] min-[360px]:text-[15px] text-[#eef6f7] truncate" aria-live="polite">
+          <span className="min-w-0 font-heading font-extrabold text-[14px] min-[360px]:text-[15px] text-[#eef6f7] truncate" aria-live="polite">
             {label}
-          </h2>
+          </span>
           <Icon
             name="caret-down-bold"
             size={13}
