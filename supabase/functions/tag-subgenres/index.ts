@@ -79,6 +79,9 @@ Deno.serve(async (req) => {
     .from('event_subgenres')
     .select('source, event_id, subgenre, text_hash')
     .in('event_id', events.map((e) => e.id))
+    // Filter on the hash too: other callers' variants of the same ids can never
+    // crowd the matching rows out of the result.
+    .in('text_hash', Object.values(hashes))
   if (readErr) return json({ configured: true, tags, error: 'cache read failed' })
   for (const r of cached || []) {
     const key = eventKey(r.source, r.event_id)
