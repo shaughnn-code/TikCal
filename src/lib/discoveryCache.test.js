@@ -129,3 +129,35 @@ test('nycToday uses New York time, not UTC', () => {
   // 02:00 UTC on Nov 11 is still Nov 10 in New York.
   assert.equal(nycToday(Date.parse('2026-11-11T02:00:00Z')), '2026-11-10')
 })
+
+test('httpsUrl keeps plain https links and drops everything else', async () => {
+  const { httpsUrl } = await import('./discoveryCache.js')
+  assert.equal(httpsUrl('https://dice.fm/event/abc'), 'https://dice.fm/event/abc')
+  assert.equal(httpsUrl('javascript:alert(1)'), '')
+  assert.equal(httpsUrl('data:text/html,<b>x</b>'), '')
+  assert.equal(httpsUrl('http://dice.fm/event/abc'), '')
+  assert.equal(httpsUrl('https://user:pw@dice.fm/x'), '')
+  assert.equal(httpsUrl(null), '')
+  assert.equal(httpsUrl('not a url'), '')
+})
+
+test('raEventUrl only accepts site-relative paths that stay on ra.co', async () => {
+  const { raEventUrl } = await import('./discoveryCache.js')
+  assert.equal(raEventUrl('/events/123'), 'https://ra.co/events/123')
+  assert.equal(raEventUrl('@evil.com/x'), '')
+  assert.equal(raEventUrl('//evil.com/x'), '')
+  assert.equal(raEventUrl('.evil.com/x'), '')
+  assert.equal(raEventUrl('https://evil.com/x'), '')
+  assert.equal(raEventUrl(''), '')
+  assert.equal(raEventUrl(undefined), '')
+})
+
+test('mappers drop unsafe URLs but keep the event', async () => {
+  const { mapRaEvents, mapDiceEvents } = await import('./discoveryCache.js')
+  const ra = mapRaEvents({ data: { events: [{ id: 1, title: 'A', date: '2026-11-20T00:00:00.000', content_url: '@evil.com/x' }] } })
+  assert.equal(ra.length, 1)
+  assert.equal(ra[0].url, '')
+  const dice = mapDiceEvents({ data: { events: [{ id: 2, name: 'B', event_start_date: '2026-11-20T22:00:00Z', url: 'javascript:alert(1)' }] } })
+  assert.equal(dice.length, 1)
+  assert.equal(dice[0].url, '')
+})
