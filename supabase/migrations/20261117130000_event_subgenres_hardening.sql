@@ -9,6 +9,15 @@
 
 alter table public.event_subgenres add column if not exists text_hash text;
 
+-- Key the cache on the text too: tags for different text about the same event id
+-- live in separate rows, so one caller's text can never overwrite or replace the
+-- row that serves another caller. Rows tagged before this change have no hash;
+-- they are only a cache, so they are dropped and re-tagged on demand.
+delete from public.event_subgenres where text_hash is null;
+alter table public.event_subgenres alter column text_hash set not null;
+alter table public.event_subgenres drop constraint if exists event_subgenres_pkey;
+alter table public.event_subgenres add primary key (source, event_id, text_hash);
+
 create table if not exists public.jev_usage (
   user_id uuid not null,
   day     date not null default current_date,

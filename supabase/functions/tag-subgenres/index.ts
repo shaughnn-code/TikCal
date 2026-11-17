@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
     }
   }))
 
-  if (rows.length) await db.from('event_subgenres').upsert(rows, { onConflict: 'source,event_id' })
+  if (rows.length) await db.from('event_subgenres').upsert(rows, { onConflict: 'source,event_id,text_hash', ignoreDuplicates: true })
 
   const notTagged = failed + capped
   return json({ configured: true, tags, ...(notTagged ? { error: `${notTagged} event(s) not tagged` } : {}) })
