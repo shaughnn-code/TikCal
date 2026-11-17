@@ -4,16 +4,20 @@ import { fetchMyCrews } from '../lib/db.js'
 import {
   loadFriends, searchPeople, sendFriendRequest, acceptFriend, removeFriend,
   loadCrewInvites, createCrew, inviteToCrew, acceptCrewInvite, declineCrewInvite, loadCrewMembers,
+  loadBlockedIds,
   updateCrewColor, fetchCrewShowStats,
 } from '../lib/social.js'
 import { CREW_COLORS, DEFAULT_CREW_COLOR } from '../lib/constants.js'
 import { GridBg, Wrap, Inp, Btn, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
+import { CrewTabs } from '../components/CrewTabs.jsx'
+import SafetyMenu from '../components/SafetyMenu.jsx'
+import { withoutBlockedPeople } from '../lib/blocking.js'
 import { Icon, Totem } from '../components/icons.jsx'
 
 // Row of crew-color swatches. `value` is the selected hex; `onPick(hex)` fires
 // on click. Used both when starting a crew and recoloring one.
 const ColorPicker = ({ value, onPick }) => (
-  <div className="flex flex-wrap gap-2">
+  <div className="grid grid-cols-5 gap-3 w-fit sm:flex sm:flex-wrap sm:gap-2">
     {CREW_COLORS.map((c) => (
       <button
         key={c.hex}
@@ -57,7 +61,7 @@ const Row = ({ profile, right, tone = 'ice' }) => (
       <div className="min-w-0">
         <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{profile?.name || 'Someone'}</div>
         {profile?.favorite_venue && (
-          <div className="font-mono text-[10px] text-slate-500 truncate flex items-center gap-1">
+          <div className="font-mono text-[11px] text-slate-500 truncate flex items-center gap-1">
             <Icon name="map-pin" size={10} className="text-violet" /> {profile.favorite_venue}
           </div>
         )}
@@ -88,10 +92,12 @@ export default function Friends() {
   const [expanded, setExpanded] = useState(null)
   const [members, setMembers] = useState([])
   const [leaderboard, setLeaderboard] = useState([])
+  const [blocked, setBlocked] = useState(new Set())
 
   const reload = useCallback(async () => {
     try {
-      const [f, c, ci] = await Promise.all([loadFriends(user.id), fetchMyCrews(user.id), loadCrewInvites(user.id)])
+      const [f, c, ci, b] = await Promise.all([loadFriends(user.id), fetchMyCrews(user.id), loadCrewInvites(user.id), loadBlockedIds()])
+      setBlocked(b)
       setFriends(f.friends); setIncoming(f.incoming); setOutgoing(f.outgoing)
       setCrews(c); setCrewInvites(ci)
     } catch (e) { setErr(e.message) } finally { setLoading(false) }
@@ -103,14 +109,17 @@ export default function Friends() {
     if (query.trim().length < 2) { setResults([]); return }
     setSearching(true)
     const t = setTimeout(async () => {
-      try { setResults(await searchPeople(query, user.id)) }
+      try { setResults(withoutBlockedPeople(await searchPeople(query, user.id), blocked)) }
       catch (e) { setErr(e.message) } finally { setSearching(false) }
     }, 300)
     return () => clearTimeout(t)
-  }, [query, user.id])
+  }, [query, user.id, blocked])
 
   const friendIds = new Set(friends.map((f) => f.other?.id))
   const pendingIds = new Set([...outgoing, ...incoming].map((r) => r.other?.id))
+
+  // Report / block control shown beside another person's row.
+  const safety = (profile) => <SafetyMenu person={profile} onBlocked={() => reload()} />
 
   const guard = (fn) => async (...a) => { const { error } = await fn(...a); if (error) return setErr(error.message); reload() }
   const doSend = guard((id) => sendFriendRequest(id, user.id))
@@ -153,7 +162,7 @@ export default function Friends() {
   const tabChip = (id, label, count) => (
     <button
       onClick={() => setTab(id)}
-      className={`px-4 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
+      className={`px-4 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-all ${
         tab === id ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
       }`}
     >
@@ -165,6 +174,7 @@ export default function Friends() {
     <>
       <GridBg lite />
       <Wrap>
+        <CrewTabs />
         <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8] mb-5">Your Crew</h1>
         {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
 
@@ -179,16 +189,19 @@ export default function Friends() {
               <SecLabel className="mb-3">▸ Add people</SecLabel>
               <Inp value={query} onChange={setQuery} placeholder="Search by name…" />
               <div className="space-y-2 mt-3">
-                {searching && <p className="font-mono text-[10px] text-slate-600">Searching…</p>}
+                {searching && <p className="font-mono text-[11px] text-slate-600">Searching…</p>}
                 {results.map((p) => (
                   <Row key={p.id} profile={p} right={
-                    friendIds.has(p.id) ? <span className="font-mono text-[10px] text-slate-600">FRIENDS</span>
-                    : pendingIds.has(p.id) ? <span className="font-mono text-[10px] text-slate-600">PENDING</span>
-                    : <Btn variant="ice" onClick={() => doSend(p.id)} cls="!px-3 !py-2">Add</Btn>
+                    <div className="flex items-center gap-1">
+                      {friendIds.has(p.id) ? <span className="font-mono text-[11px] text-slate-600">FRIENDS</span>
+                      : pendingIds.has(p.id) ? <span className="font-mono text-[11px] text-slate-600">PENDING</span>
+                      : <Btn variant="ice" onClick={() => doSend(p.id)} cls="!px-3 !py-2">Add</Btn>}
+                      {safety(p)}
+                    </div>
                   } />
                 ))}
                 {query.trim().length >= 2 && !searching && results.length === 0 && (
-                  <p className="font-mono text-[10px] text-slate-600">No one found.</p>
+                  <p className="font-mono text-[11px] text-slate-600">No one found.</p>
                 )}
               </div>
             </section>
@@ -202,6 +215,7 @@ export default function Friends() {
                       <div className="flex gap-2">
                         <Btn variant="mint" onClick={() => doAccept(r.id)} cls="!px-3 !py-2">Accept</Btn>
                         <Btn variant="ghost" onClick={() => doRemove(r.id)} cls="!px-3 !py-2">Ignore</Btn>
+                        {safety(r.other)}
                       </div>
                     } />
                   ))}
@@ -212,12 +226,15 @@ export default function Friends() {
             <section>
               <SecLabel className="mb-3">▸ Friends · {friends.length}</SecLabel>
               {friends.length === 0 ? (
-                <p className="font-mono text-[10px] text-slate-600">No friends yet. Search above to add some.</p>
+                <p className="font-mono text-[11px] text-slate-600">No friends yet. Search above to add some.</p>
               ) : (
                 <div className="space-y-2">
                   {friends.map((r) => (
                     <Row key={r.id} profile={r.other} right={
-                      <Btn variant="ghost" onClick={() => doRemove(r.id)} cls="!px-3 !py-2">Remove</Btn>
+                      <div className="flex items-center gap-1">
+                        <Btn variant="ghost" onClick={() => doRemove(r.id)} cls="!px-3 !py-2">Remove</Btn>
+                        {safety(r.other)}
+                      </div>
                     } />
                   ))}
                 </div>
@@ -249,12 +266,13 @@ export default function Friends() {
                         <Icon name="users-three" size={18} className="text-mint" />
                         <div>
                           <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{inv.crews?.name}</div>
-                          <div className="font-mono text-[10px] text-slate-500 truncate">from {inv.inviter?.name || 'a friend'}</div>
+                          <div className="font-mono text-[11px] text-slate-500 truncate">from {inv.inviter?.name || 'a friend'}</div>
                         </div>
                       </div>
                       <div className="flex gap-2 shrink-0">
                         <Btn variant="mint" onClick={() => doAcceptCrew(inv.id)} cls="!px-3 !py-2">Join</Btn>
                         <Btn variant="ghost" onClick={() => doDeclineCrew(inv.id)} cls="!px-3 !py-2">Decline</Btn>
+                        {inv.inviter && safety({ ...inv.inviter, id: inv.inviter_id })}
                       </div>
                     </HudBox>
                   ))}
@@ -279,7 +297,7 @@ export default function Friends() {
             <section>
               <SecLabel className="mb-3">▸ Your crews · {crews.length}</SecLabel>
               {crews.length === 0 ? (
-                <p className="font-mono text-[10px] text-slate-600">No crews yet. Create one or accept an invite.</p>
+                <p className="font-mono text-[11px] text-slate-600">No crews yet. Create one or accept an invite.</p>
               ) : (
                 <div className="space-y-2">
                   {crews.map((c) => {
@@ -294,9 +312,9 @@ export default function Friends() {
                               style={{ backgroundColor: c.color || '#4cc9f0', boxShadow: `0 0 7px ${c.color || '#4cc9f0'}` }}
                             />
                             {c.name}
-                            {c.role === 'owner' && <span className="font-mono text-[9px] text-slate-600">OWNER</span>}
+                            {c.role === 'owner' && <span className="font-mono text-[11px] text-slate-600">OWNER</span>}
                           </span>
-                          <span className="font-mono text-[10px] text-slate-600">{isOpen ? '−' : 'MANAGE'}</span>
+                          <span className="font-mono text-[11px] text-slate-600">{isOpen ? '−' : 'MANAGE'}</span>
                         </button>
                         {isOpen && (
                           <div className="px-4 pb-4 space-y-4 border-t border-white/[0.06] pt-4">
@@ -310,7 +328,7 @@ export default function Friends() {
                               <SecLabel className="mb-2">Members · {members.length}</SecLabel>
                               <div className="flex flex-wrap gap-2">
                                 {members.map((m) => (
-                                  <span key={m.user_id} className="font-mono text-[10px] text-slate-300 bg-white/5 rounded px-2.5 py-1 flex items-center gap-1.5">
+                                  <span key={m.user_id} className="font-mono text-[11px] text-slate-300 bg-white/5 rounded px-2.5 py-1 flex items-center gap-1.5">
                                     {m.profile?.totem && <Totem icon={m.profile.totem} size={14} />} {m.profile?.name || 'Member'}
                                   </span>
                                 ))}
@@ -337,18 +355,21 @@ export default function Friends() {
                                         >
                                           <span className="flex items-center gap-1.5 min-w-0">
                                             <span className={`shrink-0 flex items-center ${isChief ? 'text-mint' : 'text-slate-600'}`}>
-                                              {isChief ? <Icon name="crown-simple" size={12} /> : <span className="font-mono text-[10px]">#{i + 1}</span>}
+                                              {isChief ? <Icon name="crown-simple" size={12} /> : <span className="font-mono text-[11px]">#{i + 1}</span>}
                                             </span>
                                             {m.profile?.totem && <Totem icon={m.profile.totem} size={12} className="shrink-0" />}
                                             <span className="min-w-0">
-                                              <div className="font-mono text-[10px] text-slate-300 truncate">{m.profile?.name || 'Member'}</div>
-                                              <div className={`font-mono text-[9px] italic truncate ${isChief ? 'text-mint/80' : 'text-violet/70'}`}>
+                                              <div className="font-mono text-[11px] text-slate-300 truncate">{m.profile?.name || 'Member'}</div>
+                                              <div className={`font-mono text-[11px] italic truncate ${isChief ? 'text-mint/80' : 'text-violet/70'}`}>
                                                 {rankTitle(i, members.length, stat.shows_count)}
                                               </div>
                                             </span>
                                           </span>
-                                          <span className="font-mono text-[10px] text-slate-500 shrink-0">
-                                            {stat.shows_count} show{stat.shows_count === 1 ? '' : 's'}
+                                          <span className="flex items-center gap-1 shrink-0">
+                                            <span className="font-mono text-[11px] text-slate-500">
+                                              {stat.shows_count} show{stat.shows_count === 1 ? '' : 's'}
+                                            </span>
+                                            {m.user_id !== user.id && safety({ ...m.profile, id: m.user_id })}
                                           </span>
                                         </div>
                                       )
@@ -359,7 +380,7 @@ export default function Friends() {
                             <div>
                               <SecLabel className="mb-2">Invite a friend</SecLabel>
                               {friends.length === 0 ? (
-                                <p className="font-mono text-[10px] text-slate-600">Add friends first, then invite them here.</p>
+                                <p className="font-mono text-[11px] text-slate-600">Add friends first, then invite them here.</p>
                               ) : (
                                 <div className="space-y-2">
                                   {friends.filter((f) => !memberIds.has(f.other?.id)).map((f) => (
@@ -368,7 +389,7 @@ export default function Friends() {
                                     } />
                                   ))}
                                   {friends.filter((f) => !memberIds.has(f.other?.id)).length === 0 && (
-                                    <p className="font-mono text-[10px] text-slate-600">All your friends are already in this crew.</p>
+                                    <p className="font-mono text-[11px] text-slate-600">All your friends are already in this crew.</p>
                                   )}
                                 </div>
                               )}

@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchVisibleEvents } from '../lib/db.js'
+import { todayYmd } from '../lib/calendar/agenda.js'
+import useMediaQuery from '../components/useMediaQuery.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { EventCard } from '../components/EventCard.jsx'
-import CalendarZoom from '../components/calendar/CalendarZoom.jsx'
+// Each layout is its own chunk: phones never download the zoom calendar and
+// desktop never downloads the agenda.
+const CalendarZoom = lazy(() => import('../components/calendar/CalendarZoom.jsx'))
+const PhoneCalendar = lazy(() => import('../components/calendar/PhoneCalendar.jsx'))
 import SiteFooter from '../components/SiteFooter.jsx'
 import DanceFloorLoader from '../components/DanceFloorLoader.jsx'
 
@@ -20,6 +25,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
   const [selDate, setSelDate] = useState(null)
+  // Desktop (>= lg) keeps the zoom calendar + Upcoming tab. Below lg the
+  // agenda calendar replaces both, so there is no tab to pick.
+  const wide = useMediaQuery('(min-width: 1024px)')
   const [tab, setTab] = useState('calendar')
   const [introDone, setIntroDone] = useState(introPlayed)
 
@@ -36,7 +44,7 @@ export default function Dashboard() {
 
   const ownerLabel = (e) => (e.owner_id === user.id ? null : e.owner?.name?.split(' ')[0] || 'Friend')
 
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayYmd() // local date; toISOString() is UTC and flips at ~7pm ET
   const upcoming = events.filter((e) => e.event_date >= today)
   const past = events.filter((e) => e.event_date < today)
   const selEvs = selDate ? events.filter((e) => e.event_date === selDate) : []
@@ -102,7 +110,7 @@ export default function Dashboard() {
               <div className={`font-display font-extrabold text-2xl ${s.tone === 'mint' ? 'text-mint' : 'text-[#e8f4f8]'}`}>
                 {String(s.n).padStart(2, '0')}
               </div>
-              <div className="font-mono text-[9px] text-slate-500 uppercase mt-1 flex items-center justify-center gap-1">
+              <div className="font-mono text-[11px] text-slate-500 uppercase mt-1 flex items-center justify-center gap-1">
                 <Icon name={s.i} size={10} className={s.tone === 'mint' ? 'text-mint' : 'text-violet'} /> {s.l}
               </div>
             </HudBox>
@@ -114,7 +122,7 @@ export default function Dashboard() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-6">
             <SecLabel>Crews</SecLabel>
             {crewLegend.map((c) => (
-              <span key={c.crew_id} className="flex items-center gap-1.5 font-mono text-[10px] text-slate-400">
+              <span key={c.crew_id} className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
                 <span
                   className="w-2.5 h-2.5 rounded-full"
                   style={{ backgroundColor: c.color || '#4cc9f0', boxShadow: `0 0 6px ${c.color || '#4cc9f0'}` }}
@@ -125,13 +133,26 @@ export default function Dashboard() {
           </div>
         )}
 
+        {!wide ? (
+          <Suspense fallback={<div className="h-64" aria-busy="true" />}>
+            <PhoneCalendar
+              events={events}
+              userId={user.id}
+              selectedDate={selDate}
+              onSelectDate={setSelDate}
+              ownerLabel={ownerLabel}
+              empty={<Empty />}
+            />
+          </Suspense>
+        ) : (
+        <>
         {/* tab toggle */}
         <div className="flex gap-1 mb-6 bg-white/[0.04] rounded p-1 w-fit">
           {['upcoming', 'calendar'].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
+              className={`px-4 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-all ${
                 tab === t ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
               }`}
             >
@@ -142,12 +163,14 @@ export default function Dashboard() {
 
         {tab === 'calendar' ? (
           <div>
-            <CalendarZoom
-              events={events}
-              selectedDate={selDate}
-              onSelectDate={(d) => setSelDate(selDate === d ? null : d)}
-              onPickEvent={(ev) => navigate(`/events/${ev.id}`)}
-            />
+            <Suspense fallback={<div className="h-64" aria-busy="true" />}>
+              <CalendarZoom
+                events={events}
+                selectedDate={selDate}
+                onSelectDate={(d) => setSelDate(selDate === d ? null : d)}
+                onPickEvent={(ev) => navigate(`/events/${ev.id}`)}
+              />
+            </Suspense>
             {selDate && selEvs.length > 0 && (
               <div className="mt-6">
                 <SecLabel className="mb-3">
@@ -167,11 +190,11 @@ export default function Dashboard() {
             {/* Next-up hero */}
             {next && (
               <HudBox hero className="p-4 mb-6 cursor-pointer" onClick={() => navigate(`/events/${next.id}`)}>
-                <div className="font-mono text-[9px] tracking-[0.12em] text-violet">
+                <div className="font-mono text-[11px] tracking-[0.12em] text-violet">
                   ▸ NEXT UP {nextCountdown === 0 ? '· TONIGHT' : `· T-${nextCountdown}D`}
                 </div>
                 <div className="font-display font-bold text-xl text-[#e8f4f8] mt-1.5">{next.title}</div>
-                <div className="font-mono text-[10px] text-slate-500 mt-1 uppercase flex items-center gap-1.5">
+                <div className="font-mono text-[11px] text-slate-500 mt-1 uppercase flex items-center gap-1.5">
                   {next.artist && <span>{next.artist}</span>}
                   {next.venue && <><span className="text-slate-700">·</span><span>{next.venue}</span></>}
                 </div>
@@ -200,6 +223,8 @@ export default function Dashboard() {
             )}
             {events.length === 0 && <Empty />}
           </div>
+        )}
+        </>
         )}
         <SiteFooter />
       </Wrap>

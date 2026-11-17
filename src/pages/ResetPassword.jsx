@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { validatePassword } from '../lib/validation.js'
 import { GridBg, Logo, Inp, Btn, Kicker, Spinner } from '../components/ui.jsx'
+import { Icon } from '../components/icons.jsx'
 
 // Landing page for the password-reset email link. Supabase establishes a
 // recovery session from the URL automatically; here the user sets a new password.
@@ -45,7 +46,7 @@ export default function ResetPassword() {
             <Link to="/forgot" className="text-violet hover:underline text-sm">Request a new one →</Link>
           </div>
         ) : done ? (
-          <p className="text-mint text-sm text-center py-4">✓ Password updated — signing you in…</p>
+          <p className="text-mint text-sm text-center py-4"><Icon name="check" size={12} className="inline -mt-0.5" /> Password updated — signing you in…</p>
         ) : (
           <form onSubmit={submit} className="space-y-4">
             <Inp label="New password" type="password" value={pw} onChange={setPw} placeholder="Min. 8 characters, 1 letter + 1 number" required />

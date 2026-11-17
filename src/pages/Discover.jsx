@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { fetchTicketmaster, fetchRA, fetchDice, fetchMyArtists, fetchSubgenreTags, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
@@ -11,6 +11,24 @@ import DateRangePicker from '../components/DateRangePicker.jsx'
 
 const norm = (s) => (s || '').trim().toLowerCase()
 
+// Each catalog is fetched on its own clock. One slow or dead source used to
+// hold the whole page on the loading blob (Promise.all with no timeout).
+// RA and DICE are live scrapes (parse.bot) and routinely take far longer than
+// Ticketmaster's API; they get a long clock because the page no longer waits
+// on them -- their shows just join the list when they land.
+const FETCHERS = [
+  { key: 'ticketmaster', label: 'Ticketmaster', fetch: fetchTicketmaster, timeoutMs: 12000 },
+  { key: 'ra', label: 'RA', fetch: fetchRA, timeoutMs: 60000 },
+  { key: 'dice', label: 'DICE', fetch: fetchDice, timeoutMs: 60000 },
+]
+const withTimeout = (promise, ms) =>
+  Promise.race([
+    promise,
+    new Promise((resolve) =>
+      setTimeout(() => resolve({ configured: true, events: [], error: 'timed out' }), ms),
+    ),
+  ])
+
 const SOURCES = [
   { value: 'all', label: 'All' },
   { value: 'ticketmaster', label: 'Ticketmaster' },
@@ -22,7 +40,8 @@ export default function Discover() {
   const { user, profile, refreshProfile } = useAuth()
   const [params, setParams] = useSearchParams()
 
-  const [tm, setTm] = useState({ configured: true, events: [] })
+  // Raw { configured, events, error? } per source key, filled in as each lands.
+  const [results, setResults] = useState({})
   const [artists, setArtists] = useState([])
   const [loading, setLoading] = useState(true)
   const [added, setAdded] = useState(() => new Set())
@@ -41,40 +60,68 @@ export default function Discover() {
   // Ask Jev (via the tag-subgenres function) for the subgenre of electronic
   // events the keyword rules can't place. Best effort: events stay usable, just
   // untagged, if this fails or isn't deployed yet. Results are cached server-side.
-  const tagInBackground = useCallback(async (events) => {
-    const need = events.filter(needsJevTag)
-    for (let i = 0; i < need.length && i < 300; i += 100) {
+  // Sources answer one at a time, so this runs as each batch arrives; events
+  // already asked about are remembered (at most 300 per page load).
+  const askedTags = useRef(new Set())
+  const tagInBackground = async (events, isActive) => {
+    const need = []
+    for (const e of events) {
+      const k = `${e.source}:${e.id}`
+      if (!needsJevTag(e) || askedTags.current.has(k) || askedTags.current.size + need.length >= 300) continue
+      need.push(e)
+    }
+    need.forEach((e) => askedTags.current.add(`${e.source}:${e.id}`))
+    for (let i = 0; i < need.length; i += 100) {
       const got = await fetchSubgenreTags(need.slice(i, i + 100))
+      if (!isActive()) return
       if (Object.keys(got).length) setTags((prev) => ({ ...prev, ...got }))
     }
-  }, [])
-
-  const load = useCallback(() => {
-    Promise.all([fetchTicketmaster({}), fetchRA({}), fetchDice({}), fetchMyArtists(user.id)])
-      .then(([t, ra, dice, a]) => {
-        const tag = (src) => (e) => ({ ...e, source: src, key: `${src}-${e.id}` })
-        const merged = [
-          ...t.events.map(tag('ticketmaster')),
-          ...ra.events.map(tag('ra')),
-          ...dice.events.map(tag('dice')),
-        ]
-        // Some sources (RA in particular) repeat the same event across
-        // paginated/overlapping queries — dedupe by source+id so a stray
-        // duplicate can't collide on its React key and leave stale cards
-        // behind when the list re-filters.
-        const seen = new Set()
-        const events = merged.filter((e) => (seen.has(e.key) ? false : (seen.add(e.key), true)))
-        setTm({ configured: t.configured || ra.configured || dice.configured, events })
-        setArtists(a)
-        tagInBackground(events)
-      })
-      .catch((e) => setErr(e.message))
-      .finally(() => setLoading(false))
-  }, [user.id, tagInBackground])
+  }
 
   useEffect(() => {
-    load()
-  }, [load])
+    let active = true
+    fetchMyArtists(user.id).then((list) => active && setArtists(list))
+    for (const f of FETCHERS) {
+      withTimeout(f.fetch({}), f.timeoutMs).then((res) => {
+        if (!active) return
+        setResults((prev) => ({ ...prev, [f.key]: res }))
+        // Show the page as soon as any source has answered; the rest fill in.
+        setLoading(false)
+      })
+    }
+    return () => {
+      active = false
+    }
+  }, [user.id])
+
+  const tm = useMemo(() => {
+    const merged = FETCHERS.flatMap((f) =>
+      (results[f.key]?.events || []).map((e) => ({ ...e, source: f.key, key: `${f.key}-${e.id}` })),
+    )
+    // Some sources (RA in particular) repeat the same event across
+    // paginated/overlapping queries — dedupe by source+id so a stray
+    // duplicate can't collide on its React key and leave stale cards
+    // behind when the list re-filters.
+    const seen = new Set()
+    const events = merged.filter((e) => (seen.has(e.key) ? false : (seen.add(e.key), true)))
+    const settled = FETCHERS.filter((f) => results[f.key])
+    return {
+      // Until something answers, assume configured so the setup notice doesn't flash.
+      configured: settled.length === 0 || settled.some((f) => results[f.key].configured),
+      events,
+    }
+  }, [results])
+
+  useEffect(() => {
+    let active = true
+    tagInBackground(tm.events, () => active)
+    return () => {
+      active = false
+    }
+  }, [tm.events])
+
+  const waitingOn = FETCHERS.filter((f) => !results[f.key]).map((f) => f.label)
+  const failed = FETCHERS.filter((f) => results[f.key]?.error).map((f) => `${f.label}: ${results[f.key].error}`)
 
   // Return from Spotify OAuth (…/discover?spotify=connected|denied|error).
   useEffect(() => {
@@ -184,7 +231,7 @@ export default function Discover() {
     const actions = (
       <div className={tile ? 'flex items-center justify-between gap-2 mt-2' : 'flex items-center gap-3'}>
         {added.has(e.id) ? (
-          <span className="font-mono text-[10px] text-mint flex items-center gap-1">
+          <span className="font-mono text-[11px] text-mint flex items-center gap-1">
             <Icon name="check-circle" size={12} /> Added
           </span>
         ) : (
@@ -193,7 +240,7 @@ export default function Discover() {
           </Btn>
         )}
         {e.url && (
-          <a href={e.url} target="_blank" rel="noopener noreferrer" className="font-mono text-[9px] text-slate-500 hover:text-violet text-center underline">
+          <a href={e.url} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-slate-500 hover:text-violet text-center underline">
             Tickets
           </a>
         )}
@@ -206,12 +253,12 @@ export default function Discover() {
           {img}
           <div className="min-w-0 mt-2">
             {highlight && e.matched && (
-              <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
+              <div className="font-mono text-[11px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
                 <Icon name="heart" size={10} /> {e.matched}
               </div>
             )}
             <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{e.title}</div>
-            <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
+            <div className="font-mono text-[11px] text-slate-400 truncate mt-0.5">
               {fmtDate(e.date)}
               {e.venue && <span className="text-slate-700"> · </span>}
               {e.venue}
@@ -228,14 +275,14 @@ export default function Discover() {
           {img}
           <div className="flex-1 min-w-0">
             {highlight && e.matched && (
-              <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
+              <div className="font-mono text-[11px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1">
                 <Icon name="heart" size={10} /> {e.matched}
               </div>
             )}
             {/* line-clamp (not truncate) -- a single-line cutoff was chopping
                 real titles mid-word on narrow screens ("Hayley Williams w/ M..."). */}
             <div className="font-display font-bold text-sm text-[#e8f4f8] line-clamp-2">{e.title}</div>
-            <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
+            <div className="font-mono text-[11px] text-slate-400 truncate mt-0.5">
               {fmtDate(e.date)}
               {e.venue && <span className="text-slate-700"> · </span>}
               {e.venue}
@@ -266,6 +313,12 @@ export default function Discover() {
         </p>
 
         {err && <p className="text-red-400 text-xs mb-4">{err}</p>}
+        {waitingOn.length > 0 && (
+          <p className="font-mono text-[11px] text-slate-500 mb-4" role="status">Still loading {waitingOn.join(', ')}…</p>
+        )}
+        {failed.length > 0 && (
+          <p className="font-mono text-[11px] text-amber-400/80 mb-4">Couldn’t load {failed.join(' · ')}</p>
+        )}
 
         {/* Spotify connect / status */}
         {!spotifyOn ? (
@@ -281,16 +334,15 @@ export default function Discover() {
             </Btn>
           </HudBox>
         ) : (
-          <div className="font-mono text-[10px] text-mint mb-5 flex items-center gap-1.5">
+          <div className="font-mono text-[11px] text-mint mb-5 flex items-center gap-1.5">
             <Icon name="spotify-logo" size={12} /> {profile.spotify_name} · {artists.length} artists tracked
           </div>
         )}
 
         {!tm.configured && (
           <HudBox className="p-4 mb-6">
-            <p className="font-mono text-[11px] text-slate-400">
-              Live show discovery isn’t switched on yet. Add a Ticketmaster, RA, or DICE API key to the{' '}
-              <span className="text-violet">ticketmaster-events</span> / <span className="text-violet">ra-events</span> / <span className="text-violet">dice-events</span> functions to light this up.
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Show discovery is unavailable right now. Check back in a bit.
             </p>
           </HudBox>
         )}
@@ -305,7 +357,7 @@ export default function Discover() {
                   <button
                     key={s.value}
                     onClick={() => setDraft((d) => ({ ...d, source: s.value }))}
-                    className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all ${
+                    className={`px-3 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-all ${
                       draft.source === s.value ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
                     }`}
                   >
@@ -315,7 +367,7 @@ export default function Discover() {
               </div>
             </div>
 
-            <div className="min-w-[200px]">
+            <div className="w-full sm:w-auto sm:min-w-[200px]">
               <SearchSel
                 label="Venue"
                 value={draft.venue}
@@ -338,7 +390,7 @@ export default function Discover() {
             </Btn>
 
             {hasFilters && (
-              <button onClick={clearFilters} className="font-mono text-[10px] text-slate-500 hover:text-white underline">
+              <button onClick={clearFilters} className="font-mono text-[11px] text-slate-500 hover:text-white underline">
                 Clear filters
               </button>
             )}
@@ -372,7 +424,7 @@ export default function Discover() {
           <div className="flex gap-1 bg-white/[0.04] rounded p-1 w-fit">
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
                 view === 'list' ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
               }`}
             >
@@ -380,7 +432,7 @@ export default function Discover() {
             </button>
             <button
               onClick={() => setView('grid')}
-              className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-all flex items-center gap-1.5 ${
                 view === 'grid' ? 'bg-white/10 text-violet' : 'text-slate-600 hover:text-slate-300'
               }`}
             >
@@ -399,8 +451,8 @@ export default function Discover() {
         <section>
           <SecLabel className="mb-3">▸ All NYC shows{rest.length ? ` · ${rest.length}` : ''}</SecLabel>
           {rest.length === 0 && forYou.length === 0 ? (
-            <p className="font-mono text-[10px] text-slate-600">
-              {tm.configured ? 'No shows found right now.' : 'Discovery is not configured yet.'}
+            <p className="font-mono text-[11px] text-slate-600">
+              {waitingOn.length ? 'Loading shows…' : 'No shows found right now.'}
             </p>
           ) : (
             <ShowList items={rest} />

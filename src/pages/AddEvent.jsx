@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, Fragment } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../supabaseClient.js'
@@ -127,7 +127,10 @@ export default function AddEvent() {
       }`}
     >
       <span className="text-sm text-[#e8f4f8]">{label}</span>
-      <span className={`font-mono text-[10px] ${active ? 'text-mint' : 'text-slate-600'}`}>{state}</span>
+      <span className={`font-mono text-[11px] inline-flex items-center gap-1 ${active ? 'text-mint' : 'text-slate-600'}`}>
+        {active && <Icon name="check" size={12} />}
+        {state}
+      </span>
     </button>
   )
 
@@ -148,12 +151,12 @@ export default function AddEvent() {
           <Inp label="Event / Night Title" value={form.title} onChange={set('title')} placeholder="e.g. Open Air" required />
           <Inp label="Artist(s)" value={form.artist} onChange={set('artist')} placeholder="e.g. FJAAK" />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Inp label="Date" type="date" value={form.event_date} onChange={set('event_date')} required />
             <VenuePicker label="Venue" value={form.venue} onChange={set('venue')} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Inp label="Start Time (optional)" type="time" value={form.start_time} onChange={set('start_time')} />
               {!form.start_time && form.event_date && (form.artist || form.title) && (
@@ -161,14 +164,14 @@ export default function AddEvent() {
                   type="button"
                   onClick={suggestTime}
                   disabled={suggesting}
-                  className="mt-1.5 font-mono text-[10px] text-violet hover:text-iris disabled:opacity-50 transition-colors"
+                  className="mt-1.5 font-mono text-[11px] text-violet hover:text-iris disabled:opacity-50 transition-colors"
                 >
                   {suggesting ? 'Searching…' : 'Suggest time from Ticketmaster'}
                 </button>
               )}
               {suggestion && (
                 suggestion.time ? (
-                  <div className="mt-1.5 flex items-center gap-2 font-mono text-[10px] text-slate-400">
+                  <div className="mt-1.5 flex items-center gap-2 font-mono text-[11px] text-slate-400">
                     Suggested <span className="text-[#e8f4f8] font-bold">{suggestion.time}</span>
                     <button type="button" onClick={() => { set('start_time')(suggestion.time); setSuggestion(null) }} className="text-mint hover:text-mint/80">
                       Use
@@ -178,7 +181,7 @@ export default function AddEvent() {
                     </button>
                   </div>
                 ) : (
-                  <p className="mt-1.5 font-mono text-[10px] text-slate-600">No match found on Ticketmaster.</p>
+                  <p className="mt-1.5 font-mono text-[11px] text-slate-600">No match found on Ticketmaster.</p>
                 )
               )}
             </div>
@@ -199,12 +202,12 @@ export default function AddEvent() {
               {preview ? (
                 <div>
                   <img src={preview} alt="Preview" className="max-h-28 mx-auto rounded object-cover mb-2" />
-                  <p className="font-mono text-[10px] text-slate-500">Click to change</p>
+                  <p className="font-mono text-[11px] text-slate-500">Click to change</p>
                 </div>
               ) : (
                 <div className="text-slate-600">
                   <Icon name="camera" size={26} className="mx-auto mb-2 opacity-50" />
-                  <p className="font-mono text-[10px]">Upload flyer or screenshot</p>
+                  <p className="font-mono text-[11px]">Upload flyer or screenshot</p>
                 </div>
               )}
             </div>
@@ -215,9 +218,9 @@ export default function AddEvent() {
           <div>
             <SecLabel className="mb-3">Who can see this?</SecLabel>
             <div className="space-y-2">
-              {audienceBtn(shareFriends, () => setShareFriends((s) => !s), 'All my friends', shareFriends ? '✓ SHARED' : 'PRIVATE')}
-              {crews.map((c) =>
-                audienceBtn(
+              {audienceBtn(shareFriends, () => setShareFriends((s) => !s), 'All my friends', shareFriends ? 'SHARED' : 'PRIVATE')}
+              {crews.map((c) => (
+                <Fragment key={c.id}>{audienceBtn(
                   selCrews.has(c.id),
                   () => toggleCrew(c.id),
                   <span className="flex items-center gap-2">
@@ -227,11 +230,12 @@ export default function AddEvent() {
                     />
                     {c.name}
                   </span>,
-                  selCrews.has(c.id) ? '✓ SHARED' : 'ADD',
-                ),
+                  selCrews.has(c.id) ? 'SHARED' : 'ADD',
+                )}</Fragment>
+              )
               )}
             </div>
-            <p className="font-mono text-[10px] text-slate-600 mt-2">Leave everything off to keep this show private to you.</p>
+            <p className="font-mono text-[11px] text-slate-600 mt-2">Leave everything off to keep this show private to you.</p>
           </div>
 
           {err && <p className="text-red-400 text-xs">{err}</p>}

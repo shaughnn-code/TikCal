@@ -193,12 +193,10 @@ The label role isn't one fixed size — this is a dense HUD-style UI, and
 mono labels step down further depending on how crowded the surface is.
 Documented steps, smallest to largest:
 
-- **9px** — the tightest caption: popover "who's in" chips, secondary
-  meta lines packed next to other content (`EventDetail`).
-- **10px** — the most common size: button micro-labels, popover body
-  text, form helper/suggestion text (`AddEvent`, `EventPopover`,
-  `MonthView`/`WeekView` chip meta).
-- **11px** — the `SecLabel` default: section headers, primary captions.
+- **11px** — the floor, and the `SecLabel` default: section headers,
+  primary captions, popover chips, button micro-labels, calendar chip meta,
+  tab-bar labels. Nothing in the app renders below 11px; the old 9px and
+  10px steps were unreadable on a phone at arm's length.
 - **12.5px** — chip/badge text one step up from caption, still mono but
   reads as a small label rather than a footnote (`MonthView`/`WeekView`
   event chips).
@@ -206,7 +204,9 @@ Documented steps, smallest to largest:
   carry near-body weight (e.g. `EventCard`'s date/venue row).
 
 Pick the step by local density, not by component type — the same "venue
-name" string is 10px in a tight popover and 13px in a spacious card row.
+name" string is 11px in a tight popover and 13px in a spacious card row.
+If a dense surface overflows at 11px, fix the layout (truncate, wrap, drop
+a secondary line), never go back under the floor.
 
 **Section Headline** (Syne, extrabold, 26px, leading-none): the recurring
 view-title heading — `Week of Aug 16–22`, `August 2026` — used identically
@@ -310,6 +310,30 @@ not the default.
   the quieter of the two focus treatments (buttons/cards get the ring).
 - **Label:** always a `SecLabel` mono uppercase caption above the field,
   never a placeholder-only field.
+
+### App Navigation (`Nav`)
+- **Phones (< `sm`):** a fixed bottom tab bar with all six destinations
+  (Cal / Find / Plan / Crew / Sync / You). Each cell is an icon in a
+  46×32 pill over an 11px mono uppercase label. The bar pads itself clear
+  of the home indicator (`--sab`) and hides while a field has focus so it
+  never rides the keyboard. The top bar keeps only the logo and sign out.
+- **`sm` and up:** the same items sit inline in the sticky top bar as
+  icon + label pills.
+- **Active state:** every tab uses the one aurora→violet fill (plus a
+  violet glow on phones). Tabs never get their own hues: per-tab colors
+  would compete with crew/RSVP data hues (Chrome-Only Rule).
+- The items render once; the two layouts are CSS only, so Tour's
+  `[data-tour="nav-*"]` selectors always hit the visible element.
+
+### Event Hero (`StageHero`)
+- The event-detail header is a stage seen from the floor: light beams
+  fanning up behind a crowd silhouette, fading into `ink`. It replaces the
+  old title row.
+- Beams and floor wash are tinted with the event's own hue
+  (`getEventAccent`: crew color, else artist hash) against the aurora
+  bloom, never a fixed cyan. A safe `flyer_url` replaces the drawn stage.
+- Overlay: a 44px glass back button, a mono countdown · crew kicker with a
+  hue dot, then the title in Syne extrabold 34px (40px from `sm`).
 
 ### Navigation / Rail (`CalRail`)
 - View-tab buttons, Today button, and prev/next rail buttons share the

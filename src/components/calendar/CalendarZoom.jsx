@@ -13,9 +13,9 @@ const STEP_OFFSET = 28 // px the incoming/outgoing content slides, per axis
 const WHEEL_THRESHOLD = 40 // accumulated px before a pinch counts as one step
 const WHEEL_COOLDOWN_MS = 400
 
-// Month view swipes/arrow-keys vertically (deliberate, unusual axis); Week
-// and Day swipe/arrow-key horizontally.
-const AXIS = { month: 'y', week: 'x', day: 'x' }
+// Every view swipes/arrow-keys horizontally. Month used to step vertically,
+// which fought the page scroll on phones.
+const AXIS = { month: 'x', week: 'x', day: 'x' }
 
 // Translate vector for the OUTGOING content on a step; the incoming
 // content uses the mirror (negated) vector, so both sides read as one
@@ -158,7 +158,7 @@ export default function CalendarZoom({ events = [], selectedDate, onSelectDate, 
   const stepIn = stepOut ? { tx: -stepOut.tx, ty: -stepOut.ty } : null
 
   return (
-    <div className="flex flex-col lg:flex-row rounded-2xl border border-line bg-[#0a0d10] overflow-hidden">
+    <div data-popover-bounds className="flex flex-col lg:flex-row rounded-2xl border border-line bg-[#0a0d10] overflow-hidden">
       <CalRail view={view} focus={focus} onView={transitionTo} onStep={step} onToday={() => setFocus(new Date())} />
 
       <div

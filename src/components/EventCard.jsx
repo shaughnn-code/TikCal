@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { getEventAccent, getInitials, rsvpByValue } from '../lib/constants.js'
 import { Icon } from './icons.jsx'
+import { todayYmd } from '../lib/calendar/agenda.js'
 
 // One event row, HUD-styled. `event` uses DB fields (event_date, owner_id…) and
 // may carry hydrated `crews` (with color) + `rsvps` from fetchVisibleEvents.
 export const EventCard = ({ event, ownerLabel }) => {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayYmd() // local, not UTC: tonight's show isn't "past" at 8pm
   const isPast = event.event_date < today
   const s = getEventAccent(event)
 
@@ -67,37 +68,37 @@ export const EventCard = ({ event, ownerLabel }) => {
               </span>
             )}
           </div>
-          <div className="font-mono text-[11px] text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
-            <span>{fmt}</span>
+          <div className="font-mono text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5 min-w-0">
+            <span className="shrink-0">{fmt}</span>
             {event.venue && (
               <>
-                <span className="text-slate-700">·</span>
-                <span className="uppercase">{event.venue}</span>
+                <span className="text-slate-700 shrink-0">·</span>
+                <span className="uppercase truncate min-w-0">{event.venue}</span>
               </>
             )}
             {ownerLabel && (
               <>
-                <span className="text-slate-700">·</span>
-                <span className="text-violet/80 normal-case flex items-center gap-0.5">
+                <span className="text-slate-700 shrink-0">·</span>
+                <span className="text-violet/80 normal-case flex items-center gap-0.5 shrink-0">
                   <Icon name="users-three" size={12} /> {ownerLabel}
                 </span>
               </>
             )}
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
+        <div className="flex flex-col items-end gap-1 shrink-0 whitespace-nowrap">
           {countdown && !isPast && (
             <span className="font-mono text-[12px] font-semibold" style={{ color: s.color }}>
               {countdown}
             </span>
           )}
           {inCount > 0 && (
-            <span className="font-mono text-[10px] text-mint flex items-center gap-0.5">
+            <span className="font-mono text-[11px] text-mint flex items-center gap-0.5">
               <Icon name="check-circle" size={11} /> {inCount} in
             </span>
           )}
           {mine && (
-            <span className="font-mono text-[9px]" style={{ color: mine.color }}>
+            <span className="font-mono text-[11px]" style={{ color: mine.color }}>
               {mine.short}
             </span>
           )}

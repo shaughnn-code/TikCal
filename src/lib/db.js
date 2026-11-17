@@ -1,5 +1,12 @@
 import { supabase, supabaseUrl } from '../supabaseClient.js'
 import { platform } from './platform.js'
+import { withoutBlockedEvents } from './blocking.js'
+
+// Ids of people the signed-in user blocked (RLS returns only their own rows).
+async function myBlockedIds() {
+  const { data } = await supabase.from('user_blocks').select('blocked_id')
+  return new Set((data || []).map((r) => r.blocked_id))
+}
 
 // events.owner_id references auth.users, so PostgREST can't embed profiles
 // directly. We fetch events (RLS scopes them to owner + friends + crews) and
@@ -30,12 +37,18 @@ export async function fetchVisibleEvents() {
   }))
   const rsvpsByEvent = groupBy(rsvps || [], 'event_id', (r) => ({ user_id: r.user_id, status: r.status }))
 
-  return events.map((e) => ({
-    ...e,
-    owner: owners[e.owner_id] || null,
-    crews: crewsByEvent[e.id] || [],
-    rsvps: rsvpsByEvent[e.id] || [],
-  }))
+  const { data: { session } } = await supabase.auth.getSession()
+  const blocked = await myBlockedIds()
+  return withoutBlockedEvents(
+    events.map((e) => ({
+      ...e,
+      owner: owners[e.owner_id] || null,
+      crews: crewsByEvent[e.id] || [],
+      rsvps: rsvpsByEvent[e.id] || [],
+    })),
+    blocked,
+    session?.user?.id,
+  )
 }
 
 // Small grouping helper: rows → { [key]: mapped[] }.
@@ -53,6 +66,10 @@ export async function fetchEvent(id) {
     .maybeSingle()
   if (error) throw error
   if (!event) return null
+  // A show by someone you blocked reads as not found.
+  const { data: { session } } = await supabase.auth.getSession()
+  const blocked = await myBlockedIds()
+  if (event.owner_id !== session?.user?.id && blocked.has(event.owner_id)) return null
   const { data: owner } = await supabase
     .from('profiles')
     .select('id, name, totem')
@@ -75,7 +92,9 @@ export async function fetchEvent(id) {
       .select('id, name, totem')
       .in('id', rsvpRows.map((r) => r.user_id))
     const byId = Object.fromEntries((rp || []).map((p) => [p.id, p]))
-    rsvps = rsvpRows.map((r) => ({ ...r, profile: byId[r.user_id] || null }))
+    rsvps = rsvpRows
+      .filter((r) => !blocked.has(r.user_id))
+      .map((r) => ({ ...r, profile: byId[r.user_id] || null }))
   }
   const crews = (ec || []).map((c) => ({ crew_id: c.crew_id, name: c.crews?.name || null, color: c.crews?.color || null }))
   return { ...event, owner: owner || null, crews, rsvps }
@@ -141,6 +160,19 @@ export function feedUrls(token) {
   return { https, webcal: https.replace(/^https?:/, 'webcal:') }
 }
 
+// supabase-js reports any non-2xx as a generic "Edge Function returned a
+// non-2xx status code" and leaves the function's real answer on the response.
+// Our functions reply { error: '…' }, so dig that out for the user.
+async function fnError(error) {
+  try {
+    const body = await error?.context?.json?.()
+    if (body?.error) return new Error(body.error)
+  } catch {
+    /* body wasn't JSON -- fall through to the generic message */
+  }
+  return error
+}
+
 // Kick off Google Calendar OAuth: returns the consent URL to redirect to.
 // Platform travels with the state row so the callback (which Google redirects
 // to directly, with no JWT or app context) knows whether to hand control back
@@ -149,7 +181,7 @@ export async function startGoogleConnect() {
   const { data, error } = await supabase.functions.invoke('google-oauth-start', {
     body: { platform: platform() },
   })
-  if (error) throw error
+  if (error) throw await fnError(error)
   if (data?.error) throw new Error(data.error)
   return data.url
 }
@@ -179,7 +211,7 @@ export async function startSpotifyConnect() {
   const { data, error } = await supabase.functions.invoke('spotify-oauth-start', {
     body: { platform: platform() },
   })
-  if (error) throw error
+  if (error) throw await fnError(error)
   if (data?.error) throw new Error(data.error)
   return data.url
 }
@@ -213,10 +245,10 @@ export async function fetchMyArtists(userId) {
 export async function fetchTicketmaster(params = {}) {
   try {
     const { data, error } = await supabase.functions.invoke('ticketmaster-events', { body: params })
-    if (error || !data) return { configured: false, events: [] }
+    if (error || !data) return { configured: false, events: [], error: error?.message || 'no response' }
     return data
-  } catch {
-    return { configured: false, events: [] }
+  } catch (e) {
+    return { configured: false, events: [], error: e?.message || 'request failed' }
   }
 }
 
@@ -226,10 +258,10 @@ export async function fetchTicketmaster(params = {}) {
 export async function fetchRA(params = {}) {
   try {
     const { data, error } = await supabase.functions.invoke('ra-events', { body: params })
-    if (error || !data) return { configured: false, events: [] }
+    if (error || !data) return { configured: false, events: [], error: error?.message || 'no response' }
     return data
-  } catch {
-    return { configured: false, events: [] }
+  } catch (e) {
+    return { configured: false, events: [], error: e?.message || 'request failed' }
   }
 }
 
@@ -239,10 +271,10 @@ export async function fetchRA(params = {}) {
 export async function fetchDice(params = {}) {
   try {
     const { data, error } = await supabase.functions.invoke('dice-events', { body: params })
-    if (error || !data) return { configured: false, events: [] }
+    if (error || !data) return { configured: false, events: [], error: error?.message || 'no response' }
     return data
-  } catch {
-    return { configured: false, events: [] }
+  } catch (e) {
+    return { configured: false, events: [], error: e?.message || 'request failed' }
   }
 }
 

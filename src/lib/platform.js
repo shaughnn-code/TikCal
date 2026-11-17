@@ -19,6 +19,10 @@ export const APP_SCHEME = 'tikcal'
 
 export const isNative = () => Capacitor.isNativePlatform()
 
+// Phone-sized surface: the native apps, or a narrow browser viewport.
+export const isPhone = () =>
+  isNative() || (typeof window !== 'undefined' && !!window.matchMedia?.('(max-width: 639px)').matches)
+
 // 'ios' | 'android' | 'web'
 export const platform = () => Capacitor.getPlatform()
 

@@ -46,7 +46,7 @@ export default function ForgotPassword() {
 
         <div className="flex items-center gap-3 my-5 text-slate-700">
           <div className="flex-1 h-px bg-white/10" />
-          <span className="font-mono text-[9px] tracking-widest">OR</span>
+          <span className="font-mono text-[11px] tracking-widest">OR</span>
           <div className="flex-1 h-px bg-white/10" />
         </div>
 

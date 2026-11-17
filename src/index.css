@@ -27,9 +27,24 @@
   }
   html {
     background-color: #060609;
-    /* Global scale-up for readability (lifts all rem-based text + spacing ~13%). */
-    font-size: 112.5%;
     @apply font-sans;
+  }
+  /* Scale-up for readability (lifts all rem-based text + spacing ~13%), from
+     `sm` up only: on a ~390px phone the same lift read as a zoomed-in page and
+     pushed labels into wrapping. */
+  @media (min-width: 640px) {
+    html {
+      font-size: 112.5%;
+    }
+  }
+  /* iOS zooms the whole page when a focused field's text is under 16px, and
+     stays zoomed afterwards. Hold form fields at 16px on phones. */
+  @media (max-width: 639px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
   body {
     margin: 0;
@@ -66,6 +81,13 @@
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+  /* Mobile bottom tab bar (Nav.jsx): hide it while a field has focus so it
+     never rides up on top of the on-screen keyboard. */
+  @media (max-width: 639px) {
+    body:has(input:focus, textarea:focus, select:focus, [contenteditable]:focus) .tabbar {
+      display: none;
+    }
   }
   select option {
     background: #0d141b;
@@ -333,7 +355,7 @@
     gap: 6px; width: min(340px, 82vw);
   }
   .floor-weekdays span {
-    text-align: center; font-size: 9px; letter-spacing: .1em; color: rgba(255,255,255,.28);
+    text-align: center; font-size: 11px; letter-spacing: .1em; color: rgba(255,255,255,.28);
   }
   .floor-grid {
     position: relative; z-index: 1; display: grid; grid-template-columns: repeat(7, 1fr);
@@ -346,7 +368,7 @@
     display: flex; align-items: flex-start; justify-content: flex-start;
   }
   .floor-num {
-    font-size: 10px; padding: 4px 0 0 5px; color: rgba(255,255,255,0);
+    font-size: 11px; padding: 4px 0 0 5px; color: rgba(255,255,255,0);
     transition: color .5s ease;
   }
   /* disco: rainbow wave chases diagonally across the floor */
@@ -500,4 +522,34 @@
   /* Skip sits in the top-right corner of a fixed, full-bleed scene — clear the
      status bar / notch and the rounded corner. */
   .wel-skip { position: absolute; top: calc(18px + var(--sat)); right: calc(20px + var(--sar)); z-index: 5; font-size: 11px; color: #5b6b78; background: none; border: none; cursor: pointer; letter-spacing: .08em; }
+}
+
+/* Profile totems: slow 3D spin on hover (icon handoff 2026-11-10). */
+@layer components {
+  .totem { perspective: 600px; }
+  .totem > svg { display: block; transform-style: preserve-3d; transition: filter 0.3s ease; }
+  /* True fine line: stroke width in screen px, not scaled with the icon. */
+  .totem > svg * { vector-effect: non-scaling-stroke; }
+  .totem:hover > svg,
+  .totem-host:hover .totem > svg {
+    animation: totemSpin 6s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+  }
+  /* Touch screens have no hover: the totem you tap in the picker spins. */
+  @media (hover: none) {
+    .totem-host.totem-picked .totem > svg {
+      animation: totemSpin 6s linear infinite;
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+    }
+  }
+  @keyframes totemSpin {
+    0% { transform: rotateY(0deg) rotateX(0deg); }
+    50% { transform: rotateY(180deg) rotateX(10deg); }
+    100% { transform: rotateY(360deg) rotateX(0deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .totem:hover > svg,
+    .totem-host:hover .totem > svg,
+    .totem-host.totem-picked .totem > svg { animation: none; }
+  }
 }

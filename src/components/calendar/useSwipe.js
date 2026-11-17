@@ -6,8 +6,7 @@ import { resolveSwipe } from '../../lib/calendar/swipe.js'
 // path -- mouse and touch fire the same pointerdown/move/up sequence, so no
 // library and no platform branching is needed.
 //
-// `axis` is 'x' (Week/Day -- horizontal) or 'y' (Month -- vertical, by
-// design). Returns a ref that's true for one tick right after a swipe
+// `axis` is 'x' (horizontal -- every view today) or 'y' (vertical). Returns a ref that's true for one tick right after a swipe
 // commits, so a click handler on the same element can bail out instead of
 // also firing (the click that follows pointerup on the dragged element).
 export default function useSwipe(ref, { axis, onSwipe }) {

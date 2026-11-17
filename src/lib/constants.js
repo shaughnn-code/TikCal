@@ -1,6 +1,7 @@
 // ─── TOTEMS ──────────────────────────────────────────────────────────────
-// Each: { icon: Iconify Noto (full-color), name, vibe (hover blurb) }.
-// Stored on profiles.totem as the icon id (e.g. "noto:pill").
+// Each: { icon, name, vibe }. `icon` is the id stored on profiles.totem
+// (e.g. "noto:pill"); it stays stable so existing profiles keep their totem.
+// The drawing for each id lives in components/totemArt.jsx. No emoji render.
 export const TOTEMS = [
   { icon: 'noto:headphone', name: 'Earplugs', vibe: 'Still hears tomorrow. The responsible legend.' },
   { icon: 'noto:pill', name: 'The Press', vibe: 'You know the one. Sender of two-day weekends.' },

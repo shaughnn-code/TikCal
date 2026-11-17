@@ -73,19 +73,19 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
       )}
       <div className="flex-1 min-w-0">
         {e.matched && (
-          <div className="font-mono text-[9px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1 truncate">
+          <div className="font-mono text-[11px] text-mint uppercase tracking-wide mb-0.5 flex items-center gap-1 truncate">
             <Icon name="heart" size={10} className="shrink-0" />
             {e.matchedWho?.length ? `Matches ${e.matchedWho[0]}` : e.matched}
           </div>
         )}
         {e.source === 'saved' && e.savedBy?.length > 0 && (
-          <div className="font-mono text-[9px] text-violet uppercase tracking-wide mb-0.5 flex items-center gap-1 truncate">
+          <div className="font-mono text-[11px] text-violet uppercase tracking-wide mb-0.5 flex items-center gap-1 truncate">
             <Icon name="bookmark-simple" size={10} className="shrink-0" />
             Saved by {e.savedBy.join(', ')}
           </div>
         )}
         <div className="font-display font-bold text-sm text-[#e8f4f8] truncate">{e.title}</div>
-        <div className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
+        <div className="font-mono text-[11px] text-slate-400 truncate mt-0.5">
           {fmtTime(e.time) && <>{fmtTime(e.time)}<span className="text-slate-700"> · </span></>}
           {e.venue || 'Venue TBA'}
         </div>
@@ -93,7 +93,7 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
       <div className="flex flex-col gap-1 shrink-0">
         <button
           onClick={() => addToCalendar(e)}
-          className="font-mono text-[9px] text-slate-400 hover:text-mint flex items-center gap-1 justify-center"
+          className="font-mono text-[11px] text-slate-400 hover:text-mint flex items-center gap-1 justify-center"
           title="Add to calendar (.ics)"
         >
           <Icon name="calendar-plus" size={12} /> Save
@@ -103,7 +103,7 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
             href={e.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-[9px] text-slate-500 hover:text-violet text-center underline"
+            className="font-mono text-[11px] text-slate-500 hover:text-violet text-center underline"
           >
             Tickets
           </a>
@@ -114,7 +114,7 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
 
   const RecSection = ({ icon, label, tint, items, empty }) => (
     <div className="mt-4">
-      <div className={`font-mono text-[10px] uppercase tracking-wide flex items-center gap-1.5 ${tint}`}>
+      <div className={`font-mono text-[11px] uppercase tracking-wide flex items-center gap-1.5 ${tint}`}>
         <Icon name={icon} size={12} /> {label}
       </div>
       {items.length > 0 ? (
@@ -141,7 +141,7 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
             <div className="font-heading font-bold text-base text-[#e8f4f8]">
               {dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </div>
-            <div className="font-mono text-[10px] text-slate-500 uppercase">
+            <div className="font-mono text-[11px] text-slate-500 uppercase">
               {daypartMeta(bucket.daypart)?.sub || bucket.daypart}
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function CellDetail({ bucket, session, participants, onClose }) {
 
         {showRecs && (
           <div className="mt-4 pt-4 border-t border-white/10">
-            <div className="font-mono text-[10px] text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
+            <div className="font-mono text-[11px] text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
               <Icon name="sparkle" size={12} className="text-violet" />
               Event picks for this window
             </div>

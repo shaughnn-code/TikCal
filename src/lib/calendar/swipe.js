@@ -3,7 +3,7 @@
 // counts as a swipe, and which direction, or whether it's a no-op (a tap, a
 // sub-threshold nudge, or a drag along the wrong axis for this view).
 
-// axis: 'x' (Week/Day — horizontal) | 'y' (Month — vertical, by design).
+// axis: 'x' (horizontal — every calendar view today) | 'y' (vertical).
 // Returns 'next' | 'prev' | null.
 export function resolveSwipe({ dx, dy, axis, distanceThreshold = 50, axisRatio = 1.5 }) {
   const main = axis === 'y' ? dy : dx

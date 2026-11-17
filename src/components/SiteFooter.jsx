@@ -87,7 +87,7 @@ export default function SiteFooter() {
 
         {COLUMNS.map((col, i) => (
           <div key={col.label} style={reveal(i + 1)}>
-            <div className="text-[10.5px] uppercase tracking-[0.16em] text-faint mb-3">{col.label}</div>
+            <div className="text-[11px] uppercase tracking-[0.16em] text-faint mb-3">{col.label}</div>
             <ul className="space-y-2">
               {col.links.map((l) => (
                 <li key={l.label}>

@@ -5,6 +5,7 @@ import { fetchVisibleEvents, getGoogleBusy } from '../lib/db.js'
 import { loadFriends } from '../lib/social.js'
 import { getEventAccent } from '../lib/constants.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner } from '../components/ui.jsx'
+import { CrewTabs } from '../components/CrewTabs.jsx'
 import { Icon, Totem } from '../components/icons.jsx'
 
 // How far ahead to scout, and which weekdays count as "a night out."
@@ -109,7 +110,7 @@ export default function Plan() {
 
   const Person = ({ p, dim }) => (
     <span
-      className={`font-mono text-[10px] rounded px-2 py-1 flex items-center gap-1.5 border ${
+      className={`font-mono text-[11px] rounded px-2 py-1 flex items-center gap-1.5 border ${
         dim ? 'text-slate-500 border-white/[0.06]' : 'text-slate-200 border-violet/25 bg-white/[0.03]'
       }`}
     >
@@ -122,6 +123,7 @@ export default function Plan() {
     <>
       <GridBg lite />
       <Wrap>
+        <CrewTabs />
         <Kicker className="mb-1">// FREE-TIME RADAR</Kicker>
         <h1 className="font-display font-extrabold text-xl uppercase text-[#e8f4f8] mb-2">Plan a Night</h1>
         <p className="text-slate-400 text-sm mb-3 leading-relaxed">
@@ -129,11 +131,11 @@ export default function Plan() {
         </p>
         <div className="mb-6">
           {googleConnected ? (
-            <span className="font-mono text-[10px] text-mint flex items-center gap-1.5">
+            <span className="font-mono text-[11px] text-mint flex items-center gap-1.5">
               <Icon name="check-circle" size={12} /> Synced with your Google Calendar
             </span>
           ) : (
-            <button onClick={() => navigate('/profile')} className="font-mono text-[10px] text-violet underline">
+            <button onClick={() => navigate('/profile')} className="font-mono text-[11px] text-violet underline">
               Connect Google Calendar for real availability →
             </button>
           )}
@@ -161,14 +163,14 @@ export default function Plan() {
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
                     <div className="text-center shrink-0 w-12">
-                      <div className="font-mono text-[10px] text-violet tracking-wide">{wd}</div>
+                      <div className="font-mono text-[11px] text-violet tracking-wide">{wd}</div>
                       <div className="font-display font-extrabold text-base text-[#e8f4f8] leading-tight">{md}</div>
                     </div>
                     <div>
                       <div className={`font-mono text-[11px] ${allFree ? 'text-mint' : 'text-slate-300'}`}>
                         {crew.length <= 1 ? 'Just you' : allFree ? 'Everyone free' : `${free.length}/${crew.length} free`}
                       </div>
-                      <div className="font-mono text-[9px] text-slate-600">{cd}</div>
+                      <div className="font-mono text-[11px] text-slate-600">{cd}</div>
                     </div>
                   </div>
                   <Btn variant={allFree ? 'mint' : 'ghost'} onClick={() => navigate(`/calendar/add?date=${date}`)} cls="!px-3 !py-2 shrink-0">
@@ -186,7 +188,7 @@ export default function Plan() {
                           <button
                             key={e.id}
                             onClick={() => navigate(`/events/${e.id}`)}
-                            className="font-mono text-[10px] rounded px-2 py-1 flex items-center gap-1.5 border"
+                            className="font-mono text-[11px] rounded px-2 py-1 flex items-center gap-1.5 border"
                             style={{ color: a.color, borderColor: a.color + '55', backgroundColor: a.bg }}
                           >
                             <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: a.color }} />

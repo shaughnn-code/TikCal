@@ -1,7 +1,15 @@
 import InfoPage from '../components/InfoPage.jsx'
 import Seo from '../components/Seo.jsx'
 
-const EMAIL = 'dev@tikcal.nyc'
+const EMAIL = 'hello@tikcal.nyc'
+
+// Specific inboxes, so a message reaches the right place first time.
+const OTHER = [
+  { label: 'Help with your account', email: 'support@tikcal.nyc' },
+  { label: 'Report abuse or a safety issue', email: 'support@tikcal.nyc' },
+  { label: 'Privacy and data deletion', email: 'privacy@tikcal.nyc' },
+  { label: 'Security vulnerabilities', email: 'security@tikcal.nyc' },
+]
 
 export default function Contact() {
   return (
@@ -26,6 +34,17 @@ export default function Contact() {
           {EMAIL}
         </a>
       </div>
+
+      <ul className="space-y-2 text-sm">
+        {OTHER.map((o) => (
+          <li key={o.label} className="flex flex-wrap gap-x-2">
+            <span className="text-slate-400">{o.label}:</span>
+            <a href={`mailto:${o.email}`} className="text-violet hover:text-white transition-colors">
+              {o.email}
+            </a>
+          </li>
+        ))}
+      </ul>
     </InfoPage>
   )
 }

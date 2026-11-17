@@ -8,13 +8,14 @@ import { Icon, Totem } from '../components/icons.jsx'
 import { totemByIcon } from '../lib/constants.js'
 import { publicUrl } from '../lib/platform.js'
 import { openConnect } from '../lib/oauthFlow.js'
+import BlockedPeople from '../components/BlockedPeople.jsx'
 
 // Connection-state pill — the mint/muted dot-and-label read used across the
 // bento grid below wherever a card needs a live status at a glance instead
 // of a sentence (header chips, card corners).
 const StatusPill = ({ on, label }) => (
   <span
-    className={`font-mono text-[9px] uppercase tracking-[0.1em] px-2 py-1 rounded border shrink-0 ${
+    className={`font-mono text-[11px] uppercase tracking-[0.1em] px-2 py-1 rounded border shrink-0 ${
       on ? 'text-mint border-mint/40 bg-mint/10' : 'text-slate-600 border-white/10 bg-white/[0.02]'
     }`}
   >
@@ -32,6 +33,7 @@ export default function Profile() {
   const [inboxToken, setInboxToken] = useState(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [deleteText, setDeleteText] = useState('')
   const [deleteErr, setDeleteErr] = useState('')
   const [copiedAddr, setCopiedAddr] = useState(false)
   const [importStatus, setImportStatus] = useState(null)
@@ -153,7 +155,7 @@ export default function Profile() {
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-display font-extrabold text-lg uppercase text-[#e8f4f8] truncate">{profile?.name}</h2>
-              <div className="font-mono text-[10px] text-slate-500 flex items-center gap-1.5 mt-1">
+              <div className="font-mono text-[11px] text-slate-500 flex items-center gap-1.5 mt-1">
                 {profile?.favorite_venue && (
                   <><Icon name="map-pin" size={11} className="text-violet" /> {profile.favorite_venue}</>
                 )}
@@ -171,22 +173,22 @@ export default function Profile() {
         {/* Bento grid — mixed cell widths carry the "control room" read:
             three square stat cells, then full-width utility cards, then a
             three-up row of connection cards that mirrors the stat row. */}
-        <div id="stats" className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 scroll-mt-24">
+        <div id="stats" className="grid grid-cols-3 gap-2 mb-3 scroll-mt-24">
           {[
             { n: events.length, l: 'Total', tone: 'ice' },
             { n: upcoming, l: 'Upcoming', tone: 'mint' },
             { n: venues, l: 'Venues', tone: 'ice' },
           ].map((s) => (
-            <HudBox key={s.l} tone={s.tone} className="p-4 text-center">
+            <HudBox key={s.l} tone={s.tone} className="p-3 sm:p-4 text-center">
               <div className={`font-display font-extrabold text-2xl ${s.tone === 'mint' ? 'text-mint' : 'text-[#e8f4f8]'}`}>
                 {String(s.n).padStart(2, '0')}
               </div>
-              <div className="font-mono text-[9px] text-slate-500 uppercase mt-1">{s.l}</div>
+              <div className="font-mono text-[11px] text-slate-500 uppercase mt-1">{s.l}</div>
             </HudBox>
           ))}
 
           {/* Show stats */}
-          <HudBox className="p-4 sm:col-span-3">
+          <HudBox className="p-4 col-span-3">
             <SecLabel className="mb-4">// show_stats</SecLabel>
             <div className="grid grid-cols-3 gap-3 items-end">
               <div className="text-center">
@@ -197,7 +199,7 @@ export default function Profile() {
                     {String(attended).padStart(2, '0')}
                   </div>
                 </div>
-                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Attended</div>
+                <div className="font-mono text-[11px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Attended</div>
               </div>
               <div className="text-center">
                 <div className="relative inline-flex items-center justify-center">
@@ -206,37 +208,37 @@ export default function Profile() {
                     {String(attendedThisYear).padStart(2, '0')}
                   </div>
                 </div>
-                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">This year</div>
+                <div className="font-mono text-[11px] text-slate-500 uppercase mt-2 tracking-[0.14em]">This year</div>
               </div>
               <div className="text-center min-w-0">
                 <div className="font-display font-bold italic text-base text-[#e8f4f8] truncate px-1">{topVenue}</div>
-                <div className="font-mono text-[9px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Top venue</div>
+                <div className="font-mono text-[11px] text-slate-500 uppercase mt-2 tracking-[0.14em]">Top venue</div>
               </div>
             </div>
           </HudBox>
 
           {/* Invite */}
-          <HudBox className="p-4 sm:col-span-3">
+          <HudBox className="p-4 col-span-3">
             <SecLabel className="mb-2">// invite_friends</SecLabel>
             <div className="flex gap-2">
-              <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[10px] text-slate-500 truncate">
+              <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[11px] text-slate-500 truncate">
                 {shareLink}
               </div>
               <Btn variant={copied ? 'ghost' : 'ice'} onClick={copy} cls="shrink-0">
-                {copied ? '✓ Copied' : 'Copy'}
+                {copied ? <><Icon name="check" size={12} className="inline -mt-0.5" /> Copied</> : 'Copy'}
               </Btn>
             </div>
           </HudBox>
 
           {/* Email auto-import */}
-          <HudBox tone="mint" className="p-4 sm:col-span-3" data-tour="forwarding">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <SecLabel className="flex items-center gap-1.5">
+          <HudBox tone="mint" className="p-4 col-span-3" data-tour="forwarding">
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 mb-2">
+              <SecLabel className="flex items-center gap-1.5 whitespace-nowrap">
                 <Icon name="sparkle" size={11} className="text-mint" /> // auto_import
               </SecLabel>
               <button
                 onClick={() => setShowHowItWorks(true)}
-                className="font-mono text-[10px] font-bold uppercase tracking-[0.06em] text-mint hover:text-white flex items-center gap-1 shrink-0 underline decoration-mint/40 underline-offset-2 hover:decoration-white/60"
+                className="font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-mint hover:text-white flex items-center gap-1 shrink-0 underline decoration-mint/40 underline-offset-2 hover:decoration-white/60"
               >
                 <Icon name="shield-check" size={12} /> How it works &amp; is it safe?
               </button>
@@ -252,11 +254,11 @@ export default function Profile() {
             )}
 
             <div className="flex gap-2 mb-3">
-              <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[10px] text-slate-400 truncate">
+              <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[11px] text-slate-400 truncate">
                 {importAddr || 'generating…'}
               </div>
               <Btn variant={copiedAddr ? 'ghost' : 'ghost'} onClick={copyAddr} disabled={!importAddr} cls="shrink-0">
-                {copiedAddr ? '✓ Copied' : 'Copy'}
+                {copiedAddr ? <><Icon name="check" size={12} className="inline -mt-0.5" /> Copied</> : 'Copy'}
               </Btn>
             </div>
 
@@ -269,7 +271,7 @@ export default function Profile() {
                 <button
                   key={p.id}
                   onClick={() => setMailProvider(p.id)}
-                  className={`font-mono text-[9px] uppercase tracking-[0.1em] px-2.5 py-1.5 rounded border transition-colors ${
+                  className={`font-mono text-[11px] uppercase tracking-[0.1em] px-2.5 py-1.5 rounded border transition-colors ${
                     mailProvider === p.id
                       ? 'text-mint border-mint/40 bg-mint/10'
                       : 'text-slate-500 border-white/10 hover:border-white/20 hover:text-slate-300'
@@ -305,14 +307,14 @@ export default function Profile() {
               </Btn>
             )}
             {mailProvider !== 'icloud' && (
-              <p className="text-slate-500 text-[10px] mt-2 leading-relaxed">
+              <p className="text-slate-500 text-[11px] mt-2 leading-relaxed">
                 Address copied — paste it into the forwarding field that just opened, then save.
               </p>
             )}
           </HudBox>
 
           {/* Subscribe feed → Apple / Google / Outlook */}
-          <HudBox className="p-4 sm:col-span-3">
+          <HudBox className="p-4 col-span-3">
             <SecLabel className="mb-2 flex items-center gap-1.5">
               <Icon name="calendar-check" size={11} className="text-violet" /> // sync_calendar
             </SecLabel>
@@ -323,7 +325,7 @@ export default function Profile() {
             {feedToken ? (
               <>
                 <div className="flex gap-2 mb-2">
-                  <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[10px] text-slate-400 truncate">
+                  <div className="flex-1 bg-white/[0.04] border border-white/10 rounded px-3 py-2 font-mono text-[11px] text-slate-400 truncate">
                     {feedUrls(feedToken).webcal}
                   </div>
                   <Btn
@@ -336,33 +338,33 @@ export default function Profile() {
                     }
                     cls="shrink-0"
                   >
-                    {copiedFeed ? '✓ Copied' : 'Copy'}
+                    {copiedFeed ? <><Icon name="check" size={12} className="inline -mt-0.5" /> Copied</> : 'Copy'}
                   </Btn>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                  <a href={feedUrls(feedToken).webcal} className="font-mono text-[10px] text-mint underline">
+                  <a href={feedUrls(feedToken).webcal} className="font-mono text-[11px] text-mint underline">
                     Add to Apple Calendar →
                   </a>
                   <a
                     href={`https://calendar.google.com/calendar/u/0/r/settings/addbyurl?cid=${encodeURIComponent(feedUrls(feedToken).https)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-[10px] text-violet underline"
+                    className="font-mono text-[11px] text-violet underline"
                   >
                     Add to Google →
                   </a>
-                  <button onClick={rotateFeed} className="font-mono text-[10px] text-slate-600 hover:text-slate-400 underline">
+                  <button onClick={rotateFeed} className="font-mono text-[11px] text-slate-600 hover:text-slate-400 underline">
                     Reset link
                   </button>
                 </div>
               </>
             ) : (
-              <p className="font-mono text-[10px] text-slate-600">generating…</p>
+              <p className="font-mono text-[11px] text-slate-600">generating…</p>
             )}
           </HudBox>
 
           {/* Google Calendar connection (powers real free/busy in Plan) */}
-          <HudBox className="p-4">
+          <HudBox className="p-4 col-span-3 sm:col-span-1">
             <div className="flex flex-col items-start gap-1.5 mb-2">
               <SecLabel className="flex items-center gap-1.5">
                 <Icon name="google-logo" size={11} className="text-violet" /> // google_calendar
@@ -371,7 +373,7 @@ export default function Profile() {
             </div>
             {googleOn ? (
               <>
-                <p className="font-mono text-[10px] text-slate-400 truncate mb-3">{profile.google_calendar_email}</p>
+                <p className="font-mono text-[11px] text-slate-400 truncate mb-3">{profile.google_calendar_email}</p>
                 <Btn variant="ghost" onClick={unlinkGoogle} cls="!px-3 !py-2">Disconnect</Btn>
               </>
             ) : (
@@ -388,7 +390,7 @@ export default function Profile() {
           </HudBox>
 
           {/* Spotify — powers Discover / "For You" */}
-          <HudBox className="p-4">
+          <HudBox className="p-4 col-span-3 sm:col-span-1">
             <div className="flex flex-col items-start gap-1.5 mb-2">
               <SecLabel className="flex items-center gap-1.5">
                 <Icon name="spotify-logo" size={12} className="text-mint" /> // spotify
@@ -397,7 +399,7 @@ export default function Profile() {
             </div>
             {spotifyOn ? (
               <>
-                <p className="font-mono text-[10px] text-slate-400 truncate mb-3">{profile.spotify_name}</p>
+                <p className="font-mono text-[11px] text-slate-400 truncate mb-3">{profile.spotify_name}</p>
                 <div className="flex gap-2">
                   <Btn variant="ghost" onClick={resyncSpotify} cls="!px-3 !py-2">Refresh</Btn>
                   <Btn variant="ghost" onClick={unlinkSpotify} cls="!px-3 !py-2">Disconnect</Btn>
@@ -416,7 +418,7 @@ export default function Profile() {
           </HudBox>
 
           {/* Apple Music — needs Apple Developer setup (see functions/README) */}
-          <HudBox className="p-4">
+          <HudBox className="p-4 col-span-3 sm:col-span-1">
             <div className="flex flex-col items-start gap-1.5 mb-2">
               <SecLabel className="flex items-center gap-1.5">
                 <Icon name="apple-logo" size={12} className="text-slate-300" /> // apple_music
@@ -426,37 +428,60 @@ export default function Profile() {
             <p className="text-slate-500 text-xs leading-relaxed">
               {appleOn
                 ? 'Connected — your Apple Music artists feed Discover.'
-                : 'Coming once the Apple Music key is configured.'}
+                : 'Apple Music sync is coming soon.'}
             </p>
           </HudBox>
 
+          {/* Safety: blocked people + how to report */}
+          <BlockedPeople />
+
           {/* Account */}
-          <HudBox className="p-4 sm:col-span-3">
+          <HudBox className="p-4 col-span-3">
             <SecLabel className="mb-2">// account</SecLabel>
             <p className="font-mono text-[11px] text-slate-500 mb-3">{user?.email}</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Btn variant="ghost" onClick={() => navigate('/setup')}>Edit Profile</Btn>
               <Btn variant="ghost" onClick={() => { updateProfile({ seen_tour: false }); navigate('/calendar') }}>Replay tour</Btn>
               <Btn variant="danger" onClick={async () => { await signOut(); navigate('/login') }}>Sign out</Btn>
             </div>
           </HudBox>
 
-          {/* Delete account — two-step confirm, no native browser dialog */}
-          <HudBox className="p-4 sm:col-span-3">
-            <SecLabel className="mb-2">// danger zone</SecLabel>
+          {/* Delete account. Deliberately quiet: a plain text link at the very
+              bottom, then a typed confirmation, so it can't be hit by a stray
+              tap. It stays findable in-app, which the App Store requires. */}
+          <div className="col-span-3 pt-2">
             {!confirmingDelete ? (
-              <Btn variant="danger" onClick={() => setConfirmingDelete(true)}>Delete account</Btn>
+              <button
+                type="button"
+                onClick={() => { setDeleteText(''); setConfirmingDelete(true) }}
+                className="font-mono text-[11px] text-slate-600 hover:text-slate-400 underline underline-offset-2"
+              >
+                Delete account…
+              </button>
             ) : (
-              <div className="space-y-2">
+              <HudBox className="p-4 space-y-3">
+                <SecLabel>// delete account</SecLabel>
                 <p className="text-slate-400 text-xs leading-relaxed">
                   This permanently deletes your account and everything tied to it — events, RSVPs, crews you own,
                   friend connections, calendar/music integrations. This cannot be undone.
                 </p>
+                <label className="block">
+                  <span className="font-mono text-[11px] text-slate-500">Type DELETE to confirm</span>
+                  <input
+                    value={deleteText}
+                    onChange={(e) => setDeleteText(e.target.value)}
+                    autoCapitalize="characters"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className="mt-1.5 w-full bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] text-sm focus:outline-none focus:border-red-400/60 transition-colors"
+                  />
+                </label>
                 {deleteErr && <p className="text-red-400 text-xs">{deleteErr}</p>}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <Btn variant="ghost" onClick={() => setConfirmingDelete(false)} disabled={deleting}>Cancel</Btn>
                   <Btn
                     variant="danger"
-                    disabled={deleting}
+                    disabled={deleting || deleteText.trim().toUpperCase() !== 'DELETE'}
                     onClick={async () => {
                       setDeleting(true)
                       setDeleteErr('')
@@ -466,13 +491,12 @@ export default function Profile() {
                       navigate('/', { replace: true })
                     }}
                   >
-                    {deleting ? 'Deleting…' : 'Yes, permanently delete my account'}
+                    {deleting ? 'Deleting…' : 'Permanently delete'}
                   </Btn>
-                  <Btn variant="ghost" onClick={() => setConfirmingDelete(false)} disabled={deleting}>Cancel</Btn>
                 </div>
-              </div>
+              </HudBox>
             )}
-          </HudBox>
+          </div>
         </div>
       </Wrap>
 
@@ -513,7 +537,7 @@ export default function Profile() {
                 'That\'s it. Every future ticket confirmation from that inbox auto-forwards and lands on your calendar — no more manual entry.',
               ].map((step, i) => (
                 <li key={i} className="flex gap-3 text-slate-300 text-xs leading-relaxed">
-                  <span className="shrink-0 w-5 h-5 rounded-full bg-mint/15 border border-mint/40 text-mint font-mono text-[10px] font-bold flex items-center justify-center">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-mint/15 border border-mint/40 text-mint font-mono text-[11px] font-bold flex items-center justify-center">
                     {i + 1}
                   </span>
                   <span className="pt-0.5">{step}</span>

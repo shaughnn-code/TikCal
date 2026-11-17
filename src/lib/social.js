@@ -60,7 +60,7 @@ export async function removeFriend(id) {
 export async function loadCrewInvites(myId) {
   const { data, error } = await supabase
     .from('crew_invites')
-    .select('id, crew_id, inviter_id, status, crews(name, description)')
+    .select('id, crew_id, inviter_id, status, created_at, crews(name, description)')
     .eq('invitee_id', myId)
     .eq('status', 'pending')
   if (error) throw error
@@ -106,4 +106,48 @@ export async function fetchCrewShowStats(crewId) {
   const { data, error } = await supabase.rpc('crew_show_stats', { p_crew: crewId })
   if (error) throw error
   return data || []
+}
+
+// ─── BLOCK + REPORT ─────────────────────────────────────────────────────────
+// Blocks are enforced in the database (block_user cuts friendships, invites and
+// nudges; new requests/invites between the pair are refused). These calls are
+// the client side of that; see supabase/migrations/20261109120000_block_and_report.sql.
+
+// Ids of people I blocked (RLS only returns my own blocks).
+export async function loadBlockedIds() {
+  const { data, error } = await supabase.from('user_blocks').select('blocked_id')
+  if (error) return new Set()
+  return new Set((data || []).map((r) => r.blocked_id))
+}
+
+// People I blocked, with names, for the Profile "Blocked people" list.
+export async function loadBlockedPeople() {
+  const { data, error } = await supabase.from('user_blocks').select('blocked_id, created_at').order('created_at', { ascending: false })
+  if (error) throw error
+  const profs = await profilesByIds((data || []).map((r) => r.blocked_id))
+  return (data || []).map((r) => ({ id: r.blocked_id, created_at: r.created_at, profile: profs[r.blocked_id] || null }))
+}
+
+export async function blockUser(userId) {
+  return supabase.rpc('block_user', { p_user: userId })
+}
+
+export async function unblockUser(userId) {
+  return supabase.from('user_blocks').delete().eq('blocked_id', userId)
+}
+
+// Files a report, then asks report-alert to email the team. The alert is best
+// effort: the report is saved either way and reviewed from the dashboard.
+export async function reportContent({ userId = null, eventId = null, reason, details = '' }) {
+  const { data: reportId, error } = await supabase.rpc('report_content', {
+    p_user: userId,
+    p_event: eventId,
+    p_reason: reason,
+    p_details: details,
+  })
+  if (error) return { error }
+  try {
+    await supabase.functions.invoke('report-alert', { body: { report_id: reportId } })
+  } catch { /* report is stored; the alert can be resent from the dashboard */ }
+  return { data: reportId, error: null }
 }
