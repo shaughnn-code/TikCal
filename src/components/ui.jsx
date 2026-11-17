@@ -249,3 +249,84 @@ export const Spinner = () => (
     </div>
   </div>
 )
+
+// Count-up number — eases from 0 to `value` once scrolled into view, zero-padded
+// to `pad` digits. Renders the final value immediately under reduced motion.
+export const CountUp = ({ value, pad = 2, duration = 900, className = '' }) => {
+  const ref = useRef(null)
+  const [n, setN] = useState(0)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (reduce || typeof IntersectionObserver === 'undefined' || !value) return setN(value)
+    let raf
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return
+      io.disconnect()
+      const t0 = performance.now()
+      const tick = (t) => {
+        const p = Math.min(1, (t - t0) / duration)
+        setN(Math.round(value * (1 - Math.pow(1 - p, 3))))
+        if (p < 1) raf = requestAnimationFrame(tick)
+      }
+      raf = requestAnimationFrame(tick)
+    }, { threshold: 0.4 })
+    io.observe(el)
+    return () => { io.disconnect(); cancelAnimationFrame(raf) }
+  }, [value, duration])
+  return <span ref={ref} className={className}>{String(n).padStart(pad, '0')}</span>
+}
+
+// Scroll reveal — fades/lifts its child in once it enters the viewport.
+export const Reveal = ({ children, delay = 0, className = '' }) => {
+  const ref = useRef(null)
+  const [seen, setSeen] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (typeof IntersectionObserver === 'undefined') return setSeen(true)
+    const io = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect() } },
+      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  return (
+    <div ref={ref} className={`reveal ${seen ? 'is-in' : ''} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+      {children}
+    </div>
+  )
+}
+
+// Typewriter label — types `text` once scrolled into view. Reserves its final
+// width so layout never shifts.
+export const Typed = ({ text, speed = 28, className = '' }) => {
+  const ref = useRef(null)
+  const [n, setN] = useState(0)
+  const [go, setGo] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (reduce || typeof IntersectionObserver === 'undefined') { setN(text.length); return }
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && (setGo(true), io.disconnect()), { threshold: 0.4 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [text])
+  useEffect(() => {
+    if (!go || n >= text.length) return
+    const t = setTimeout(() => setN(n + 1), speed)
+    return () => clearTimeout(t)
+  }, [go, n, text, speed])
+  return (
+    <span ref={ref} className={`relative inline-block ${className}`} aria-label={text}>
+      <span className="invisible" aria-hidden>{text}</span>
+      <span className="absolute inset-0" aria-hidden>
+        {text.slice(0, n)}
+        <span className={`typed-caret ${go && n < text.length ? 'on' : ''}`} />
+      </span>
+    </span>
+  )
+}
