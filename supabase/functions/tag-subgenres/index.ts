@@ -18,6 +18,7 @@ import { corsHeaders } from '../_shared/cors.ts'
 import { MAX_BATCH, MODEL, buildRequest, chunk, eventKey, parseAnswers } from '../_shared/jevSubgenre.js'
 
 const MAX_EVENTS = 100
+const DAILY_QUOTA = 300 // events per user per day sent to Jev; cached tags are free
 const SOURCES = new Set(['ticketmaster', 'ra', 'dice'])
 const JEV_URL = 'https://api.typesafe.ai/v1/systemone'
 const NONE = 'none' // stored for "not EDM"
@@ -68,18 +69,37 @@ Deno.serve(async (req) => {
   // signed-in users read access and no write policy.
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
+  // A cached tag is served only if the caller's event text hashes the same as
+  // the text that was tagged, so made-up text cannot poison other users' tags.
+  const hashes: Record<string, string> = {}
+  for (const e of events) hashes[eventKey(e.source, e.id)] = await textHash(e)
+
   const tags: Record<string, { subgenre: string | null }> = {}
   const { data: cached, error: readErr } = await db
     .from('event_subgenres')
-    .select('source, event_id, subgenre')
+    .select('source, event_id, subgenre, text_hash')
     .in('event_id', events.map((e) => e.id))
   if (readErr) return json({ configured: true, tags, error: 'cache read failed' })
   for (const r of cached || []) {
     const key = eventKey(r.source, r.event_id)
-    if (seen.has(key)) tags[key] = { subgenre: r.subgenre === NONE ? null : r.subgenre }
+    if (seen.has(key) && r.text_hash === hashes[key]) tags[key] = { subgenre: r.subgenre === NONE ? null : r.subgenre }
   }
 
-  const missing = events.filter((e) => !(eventKey(e.source, e.id) in tags))
+  let missing = events.filter((e) => !(eventKey(e.source, e.id) in tags))
+
+  // Per-user daily budget of events sent to Jev (cached tags are free).
+  let capped = 0
+  if (missing.length) {
+    const { data: granted, error: quotaErr } = await db.rpc('jev_take_quota', {
+      p_user: user.id,
+      p_want: missing.length,
+      p_limit: DAILY_QUOTA,
+    })
+    if (quotaErr) return json({ configured: true, tags, error: 'quota check failed' })
+    const n = Number(granted) || 0
+    capped = missing.length - n
+    missing = missing.slice(0, n)
+  }
   let failed = 0
 
   // deno-lint-ignore no-explicit-any
@@ -99,7 +119,7 @@ Deno.serve(async (req) => {
         const t = out[key]
         if (!t) { failed += 1; continue }
         tags[key] = { subgenre: t.subgenre }
-        rows.push({ source: e.source, event_id: e.id, subgenre: t.subgenre ?? NONE, edm: t.edm, model: MODEL })
+        rows.push({ source: e.source, event_id: e.id, subgenre: t.subgenre ?? NONE, edm: t.edm, model: MODEL, text_hash: hashes[key] })
       }
     } catch {
       failed += batch.length
@@ -108,5 +128,13 @@ Deno.serve(async (req) => {
 
   if (rows.length) await db.from('event_subgenres').upsert(rows, { onConflict: 'source,event_id' })
 
-  return json({ configured: true, tags, ...(failed ? { error: `${failed} event(s) not tagged` } : {}) })
+  const notTagged = failed + capped
+  return json({ configured: true, tags, ...(notTagged ? { error: `${notTagged} event(s) not tagged` } : {}) })
 })
+
+// SHA-256 (hex) of the event text exactly as it is sent to Jev.
+async function textHash(e: Ev): Promise<string> {
+  const text = [e.title, e.artist, e.venue, e.genre].map((s) => s.trim().slice(0, 200)).join('\u0001')
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+  return Array.from(new Uint8Array(d), (b) => b.toString(16).padStart(2, '0')).join('')
+}
