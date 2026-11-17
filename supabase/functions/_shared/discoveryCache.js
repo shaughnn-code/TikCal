@@ -52,6 +52,29 @@ export function claimCutoff(now = Date.now()) {
   return new Date(now - RETRY_AFTER_MS).toISOString()
 }
 
+// Event links come from third-party scrapers, so they are untrusted: keep only
+// plain https links without embedded credentials ('' otherwise). Plain JS (no
+// imports) because Deno can't import from src/ at deploy time.
+export function httpsUrl(raw) {
+  if (typeof raw !== 'string' || !raw) return ''
+  let u
+  try {
+    u = new URL(raw.trim())
+  } catch {
+    return ''
+  }
+  if (u.protocol !== 'https:' || u.username || u.password) return ''
+  return u.href
+}
+
+// RA gives a site-relative path. Require a single leading '/' and make sure the
+// result really is on ra.co (blocks '@evil.com/x' and '//evil.com/x').
+export function raEventUrl(contentUrl) {
+  if (typeof contentUrl !== 'string' || !contentUrl.startsWith('/') || contentUrl.startsWith('//')) return ''
+  const u = httpsUrl(`https://ra.co${contentUrl}`)
+  return u && new URL(u).hostname === 'ra.co' ? u : ''
+}
+
 // Resident Advisor `list_area_events` response -> TikCal event shape.
 // Shape (confirmed live 2026-08-18): { data: { events: [{ id, title, date,
 // start_time, content_url, flyer_url, artists: [{ name }], venue: { name },
@@ -72,7 +95,7 @@ export function mapRaEvents(payload) {
         time: (e?.start_time || '').slice(11, 16),
         venue: venue.name || '',
         city: e?.area || 'New York',
-        url: e?.content_url ? `https://ra.co${e.content_url}` : '',
+        url: raEventUrl(e?.content_url),
         image: e?.flyer_url || '',
       }
     })
@@ -96,7 +119,7 @@ export function mapDiceEvents(payload) {
       time: (e?.event_start_date || '').slice(11, 16),
       venue: e?.venue_name || '',
       city: 'New York',
-      url: e?.url || '',
+      url: httpsUrl(e?.url),
       image: e?.image_square || '',
       genre: (e?.tags || [])[0] || '',
     }))
