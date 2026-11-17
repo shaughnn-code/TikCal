@@ -7,6 +7,7 @@ import { Icon } from '../components/icons.jsx'
 import { openConnect } from '../lib/oauthFlow.js'
 import { buildVenueOptions, buildSubgenreOptions, filterEvents, needsJevTag } from '../lib/discoverFilters.js'
 import { eventCounts, toISO } from '../lib/dateRange.js'
+import { safeExternalUrl } from '../lib/externalLink.js'
 import DateRangePicker from '../components/DateRangePicker.jsx'
 
 const norm = (s) => (s || '').trim().toLowerCase()
@@ -239,8 +240,8 @@ export default function Discover() {
             + Add
           </Btn>
         )}
-        {e.url && (
-          <a href={e.url} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-slate-500 hover:text-violet text-center underline">
+        {safeExternalUrl(e.url) && (
+          <a href={safeExternalUrl(e.url)} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-slate-500 hover:text-violet text-center underline">
             Tickets
           </a>
         )}
