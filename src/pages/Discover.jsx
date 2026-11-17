@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { fetchTicketmaster, fetchRA, fetchDice, fetchMyArtists, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
+import { fetchTicketmaster, fetchRA, fetchDice, fetchMyArtists, fetchSubgenreTags, addDiscoveredEvent, startSpotifyConnect } from '../lib/db.js'
 import { GridBg, Wrap, Btn, Kicker, SecLabel, HudBox, Spinner, SearchSel } from '../components/ui.jsx'
 import { Icon } from '../components/icons.jsx'
 import { openConnect } from '../lib/oauthFlow.js'
+import { buildVenueOptions, buildSubgenreOptions, filterEvents, needsJevTag } from '../lib/discoverFilters.js'
+import { eventCounts, toISO } from '../lib/dateRange.js'
+import DateRangePicker from '../components/DateRangePicker.jsx'
 
 const norm = (s) => (s || '').trim().toLowerCase()
 
@@ -25,12 +28,26 @@ export default function Discover() {
   const [added, setAdded] = useState(() => new Set())
   const [connecting, setConnecting] = useState(false)
   const [err, setErr] = useState('')
-  const emptyFilters = { source: 'all', venue: '', dateFrom: '', dateUntil: '' }
+  const emptyFilters = { source: 'all', venue: '', subgenre: '', dateFrom: '', dateUntil: '' }
   // Draft filters track the controls; `applied` only updates when the user
   // hits Go Disco, so nothing re-filters the list mid-edit.
   const [draft, setDraft] = useState(emptyFilters)
   const [applied, setApplied] = useState(emptyFilters)
   const [view, setView] = useState('list')
+  // Jev subgenre tags keyed `${source}:${id}`; fills in after the events load.
+  const [tags, setTags] = useState({})
+  const todayISO = useMemo(() => toISO(new Date()), [])
+
+  // Ask Jev (via the tag-subgenres function) for the subgenre of electronic
+  // events the keyword rules can't place. Best effort: events stay usable, just
+  // untagged, if this fails or isn't deployed yet. Results are cached server-side.
+  const tagInBackground = useCallback(async (events) => {
+    const need = events.filter(needsJevTag)
+    for (let i = 0; i < need.length && i < 300; i += 100) {
+      const got = await fetchSubgenreTags(need.slice(i, i + 100))
+      if (Object.keys(got).length) setTags((prev) => ({ ...prev, ...got }))
+    }
+  }, [])
 
   const load = useCallback(() => {
     Promise.all([fetchTicketmaster({}), fetchRA({}), fetchDice({}), fetchMyArtists(user.id)])
@@ -49,10 +66,11 @@ export default function Discover() {
         const events = merged.filter((e) => (seen.has(e.key) ? false : (seen.add(e.key), true)))
         setTm({ configured: t.configured || ra.configured || dice.configured, events })
         setArtists(a)
+        tagInBackground(events)
       })
       .catch((e) => setErr(e.message))
       .finally(() => setLoading(false))
-  }, [user.id])
+  }, [user.id, tagInBackground])
 
   useEffect(() => {
     load()
@@ -71,27 +89,35 @@ export default function Discover() {
   const artistSet = useMemo(() => new Set(artists.map((a) => a.artist_norm)), [artists])
   const spotifyOn = !!profile?.spotify_name
 
-  const venueOptions = useMemo(
-    () => [...new Set((tm.events || []).map((e) => e.venue).filter(Boolean))].sort(),
-    [tm.events],
+  // Events with their Jev subgenre tag attached (when there is one).
+  const allEvents = useMemo(
+    () =>
+      (tm.events || []).map((e) => {
+        const t = tags[`${e.source}:${e.id}`]
+        return t ? { ...e, jevSubgenre: t.subgenre } : e
+      }),
+    [tm.events, tags],
   )
 
-  const filtered = useMemo(() => {
-    return (tm.events || []).filter((e) => {
-      if (applied.source !== 'all' && e.source !== applied.source) return false
-      if (applied.venue && e.venue !== applied.venue) return false
-      if (applied.dateFrom && e.date < applied.dateFrom) return false
-      if (applied.dateUntil && e.date > applied.dateUntil) return false
-      return true
-    })
-  }, [tm.events, applied])
+  // Venue and subgenre choices come from the events in the selected source,
+  // so the lists never offer something that would return nothing.
+  const sourceEvents = useMemo(
+    () => (draft.source === 'all' ? allEvents : allEvents.filter((e) => e.source === draft.source)),
+    [allEvents, draft.source],
+  )
+  const dayCounts = useMemo(() => eventCounts(sourceEvents), [sourceEvents])
+  const venueOptions = useMemo(() => buildVenueOptions(sourceEvents).map((v) => v.label), [sourceEvents])
+  const subgenreOptions = useMemo(() => buildSubgenreOptions(sourceEvents), [sourceEvents])
+
+  const filtered = useMemo(() => filterEvents(allEvents, applied), [allEvents, applied])
 
   const dirty =
     draft.source !== applied.source ||
     draft.venue !== applied.venue ||
+    draft.subgenre !== applied.subgenre ||
     draft.dateFrom !== applied.dateFrom ||
     draft.dateUntil !== applied.dateUntil
-  const hasFilters = applied.source !== 'all' || applied.venue || applied.dateFrom || applied.dateUntil
+  const hasFilters = applied.source !== 'all' || applied.venue || applied.subgenre || applied.dateFrom || applied.dateUntil
 
   const applyFilters = () => setApplied(draft)
   const clearFilters = () => {
@@ -269,8 +295,8 @@ export default function Discover() {
           </HudBox>
         )}
 
-        {/* Filters */}
-        <HudBox className="p-4 mb-6">
+        {/* Filters. z-20 keeps the date popover above the event cards below. */}
+        <HudBox className="p-4 mb-6 z-20">
           <div className="flex flex-wrap gap-4 items-end">
             <div>
               <SecLabel className="mb-2">Source</SecLabel>
@@ -299,24 +325,13 @@ export default function Discover() {
               />
             </div>
 
-            <div>
-              <SecLabel className="mb-2">From</SecLabel>
-              <input
-                type="date"
-                value={draft.dateFrom}
-                onChange={(e) => setDraft((d) => ({ ...d, dateFrom: e.target.value }))}
-                className="bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] text-sm focus:outline-none focus:border-violet/60 transition-colors"
-              />
-            </div>
-            <div>
-              <SecLabel className="mb-2">Until</SecLabel>
-              <input
-                type="date"
-                value={draft.dateUntil}
-                onChange={(e) => setDraft((d) => ({ ...d, dateUntil: e.target.value }))}
-                className="bg-white/[0.045] border border-white/10 rounded px-3 py-3 text-[#e8f4f8] text-sm focus:outline-none focus:border-violet/60 transition-colors"
-              />
-            </div>
+            <DateRangePicker
+              from={draft.dateFrom}
+              until={draft.dateUntil}
+              counts={dayCounts}
+              todayISO={todayISO}
+              onChange={({ from, until }) => setDraft((d) => ({ ...d, dateFrom: from, dateUntil: until }))}
+            />
 
             <Btn variant="aurora" onClick={applyFilters} disabled={!dirty} cls="!px-5">
               <Icon name="disco-ball" size={14} /> Go Disco
@@ -328,6 +343,28 @@ export default function Discover() {
               </button>
             )}
           </div>
+
+          {subgenreOptions.length > 0 && (
+            <div className="mt-4">
+              <SecLabel className="mb-2">Subgenre</SecLabel>
+              <div className="flex flex-wrap gap-1.5">
+                {[{ value: '', label: 'Any' }, ...subgenreOptions].map((s) => (
+                  <button
+                    key={s.value || 'any'}
+                    onClick={() => setDraft((d) => ({ ...d, subgenre: s.value }))}
+                    className={`px-3 py-1.5 rounded font-mono text-[10px] uppercase tracking-wide transition-all border ${
+                      draft.subgenre === s.value
+                        ? 'bg-white/10 text-violet border-violet/40'
+                        : 'text-slate-500 border-white/10 hover:text-slate-300'
+                    }`}
+                  >
+                    {s.label}
+                    {s.count != null && <span className="text-slate-600"> {s.count}</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </HudBox>
 
         {/* View toggle */}

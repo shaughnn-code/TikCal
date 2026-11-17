@@ -246,6 +246,27 @@ export async function fetchDice(params = {}) {
   }
 }
 
+// EDM subgenre tags for Discover events (Jev via the tag-subgenres edge
+// function, cached in event_subgenres). Returns { "<source>:<id>": { subgenre } }.
+// Best effort: Discover works without tags, so any failure resolves to {}.
+export async function fetchSubgenreTags(events) {
+  const slim = events.map((e) => ({
+    source: e.source,
+    id: e.id,
+    title: e.title,
+    artist: e.artist,
+    venue: e.venue,
+    genre: e.genre,
+  }))
+  try {
+    const { data, error } = await supabase.functions.invoke('tag-subgenres', { body: { events: slim } })
+    if (error || !data?.tags) return {}
+    return data.tags
+  } catch {
+    return {}
+  }
+}
+
 // Add a discovered show to the user's own calendar.
 export async function addDiscoveredEvent(userId, ev) {
   return supabase.from('events').insert({
