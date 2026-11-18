@@ -23,11 +23,6 @@ export default function Privacy() {
         account or modify your Spotify data.
       </p>
       <p>
-        <strong className="text-white">Location</strong> — with your permission, we use your
-        device's approximate location to show concerts and events near you. You can deny location
-        access and search by city manually instead.
-      </p>
-      <p>
         <strong className="text-white">Event and ticketing data</strong> — we display publicly
         available event listings sourced from third-party ticketing platforms. We don't process
         your payments; ticket purchases happen on the third-party platform's own site or app.
@@ -57,8 +52,7 @@ export default function Privacy() {
 
       <H2>Your choices</H2>
       <p>
-        Disconnect Spotify anytime in Settings. Revoke location permission in your device's iOS
-        Settings. Delete your account and its data by emailing us below.
+        Disconnect Spotify anytime in Settings. Delete your account and its data in Profile → Delete account, or by emailing us below.
       </p>
 
       <H2>Data retention</H2>

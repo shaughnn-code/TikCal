@@ -25,7 +25,7 @@ const STEPS = [
     route: '/discover',
     selector: '[data-tour="nav-discover"]',
     title: 'Discover',
-    body: 'Browse shows from Ticketmaster, Resident Advisor, and DICE near you.',
+    body: 'Browse upcoming NYC shows from Ticketmaster.',
   },
   {
     route: '/overlap',

@@ -17,10 +17,17 @@ const norm = (s) => (s || '').trim().toLowerCase()
 // RA and DICE are live scrapes (parse.bot) and routinely take far longer than
 // Ticketmaster's API; they get a long clock because the page no longer waits
 // on them -- their shows just join the list when they land.
+// App Store review build (2026-11): RA and DICE are unofficial scrapes, so they
+// are switched off. Set ENABLE_SCRAPED_SOURCES to true to bring them back.
+const ENABLE_SCRAPED_SOURCES = false
 const FETCHERS = [
   { key: 'ticketmaster', label: 'Ticketmaster', fetch: fetchTicketmaster, timeoutMs: 12000 },
-  { key: 'ra', label: 'RA', fetch: fetchRA, timeoutMs: 60000 },
-  { key: 'dice', label: 'DICE', fetch: fetchDice, timeoutMs: 60000 },
+  ...(ENABLE_SCRAPED_SOURCES
+    ? [
+        { key: 'ra', label: 'RA', fetch: fetchRA, timeoutMs: 60000 },
+        { key: 'dice', label: 'DICE', fetch: fetchDice, timeoutMs: 60000 },
+      ]
+    : []),
 ]
 const withTimeout = (promise, ms) =>
   Promise.race([
@@ -33,8 +40,12 @@ const withTimeout = (promise, ms) =>
 const SOURCES = [
   { value: 'all', label: 'All' },
   { value: 'ticketmaster', label: 'Ticketmaster' },
-  { value: 'ra', label: 'RA' },
-  { value: 'dice', label: 'DICE' },
+  ...(ENABLE_SCRAPED_SOURCES
+    ? [
+        { value: 'ra', label: 'RA' },
+        { value: 'dice', label: 'DICE' },
+      ]
+    : []),
 ]
 
 export default function Discover() {
