@@ -553,3 +553,15 @@
     .totem-host.totem-picked .totem > svg { animation: none; }
   }
 }
+
+/* Scroll reveal + typed caret (Profile) */
+.reveal { opacity: 0; transform: translateY(28px) scale(.985); filter: blur(4px);
+  transition: opacity .7s cubic-bezier(.22,.9,.3,1), transform .7s cubic-bezier(.22,.9,.3,1), filter .7s ease; }
+.reveal.is-in { opacity: 1; transform: none; filter: none; }
+.typed-caret { display: inline-block; width: 1px; height: 1em; margin-left: 2px; vertical-align: -0.12em; background: currentColor; opacity: 0; }
+.typed-caret.on { opacity: 1; animation: caret-blink .7s steps(1) infinite; }
+@keyframes caret-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+  .typed-caret.on { animation: none; }
+}

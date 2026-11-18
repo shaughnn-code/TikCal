@@ -4,7 +4,7 @@
 //   node screenshot.mjs http://localhost:5173 overlap-grid
 //   node screenshot.mjs http://localhost:5173 overlap-grid --mobile
 //
-// Flags: --mobile (390x844)  --width=N  --height=N  --viewport (clip to fold)
+// Flags: --login (sign in first using TIKCAL_TEST_EMAIL / TIKCAL_TEST_PASSWORD env vars)  --mobile (390x844)  --width=N  --height=N  --viewport (clip to fold)
 // Saves to ./temporary screenshots/screenshot-N[-label].png, never overwriting.
 
 import puppeteer from 'puppeteer'
@@ -56,7 +56,31 @@ try {
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
   page.on('pageerror', (e) => errors.push(e.message))
 
+  if (flag('login')) {
+    const email = process.env.TIKCAL_TEST_EMAIL
+    const pw = process.env.TIKCAL_TEST_PASSWORD
+    if (!email || !pw) throw new Error('--login needs TIKCAL_TEST_EMAIL and TIKCAL_TEST_PASSWORD env vars')
+    const origin = new URL(url).origin
+    await page.goto(`${origin}/login`, { waitUntil: 'networkidle0', timeout: 30_000 })
+    await page.type('input[type=email]', email)
+    await page.type('input[type=password]', pw)
+    try {
+      await Promise.all([page.waitForFunction(() => !location.pathname.startsWith('/login'), { timeout: 15_000 }), page.click('button[type=submit]')])
+    } catch {
+      const msg = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').slice(0, 300))
+      throw new Error(`login did not redirect (at ${page.url()}). Page says: ${msg}`)
+    }
+  }
   await page.goto(url, { waitUntil: 'networkidle0', timeout: 30_000 })
+  // Scroll the whole page so scroll-reveal sections trigger before a full-page capture.
+  await page.evaluate(async () => {
+    for (let y = 0; y < document.body.scrollHeight; y += 300) {
+      window.scrollTo(0, y)
+      await new Promise((r) => setTimeout(r, 120))
+    }
+    window.scrollTo(0, 0)
+  })
+  await new Promise((r) => setTimeout(r, 1200))
   await page.evaluate(() => document.fonts.ready)
   // Let CSS transitions / entrance animations settle before capturing.
   await new Promise((r) => setTimeout(r, 400))
