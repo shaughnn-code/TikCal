@@ -64,7 +64,12 @@ try {
     await page.goto(`${origin}/login`, { waitUntil: 'networkidle0', timeout: 30_000 })
     await page.type('input[type=email]', email)
     await page.type('input[type=password]', pw)
-    await Promise.all([page.waitForFunction(() => !location.pathname.startsWith('/login'), { timeout: 20_000 }), page.click('button[type=submit]')])
+    try {
+      await Promise.all([page.waitForFunction(() => !location.pathname.startsWith('/login'), { timeout: 15_000 }), page.click('button[type=submit]')])
+    } catch {
+      const msg = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').slice(0, 300))
+      throw new Error(`login did not redirect (at ${page.url()}). Page says: ${msg}`)
+    }
   }
   await page.goto(url, { waitUntil: 'networkidle0', timeout: 30_000 })
   // Scroll the whole page so scroll-reveal sections trigger before a full-page capture.
