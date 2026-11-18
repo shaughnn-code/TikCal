@@ -31,10 +31,6 @@ export default function Privacy() {
         <strong className="text-white">Crew data</strong> — if you use Crews, we store your friend
         connections, shared events, and RSVP status so you can see who's going to a show with you.
       </p>
-      <p>
-        <strong className="text-white">Usage data</strong> — basic app usage and diagnostic data
-        (crash logs, feature usage) to improve the app.
-      </p>
 
       <H2>How we use it</H2>
       <p>
@@ -60,8 +56,8 @@ export default function Privacy() {
 
       <H2>Children's privacy</H2>
       <p>
-        TikCal isn't directed to children under 13, and we don't knowingly collect data from
-        children under 13.
+        TikCal is for adults 18 and over and isn't directed to children. We don't knowingly collect
+        data from anyone under 18.
       </p>
 
       <H2>Changes to this policy</H2>

@@ -17,7 +17,7 @@ export default function Terms() {
         use TikCal.
       </p>
       <p>
-        You must be at least 13 years old to use TikCal. You're responsible for the activity on
+        You must be at least 18 years old to use TikCal. You're responsible for the activity on
         your account and for keeping your login credentials secure.
       </p>
 
