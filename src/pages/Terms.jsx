@@ -32,7 +32,7 @@ export default function Terms() {
       <H2>Event and ticketing data</H2>
       <p>
         TikCal displays publicly available event listings sourced from third-party platforms
-        (including Ticketmaster, Resident Advisor, and DICE). We don't sell tickets and don't
+        (currently Ticketmaster). We don't sell tickets and don't
         process ticket payments — purchases happen on the third-party platform's own site or app,
         under that platform's own terms. We aren't responsible for the accuracy of listings we
         didn't create, or for your transactions with those platforms.
